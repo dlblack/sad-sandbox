@@ -1,0 +1,115 @@
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  left: 8px;
+  width: 16px;
+  background: #fff;
+  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.lds-facebook div:nth-child(1) {
+  left: 8px;
+  animation-delay: -0.24s;
+}
+.lds-facebook div:nth-child(2) {
+  left: 32px;
+  animation-delay: -0.12s;
+}
+.lds-facebook div:nth-child(3) {
+  left: 56px;
+  animation-delay: 0;
+}
+@keyframes lds-facebook {
+  0% {
+    top: 8px;
+    height: 64px;
+  }
+  50%,
+  100% {
+    top: 24px;
+    height: 32px;
+  }
+}
+
+.card-body {
+  padding: 0;
+  max-height: 100%;
+}
+
+/* Project Tree Styling */
+.project-tree {
+  font-family: Arial, sans-serif;
+  color: white;
+  width: 100%;
+}
+
+.tree-node {
+  position: relative;
+}
+
+.tree-label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.tree-label.expanded::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.tree-label:not(.expanded)::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.tree-label.expanded::before,
+.tree-label:not(.expanded)::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  background: url("path-to-your-folder-icon.svg") no-repeat center center;
+}
+
+.tree-children {
+  margin-left: 20px;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Toolbar styling */
+.toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.btn-secondary,
+.no-icon {
+  max-height: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  min-width: 40px;
+  padding: 1px 1px 1px 1px;
+  line-height: 1;
+}
+
+.divider {
+  width: 1px;
+  background-color: #272b30;
+  margin: 0 1px;
+  height: 100%;
+}

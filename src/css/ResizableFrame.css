@@ -1,0 +1,157 @@
+.resizable-frame-container {
+  display: grid;
+  grid-template-columns: 2fr 5px 3fr;
+  grid-template-rows: 1fr 5px 1fr;
+  width: 100vw;
+  height: 100vh;
+}
+
+.resizable-column {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 5px;
+}
+
+.resizable-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #272b30;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.resizable-content-align-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.frame-component-message {
+  background-color: lightsteelblue;
+}
+
+.resizable-separator {
+  width: 100%;
+  height: 5px;
+  background-color: gray;
+}
+
+.resizable-separator-vertical {
+  width: 5px;
+  background-color: gray;
+}
+
+/* Custom Resize Handles */
+.resizable-handle-n,
+.resizable-handle-s,
+.resizable-handle-w,
+.resizable-handle-e,
+.resizable-handle-nw,
+.resizable-handle-ne,
+.resizable-handle-sw,
+.resizable-handle-se {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.resizable-handle-n {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.resizable-handle-s {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+
+.resizable-handle-w {
+  top: 50%;
+  left: -5px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.resizable-handle-e {
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+
+.resizable-handle-nw {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.resizable-handle-ne {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.resizable-handle-sw {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.resizable-handle-se {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+
+.resizable-box {
+  position: relative;
+}
+
+.resizable-edge {
+  position: absolute;
+  width: 10px; /* Adjust the width as needed */
+  height: 100%;
+  top: 0;
+  background-color: transparent;
+  cursor: col-resize;
+  z-index: 2;
+}
+
+.resizable-edge.left {
+  left: 0;
+}
+
+.resizable-edge.right {
+  right: 0;
+}
+
+.resizable-edge.top {
+  left: 0;
+  top: 0;
+  height: 10px;
+  cursor: row-resize;
+}
+
+.resizable-edge.bottom {
+  left: 0;
+  bottom: 0;
+  height: 10px;
+  cursor: row-resize;
+}
+
+.resizing {
+  background-color: rgba(0, 0, 0, 0.2);
+}
