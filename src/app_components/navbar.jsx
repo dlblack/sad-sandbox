@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 
 function Navbar({
@@ -5,12 +6,20 @@ function Navbar({
   toggleClipboardToolbar,
   toggleMapsToolbar,
   toggleDssVueToolbar,
+  isStandardToolbarDisplayed,
+  isClipboardToolbarDisplayed,
+  isMapsToolbarDisplayed,
+  isDssVueToolbarDisplayed,
 }) {
   const [showMenu, setShowMenu] = useState(false);
 
   const menuClass = ["collapse navbar-collapse", showMenu ? "show" : ""].join(
     " "
   );
+
+  React.useEffect(() => {
+    console.log("isStandardToolbarDisplayed:", isStandardToolbarDisplayed);
+  }, [isStandardToolbarDisplayed]);
 
   return (
     <nav
@@ -121,28 +130,28 @@ function Navbar({
                       href="#"
                       onClick={toggleStandardToolbar}
                     >
-                      Standard
+                      Standard {isStandardToolbarDisplayed && "✓"}{" "}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleClipboardToolbar}
                     >
-                      Clipboard
+                      Clipboard {isClipboardToolbarDisplayed && "✓"}{" "}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleMapsToolbar}
                     >
-                      Maps
+                      Maps {isMapsToolbarDisplayed && "✓"}{" "}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleDssVueToolbar}
                     >
-                      DssVue
+                      DssVue {isDssVueToolbarDisplayed && "✓"}{" "}
                     </a>
                   </div>
                 </div>

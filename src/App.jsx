@@ -33,6 +33,10 @@ function App() {
         toggleClipboardToolbar={toggleClipboardToolbar}
         toggleMapsToolbar={toggleMapsToolbar}
         toggleDssVueToolbar={toggleDssVueToolbar}
+        isStandardToolbarDisplayed={standardToolbarVisible}
+        isClipboardToolbarDisplayed={clipboardToolbarVisible}
+        isMapsToolbarDisplayed={mapsToolbarVisible}
+        isDssVueToolbarDisplayed={dssVueToolbarVisible}
       />
       <div style={{ display: "flex", alignItems: "stretch" }}>
         <ToolbarContainer
