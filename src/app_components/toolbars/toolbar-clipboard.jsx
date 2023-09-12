@@ -10,14 +10,17 @@ const ClipboardToolbar = ({ isVisible }) => {
     {
       label: "",
       icon: "content_copy",
+      tooltip: "Copy",
     },
     {
       label: "",
       icon: "content_paste",
+      tooltip: "Paste",
     },
     {
       label: "",
       icon: "content_cut",
+      tooltip: "Cut",
     },
   ];
 
