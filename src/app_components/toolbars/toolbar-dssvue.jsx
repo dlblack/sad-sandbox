@@ -10,6 +10,7 @@ const DssVueToolbar = ({ isVisible }) => {
     {
       label: "",
       icon: "../../../resources/ssp/client/dss.gif",
+      tooltip: "Open DSSVue",
     },
   ];
 
