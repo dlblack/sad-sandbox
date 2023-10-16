@@ -13,7 +13,6 @@ class DockableItem extends Component {
   }
 
   componentDidMount() {
-    // When mounted, add the item to the DockableItemManager
     const id = dockableItemManager.addItem(this.state.content);
     this.setState({
       id,
@@ -21,7 +20,6 @@ class DockableItem extends Component {
   }
 
   componentWillUnmount() {
-    // When unmounted, remove the item from the DockableItemManager
     dockableItemManager.removeItem(this.state.id);
   }
 
