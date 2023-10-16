@@ -3,6 +3,7 @@ import Navbar from "./app_components/navbar";
 import ToolbarContainer from "./app_components/toolbars/toolbar-container";
 import ResizableFrame from "./app_components/resizable-frame";
 import Divider from "./app_components/toolbars/divider";
+import DockableFrame from "./app_components/dockable-frame";
 
 function App() {
   const [standardToolbarVisible, setStandardToolbarVisible] = useState(true);
@@ -59,7 +60,7 @@ function App() {
           toggleToolbar={toggleDssVueToolbar}
         />
       </div>
-      <ResizableFrame />
+      <DockableFrame />
     </div>
   );
 }
