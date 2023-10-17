@@ -4,7 +4,7 @@ import RGL, { WidthProvider } from "react-grid-layout";
 import DockableItem from "./dockable-item";
 import ProjectTree from "../project-tree";
 import ComponentEditorComponent from "../component-editor-component";
-import MapComponent from "../map-component";
+import DockableMapItem from "./dockable-map-item";
 import MessageComponent from "../message-component";
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -24,7 +24,7 @@ export default class DockableFrame extends React.PureComponent {
     const items = [
       { id: "projecttree", content: ProjectTree },
       { id: "componenteditor", content: ComponentEditorComponent },
-      { id: "map", content: MapComponent },
+      { id: "map", content: DockableMapItem },
       { id: "message", content: MessageComponent },
     ];
 
@@ -76,7 +76,7 @@ export default class DockableFrame extends React.PureComponent {
           id="componenteditor"
           content={<ComponentEditorComponent />}
         />
-        <DockableItem key="map" id="map" content={<MapComponent />} />
+        <DockableMapItem />
         <DockableItem
           key="message"
           id="message"
