@@ -1,19 +1,19 @@
 class DockableItemManager {
   constructor() {
     this.items = [];
-    this.logItemCount(); // Log the initial item count
+    this.logItemCount();
   }
 
   addItem(content) {
     const id = this.generateId();
     this.items.push({ id, content });
-    this.logItemCount(); // Log the updated item count
+    this.logItemCount();
     return id;
   }
 
   removeItem(id) {
     this.items = this.items.filter((item) => item.id !== id);
-    this.logItemCount(); // Log the updated item count
+    this.logItemCount();
   }
 
   getItems() {

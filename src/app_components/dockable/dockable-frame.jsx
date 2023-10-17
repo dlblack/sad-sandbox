@@ -1,88 +1,65 @@
-import React from "react";
+import React, { Component } from "react";
 import _ from "lodash";
-import RGL, { WidthProvider } from "react-grid-layout";
+import { Responsive, WidthProvider } from "react-grid-layout";
 import DockableItem from "./dockable-item";
 import ProjectTree from "../project-tree";
 import ComponentEditorComponent from "../component-editor-component";
-import DockableMapItem from "./dockable-map-item";
+import MapComponent from "../map-component";
 import MessageComponent from "../message-component";
 
-const ReactGridLayout = WidthProvider(RGL);
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
+const COMPONENT = "component";
 
-export default class DockableFrame extends React.PureComponent {
-  static defaultProps = {
-    className: "layout",
-    rowHeight: 30,
-    onLayoutChange: function () {},
-    cols: 12,
-  };
+class DockableFrame extends Component {
+  componentsToDisplay = [
+    { name: "Project", id: COMPONENT + "1", component: <ProjectTree /> },
+    {
+      name: "Component Editor",
+      id: COMPONENT + "2",
+      component: <ComponentEditorComponent />,
+    },
+    { name: "Map", id: COMPONENT + "3", component: <MapComponent /> },
+    { name: "Messages", id: COMPONENT + "4", component: <MessageComponent /> },
+  ];
 
-  constructor(props) {
-    super(props);
-
-    // Initialize the items state with the MessageComponent
-    const items = [
-      { id: "projecttree", content: ProjectTree },
-      { id: "componenteditor", content: ComponentEditorComponent },
-      { id: "map", content: DockableMapItem },
-      { id: "message", content: MessageComponent },
-    ];
-
-    const layout = this.generateLayout(items);
-    this.state = { layout, items };
-  }
-
-  generateItems() {
-    return React.Children.map(this.props.children, (child, index) => {
-      const { id, content } = child.props;
-      return <DockableItem key={index} id={id} content={content} />;
-    });
-  }
-
-  generateLayout(items) {
-    const p = this.props;
-    const itemCount = items.length;
-    return _.map(new Array(itemCount), function (item, i) {
-      const y = _.result(p, "y") || Math.ceil(Math.random() * 4) + 1;
-      return {
-        x: (i * 2) % 12,
-        y: Math.floor(i / 6) * y,
-        w: 2,
-        h: y,
-        i: i.toString(),
-      };
-    });
-  }
-
-  onLayoutChange(layout) {
-    this.props.onLayoutChange(layout);
+  generateLayoutItems() {
+    return this.componentsToDisplay.map((component) => ({
+      ...component,
+      x: 0,
+      y: 0,
+      w: 2,
+      h: 1,
+      static: false,
+    }));
   }
 
   render() {
+    const layoutItems = this.generateLayoutItems();
+
     return (
-      <ReactGridLayout
-        layout={this.state.layout}
-        onLayoutChange={this.onLayoutChange}
-        {...this.props}
-      >
-        {this.generateItems()}
-        <DockableItem
-          key="projecttree"
-          id="projecttree"
-          content={<ProjectTree />}
-        />
-        <DockableItem
-          key="componenteditor"
-          id="componenteditor"
-          content={<ComponentEditorComponent />}
-        />
-        <DockableMapItem />
-        <DockableItem
-          key="message"
-          id="message"
-          content={<MessageComponent />}
-        />
-      </ReactGridLayout>
+      <div>
+        <ResponsiveReactGridLayout
+          className="layout"
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+          rowHeight={30}
+          layouts={{
+            lg: layoutItems,
+            md: layoutItems,
+            sm: layoutItems,
+            xs: layoutItems,
+            xxs: layoutItems,
+          }}
+        >
+          {layoutItems.map((layoutItem) => (
+            <div key={layoutItem.id}>
+              <div className="gray-box">{layoutItem.component}</div>
+            </div>
+          ))}
+        </ResponsiveReactGridLayout>
+      </div>
     );
   }
 }
+
+export default DockableFrame;

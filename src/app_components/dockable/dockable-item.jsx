@@ -16,9 +16,18 @@ class DockableItem extends React.Component {
   render() {
     const { id, content } = this.props;
 
+    // Define default width and height
+    const defaultWidth = "100px";
+    const defaultHeight = "50px";
+
     return (
       <div key={id}>
-        <span className="text">{content}</span>
+        <span
+          className="text"
+          style={{ width: defaultWidth, height: defaultHeight }}
+        >
+          {content}
+        </span>
       </div>
     );
   }
