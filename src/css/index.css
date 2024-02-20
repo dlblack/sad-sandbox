@@ -112,3 +112,8 @@
   margin: 0 1px;
   height: 100%;
 }
+
+/* Dockable */
+.gray-box {
+  background-color: lightgray;
+}

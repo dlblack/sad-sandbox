@@ -1,5 +1,4 @@
 import React from "react";
-import "../css/MessageComponent.css";
 
 function MessageComponent() {
   return (
