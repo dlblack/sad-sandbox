@@ -1,5 +1,6 @@
+// Each component in the main window below the toolbar is wrapped with a dockable item.
 import React from "react";
-import DockableItemManager from "./dockable-item-manager";
+import DockableItemManager from "./DockableItemManager";
 
 const dockableItemManager = new DockableItemManager();
 

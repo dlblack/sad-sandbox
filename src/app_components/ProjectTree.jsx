@@ -1,5 +1,5 @@
 import React from "react";
-import TreeNode from "./tree-node";
+import TreeNode from "./TreeNode";
 
 const ProjectTree = () => (
   <div className="project-tree">

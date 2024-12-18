@@ -1,5 +1,5 @@
 import React from "react";
-import ToolbarButton from "./toolbar-button";
+import ToolbarButton from "./ToolbarButton";
 
 function Toolbar({ buttons }) {
   return (

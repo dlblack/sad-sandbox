@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import _ from "lodash";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import ProjectTree from "../project-tree";
-import ComponentEditorComponent from "../component-editor-component";
-import MapComponent from "../map-component";
-import MessageComponent from "../message-component";
-import { generateLayout } from "./utils";
+import ProjectTree from "../ProjectTree";
+import ComponentEditorComponent from "../ComponentEditorComponent";
+import MapComponent from "../MapComponent";
+import MessageComponent from "../MessageComponent";
+import { generateLayout } from "./Utils";
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 const COMPONENT = "component";

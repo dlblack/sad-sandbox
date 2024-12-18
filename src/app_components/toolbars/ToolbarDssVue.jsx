@@ -1,5 +1,5 @@
 import React from "react";
-import Toolbar from "./toolbar";
+import Toolbar from "./Toolbar";
 
 const DssVueToolbar = ({ isVisible }) => {
   if (!isVisible) {

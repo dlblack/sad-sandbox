@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Navbar from "./app_components/navbar";
-import ToolbarContainer from "./app_components/toolbars/toolbar-container";
-import Divider from "./app_components/toolbars/divider";
-import DockableFrame from "./app_components/dockable/dockable-frame";
+import ToolbarContainer from "./app_components/toolbars/ToolbarContainer";
+import Divider from "./app_components/toolbars/Divider";
+import DockableFrame from "./app_components/dockable/DockableFrame";
 
 function App() {
   const [standardToolbarVisible, setStandardToolbarVisible] = useState(true);
