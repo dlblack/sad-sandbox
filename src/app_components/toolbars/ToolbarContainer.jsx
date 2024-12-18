@@ -1,8 +1,8 @@
 import React from "react";
-import StandardToolbar from "./toolbar-standard";
-import ClipboardToolbar from "./toolbar-clipboard";
-import MapsToolbar from "./toolbar-maps";
-import DssVueToolbar from "./toolbar-dssvue";
+import StandardToolbar from "./ToolbarStandard";
+import ClipboardToolbar from "./ToolbarClipboard";
+import MapsToolbar from "./ToolbarMaps";
+import DssVueToolbar from "./ToolbarDssVue";
 
 function ToolbarContainer({ activeToolbar, isVisible }) {
   return (
