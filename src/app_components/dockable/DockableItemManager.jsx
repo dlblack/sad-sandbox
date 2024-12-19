@@ -6,7 +6,7 @@ class DockableItemManager {
 
   addItem(content) {
     const id = this.generateId();
-    this.items.push({ id, content });
+    this.items.push({ id, ...content });
     this.logItemCount();
     return id;
   }
@@ -21,11 +21,11 @@ class DockableItemManager {
   }
 
   generateId() {
-    return this.items.length + 1;
+    return `item-${this.items.length + 1}`;
   }
 
   logItemCount() {
-    console.log(`Number of items managed: ${this.items.length}`);
+    console.log(`[DockableItemManager] Number of items managed: ${this.items.length}`);
   }
 }
 
