@@ -1,5 +1,5 @@
-import React from "react";
-import { useState } from "react";
+import React, { useContext, useState } from "react";
+import { StyleContext } from "../styles/StyleContext";
 
 function Navbar({
   toggleStandardToolbar,
@@ -10,22 +10,26 @@ function Navbar({
   isClipboardToolbarDisplayed,
   isMapsToolbarDisplayed,
   isDssVueToolbarDisplayed,
+  addComponent,
 }) {
+  const { style } = useContext(StyleContext);
+  
   const [showMenu, setShowMenu] = useState(false);
 
   const menuClass = ["collapse navbar-collapse", showMenu ? "show" : ""].join(
     " "
   );
 
-  React.useEffect(() => {
-    console.log("isStandardToolbarDisplayed:", isStandardToolbarDisplayed);
-  }, [isStandardToolbarDisplayed]);
+  const navbarClass = `navbar navbar-expand-lg navbar-dark ${style || "bg-primary"}`;
+
+  // Debugging helper for opening components
+  const handleOpenComponent = (type) => {
+    console.log(`[Navbar] Attempting to open: ${type}`);
+    addComponent(type);
+  };
 
   return (
-    <nav
-      className="navbar navbar-expand-lg navbar-dark bg-primary"
-      style={{ zIndex: 2000 }}
-    >
+    <nav className={navbarClass} style={{ zIndex: 2000 }}>
       <div className="container-fluid">
         HEC-SSP
         <button
@@ -36,70 +40,13 @@ function Navbar({
           aria-controls="navbarColor01"
           aria-expanded="false"
           aria-label="Toggle navigation"
-          onClick={() => {
-            setShowMenu(!showMenu);
-          }}
+          onClick={() => setShowMenu(!showMenu)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className={menuClass} id="navbarColor01">
           <ul className="navbar-nav me-auto">
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                File
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  New Project
-                </a>
-                <a className="dropdown-item" href="#">
-                  Open Project
-                </a>
-                <a className="dropdown-item" href="#">
-                  Save Project
-                </a>
-                <a className="dropdown-item" href="#">
-                  Save Project As...
-                </a>
-                <a className="dropdown-item" href="#">
-                  Close Project
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Recent Projects
-                </a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Edit
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Cut
-                </a>
-                <a className="dropdown-item" href="#">
-                  Copy
-                </a>
-                <a className="dropdown-item" href="#">
-                  Paste
-                </a>
-              </div>
-            </li>
+            {/* Toolbar Menu */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -130,44 +77,35 @@ function Navbar({
                       href="#"
                       onClick={toggleStandardToolbar}
                     >
-                      Standard {isStandardToolbarDisplayed && "✓"}{" "}
+                      Standard {isStandardToolbarDisplayed && "✓"}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleClipboardToolbar}
                     >
-                      Clipboard {isClipboardToolbarDisplayed && "✓"}{" "}
+                      Clipboard {isClipboardToolbarDisplayed && "✓"}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleMapsToolbar}
                     >
-                      Maps {isMapsToolbarDisplayed && "✓"}{" "}
+                      Maps {isMapsToolbarDisplayed && "✓"}
                     </a>
                     <a
                       className="dropdown-item"
                       href="#"
                       onClick={toggleDssVueToolbar}
                     >
-                      DssVue {isDssVueToolbarDisplayed && "✓"}{" "}
+                      DssVue {isDssVueToolbarDisplayed && "✓"}
                     </a>
                   </div>
                 </div>
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
-                </a>
-                <div className="dropdown-divider"></div>
               </div>
             </li>
+
+            {/* Components Menu */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -177,160 +115,33 @@ function Navbar({
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                Maps
+                Components
               </a>
               <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Action
+                <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenComponent("Map");
+                  }}
+                >
+                  Open Map Window
                 </a>
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
+                <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenComponent("StyleSelector");
+                  }}
+                >
+                  Open Style Selector
                 </a>
               </div>
             </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Data
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
-                </a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Analysis
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
-                </a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Results
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Graph
-                </a>
-                <a className="dropdown-item" href="#">
-                  Data
-                </a>
-                <a className="dropdown-item" href="#">
-                  Results
-                </a>
-                <a className="dropdown-item" href="#">
-                  Summary Report
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Default Plot Line Styles
-                </a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-auto-close="outside"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Tools
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
-                </a>
-              </div>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                data-bs-toggle="dropdown"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                Window
-              </a>
-              <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                  Action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Another action
-                </a>
-                <a className="dropdown-item" href="#">
-                  Something else here
-                </a>
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Separated link
-                </a>
-              </div>
-            </li>
+            
+            {/* Help Menu */}
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -376,9 +187,7 @@ function Navbar({
                   Training
                 </a>
                 <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  Install Example Data
-                </a>
+                <a className="dropdown-item" href="#">Install Example Data</a>
                 <div className="dropdown-divider"></div>
                 <a
                   className="dropdown-item"
@@ -388,9 +197,7 @@ function Navbar({
                 >
                   Terms and Conditions for Use
                 </a>
-                <a className="dropdown-item" href="#">
-                  About HEC-SSP
-                </a>
+                <a className="dropdown-item" href="#">About HEC-SSP</a>
               </div>
             </li>
           </ul>

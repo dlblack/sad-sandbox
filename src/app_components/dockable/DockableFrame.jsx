@@ -1,113 +1,100 @@
 import React, { Component } from "react";
-import _ from "lodash";
-import { Responsive, WidthProvider } from "react-grid-layout";
-import ProjectTree from "../ProjectTree";
+import DockableItem from "./DockableItem";
 import ComponentEditorComponent from "../ComponentEditorComponent";
 import MapComponent from "../MapComponent";
 import MessageComponent from "../MessageComponent";
-import { generateLayout } from "./Utils";
-
-const ResponsiveReactGridLayout = WidthProvider(Responsive);
-const COMPONENT = "component";
+import ProjectTree from "../ProjectTree";
+import StyleSelectorComponent from "../StyleSelectorComponent";
 
 class DockableFrame extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentBreakpoint: "lg",
-      compactType: "vertical",
-      resizeHandles: ["se"],
-      mounted: false,
-      layouts: { lg: generateLayout(["se"]) },
+  getWindowTitle(type) {
+    const titles = {
+      StyleSelector: "Style Selector",
+      Map: "Map Viewer",
+      Project: "Project Explorer",
+      ComponentEditor: "Component Editor",
+      Messages: "Message Log",
     };
+    return titles[type] || type; // Fallback to type if no custom title is set
   }
 
-  componentsToDisplay = [
-    { name: "Project", id: COMPONENT + "1", component: <ProjectTree /> },
-    {
-      name: "Component Editor",
-      id: COMPONENT + "2",
-      component: <ComponentEditorComponent />,
-    },
-    { name: "Map", id: COMPONENT + "3", component: <MapComponent /> },
-    { name: "Messages", id: COMPONENT + "4", component: <MessageComponent /> },
-  ];
+  startDrag = (id, event) => {
+    event.stopPropagation();
+    console.log(`[DockableFrame] Start dragging component with ID: ${id}`);
+    this.setState({
+      dragging: { id, startX: event.clientX, startY: event.clientY },
+    });
 
-  onCompactTypeChange = () => {
-    const { compactType: oldCompactType } = this.state;
-    const compactType =
-      oldCompactType === "horizontal"
-        ? "vertical"
-        : oldCompactType === "vertical"
-        ? null
-        : "horizontal";
-    this.setState({ compactType });
+    window.addEventListener("mousemove", this.handleDrag);
+    window.addEventListener("mouseup", this.stopDrag);
   };
 
-  onResizeTypeChange = () => {
-    const resizeHandles =
-      this.state.resizeHandles === availableHandles ? ["se"] : availableHandles;
+  handleDrag = (event) => {
+    const { dragging } = this.state;
+    if (!dragging) return;
+
+    const { id, startX, startY } = dragging;
+    const deltaX = event.clientX - startX;
+    const deltaY = event.clientY - startY;
+
+    this.props.setContainers((prev) => {
+      const updatedContainers = { ...prev };
+      updatedContainers[id].x = Math.max(0, updatedContainers[id].x + deltaX);
+      updatedContainers[id].y = Math.max(0, updatedContainers[id].y + deltaY);
+      return updatedContainers;
+    });
+
     this.setState({
-      resizeHandles,
-      layouts: { lg: generateLayout(resizeHandles) },
+      dragging: { ...dragging, startX: event.clientX, startY: event.clientY },
     });
   };
 
-  onLayoutChange = (layout, layouts) => {
-    this.props.onLayoutChange(layout, layouts);
+  stopDrag = () => {
+    console.log(`[DockableFrame] Stopped dragging.`);
+    this.setState({ dragging: null });
+    window.removeEventListener("mousemove", this.handleDrag);
+    window.removeEventListener("mouseup", this.stopDrag);
   };
 
-  onNewLayout = () => {
-    this.setState({
-      layouts: { lg: generateLayout(this.state.resizeHandles) },
-    });
+  renderComponent = (type) => {
+    console.log(`[DockableFrame] Rendering component type: ${type}`);
+    switch (type) {
+      case "StyleSelector":
+        return <StyleSelectorComponent />;
+      case "Map":
+        return <MapComponent />;
+      case "Project":
+        return <ProjectTree />;
+      case "ComponentEditor":
+        return <ComponentEditorComponent />;
+      case "Messages":
+        return <MessageComponent />;
+      default:
+        return null;
+    }
   };
-
-  onDrop = (layout, item, e) => {
-    alert(`Element parameters: ${JSON.stringify(item)}`);
-  };
-
-  generateLayoutItems() {
-    return this.componentsToDisplay.map((component) => ({
-      ...component,
-      x: 0,
-      y: 0,
-      w: 2,
-      h: 1,
-      static: false,
-    }));
-  }
 
   render() {
-    const layoutItems = this.generateLayoutItems();
+    const { containers } = this.props;
+    console.log(`[DockableFrame] Rendering containers: ${JSON.stringify(containers)}`);
 
     return (
-      <div>
-        <ResponsiveReactGridLayout
-          className="layout"
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-          rowHeight={30}
-          onBreakpointChange={this.onBreakpointChange}
-          onDrop={this.onDrop}
-          measureBeforeMount={false}
-          useCSSTransforms={this.state.mounted}
-          compactType={this.state.compactType}
-          preventCollision={!this.state.compactType}
-          layouts={{
-            lg: layoutItems,
-            md: layoutItems,
-            sm: layoutItems,
-            xs: layoutItems,
-            xxs: layoutItems,
-          }}
-        >
-          {layoutItems.map((layoutItem) => (
-            <div key={layoutItem.id}>
-              <div className="gray-box">{layoutItem.component}</div>
-            </div>
-          ))}
-        </ResponsiveReactGridLayout>
+      <div className="resizable-frame-container" style={{ position: "relative" }}>
+        {Object.entries(containers).map(([id, { x, y, width, height, type }]) => (
+          <DockableItem
+            key={id}
+            id={id}
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            type={this.getWindowTitle(type)}
+            onRemove={this.props.removeComponent}
+            onDragStart={this.startDrag}
+          >
+            {this.renderComponent(type)}
+          </DockableItem>
+        ))}
       </div>
     );
   }
