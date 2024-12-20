@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { StyleProvider } from "./styles/StyleContext";
+import React, { useState, useContext } from "react";
+import { StyleContext } from "./styles/StyleContext";
 import Navbar from "./app_components/navbar";
 import ToolbarContainer from "./app_components/toolbars/ToolbarContainer";
 import Divider from "./app_components/toolbars/Divider";
 import DockableFrame from "./app_components/dockable/DockableFrame";
 
 function App() {
+  const { appBackgroundStyle } = useContext(StyleContext);
+
   const [standardToolbarVisible, setStandardToolbarVisible] = useState(true);
   const [clipboardToolbarVisible, setClipboardToolbarVisible] = useState(true);
   const [mapsToolbarVisible, setMapsToolbarVisible] = useState(true);
@@ -55,57 +57,73 @@ function App() {
     });
   };
 
+  const onDragStart = (id, event) => {
+    const container = containers[id];
+    const startX = event.clientX - container.x;
+    const startY = event.clientY - container.y;
+
+    const onMouseMove = (moveEvent) => {
+      const newX = moveEvent.clientX - startX;
+      const newY = moveEvent.clientY - startY;
+      setContainers((prev) => ({
+        ...prev,
+        [id]: { ...prev[id], x: newX, y: newY },
+      }));
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+
   return (
-    <StyleProvider>
-      <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-        <div>
-          <Navbar
-            toggleStandardToolbar={toggleStandardToolbar}
-            toggleClipboardToolbar={toggleClipboardToolbar}
-            toggleMapsToolbar={toggleMapsToolbar}
-            toggleDssVueToolbar={toggleDssVueToolbar}
-            isStandardToolbarDisplayed={standardToolbarVisible}
-            isClipboardToolbarDisplayed={clipboardToolbarVisible}
-            isMapsToolbarDisplayed={mapsToolbarVisible}
-            isDssVueToolbarDisplayed={dssVueToolbarVisible}
-            addComponent={addComponent}
+    <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh" }}>
+      <div>
+        <Navbar
+          toggleStandardToolbar={toggleStandardToolbar}
+          toggleClipboardToolbar={toggleClipboardToolbar}
+          toggleMapsToolbar={toggleMapsToolbar}
+          toggleDssVueToolbar={toggleDssVueToolbar}
+          isStandardToolbarDisplayed={standardToolbarVisible}
+          isClipboardToolbarDisplayed={clipboardToolbarVisible}
+          isMapsToolbarDisplayed={mapsToolbarVisible}
+          isDssVueToolbarDisplayed={dssVueToolbarVisible}
+          addComponent={addComponent}
+        />
+        <div style={{ display: "flex", alignItems: "stretch" }}>
+          <ToolbarContainer
+            activeToolbar="standardtoolbar"
+            isVisible={standardToolbarVisible}
           />
-          <div style={{ display: "flex", alignItems: "stretch" }}>
-            <ToolbarContainer
-              activeToolbar="standardtoolbar"
-              isVisible={standardToolbarVisible}
-              toggleToolbar={toggleStandardToolbar}
-            />
-            <Divider />
-            <ToolbarContainer
-              activeToolbar="clipboardtoolbar"
-              isVisible={clipboardToolbarVisible}
-              toggleToolbar={toggleClipboardToolbar}
-            />
-            <Divider />
-            <ToolbarContainer
-              activeToolbar="mapstoolbar"
-              isVisible={mapsToolbarVisible}
-              toggleToolbar={toggleMapsToolbar}
-            />
-            <Divider />
-            <ToolbarContainer
-              activeToolbar="dssvuetoolbar"
-              isVisible={dssVueToolbarVisible}
-              toggleToolbar={toggleDssVueToolbar}
-            />
-          </div>
-        </div>
-        <div style={{ flex: 1, overflow: "hidden" }}>
-          <DockableFrame
-            containers={containers}
-            setContainers={setContainers}
-            addComponent={addComponent}
-            removeComponent={removeComponent}
+          <Divider />
+          <ToolbarContainer
+            activeToolbar="clipboardtoolbar"
+            isVisible={clipboardToolbarVisible}
+          />
+          <Divider />
+          <ToolbarContainer
+            activeToolbar="mapstoolbar"
+            isVisible={mapsToolbarVisible}
+          />
+          <Divider />
+          <ToolbarContainer
+            activeToolbar="dssvuetoolbar"
+            isVisible={dssVueToolbarVisible}
           />
         </div>
       </div>
-    </StyleProvider>
+      <div style={{ flex: 1, overflow: "hidden" }}>
+        <DockableFrame
+          containers={containers}
+          removeComponent={removeComponent}
+          onDragStart={onDragStart}
+        />
+      </div>
+    </div>
   );
 }
 

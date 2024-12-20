@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { StyleContext } from "../../styles/StyleContext";
 
 function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, children }) {
-  const { style } = useContext(StyleContext);
+  const { modalStyle } = useContext(StyleContext);
 
   return (
     <div
@@ -20,10 +20,10 @@ function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, ch
         overflow: "hidden",
       }}
     >
-      <div className={`modal-content`} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div className="modal-content" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         {/* Modal Header */}
         <div
-          className={`modal-header ${style}`}
+          className={`modal-header ${modalStyle}`}
           onMouseDown={(e) => onDragStart(id, e)}
           style={{
             cursor: "move",
@@ -31,17 +31,22 @@ function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, ch
             borderBottom: "1px solid #dee2e6",
           }}
         >
-          <h5 className="modal-title">{type} Window</h5>
+          <h5 className="modal-title">{type}</h5>
           <button
             type="button"
             className="btn-close"
             onClick={() => onRemove(id)}
             aria-label="Close"
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
           ></button>
         </div>
 
         {/* Modal Body */}
-        <div className="modal-body" style={{ flex: 1, overflow: "auto", padding: "10px" }}>
+        <div className="modal-body" style={{ flex: 1, overflow: "auto", padding: "1px" }}>
           {children}
         </div>
       </div>

@@ -12,7 +12,7 @@ function Navbar({
   isDssVueToolbarDisplayed,
   addComponent,
 }) {
-  const { style } = useContext(StyleContext);
+  const { navbarStyle } = useContext(StyleContext);
   
   const [showMenu, setShowMenu] = useState(false);
 
@@ -20,7 +20,7 @@ function Navbar({
     " "
   );
 
-  const navbarClass = `navbar navbar-expand-lg navbar-dark ${style || "bg-primary"}`;
+  const navbarClass = `navbar navbar-expand-lg ${navbarStyle || "bg-primary"}`;
 
   // Debugging helper for opening components
   const handleOpenComponent = (type) => {

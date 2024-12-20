@@ -10,6 +10,7 @@ function Toolbar({ buttons }) {
           label={button.label}
           icon={button.icon}
           tooltip={button.tooltip}
+          onClick={button.onClick}
         />
       ))}
     </div>

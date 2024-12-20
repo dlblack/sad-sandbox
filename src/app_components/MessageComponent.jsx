@@ -5,7 +5,7 @@ function MessageComponent() {
   const { style } = useContext(StyleContext);
 
   return (
-    <div className={`${style}`}>
+    <div style={{ backgroundColor: "#fff", padding: "10px" }}>
       <div className="text-info">Info: This line is using "text-info".</div>
       <div className="text-danger">Danger: This line is using "text-danger".</div>
       <div className="text-warning">Warning: This line is using "text-warning".</div>

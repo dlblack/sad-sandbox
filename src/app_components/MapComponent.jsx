@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useContext } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "../styles/css/MapComponent.css";
 import { StyleContext } from "../styles/StyleContext";
 
 function MapComponent() {

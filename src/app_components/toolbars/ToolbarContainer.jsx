@@ -1,24 +1,14 @@
 import React from "react";
-import StandardToolbar from "./ToolbarStandard";
-import ClipboardToolbar from "./ToolbarClipboard";
-import MapsToolbar from "./ToolbarMaps";
-import DssVueToolbar from "./ToolbarDssVue";
+import Toolbar from "./Toolbar";
+import { toolbarsConfig } from "../../config/toolbarConfig";
 
 function ToolbarContainer({ activeToolbar, isVisible }) {
-  return (
-    <div>
-      {activeToolbar === "standardtoolbar" && (
-        <StandardToolbar isVisible={isVisible} />
-      )}
-      {activeToolbar === "clipboardtoolbar" && (
-        <ClipboardToolbar isVisible={isVisible} />
-      )}
-      {activeToolbar === "mapstoolbar" && <MapsToolbar isVisible={isVisible} />}
-      {activeToolbar === "dssvuetoolbar" && (
-        <DssVueToolbar isVisible={isVisible} />
-      )}
-    </div>
-  );
+  if (!isVisible) return null;
+
+  // Fetch the buttons for the active toolbar
+  const buttons = toolbarsConfig[activeToolbar] || [];
+
+  return <Toolbar buttons={buttons} />;
 }
 
 export default ToolbarContainer;
