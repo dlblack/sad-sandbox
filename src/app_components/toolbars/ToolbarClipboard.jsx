@@ -1,34 +1,9 @@
 import React from "react";
 import Toolbar from "./Toolbar";
+import { clipboardToolbarButtons } from "../../config/toolbarConfig";
 
-const ClipboardToolbar = ({ isVisible }) => {
-  if (!isVisible) {
-    return null;
-  }
-
-  const clipboardToolbarButtons = [
-    {
-      label: "",
-      icon: "content_copy",
-      tooltip: "Copy",
-    },
-    {
-      label: "",
-      icon: "content_paste",
-      tooltip: "Paste",
-    },
-    {
-      label: "",
-      icon: "content_cut",
-      tooltip: "Cut",
-    },
-  ];
-
-  return (
-    <div>
-      <Toolbar buttons={clipboardToolbarButtons} />
-    </div>
-  );
+const ToolbarClipboard = () => {
+  return <Toolbar buttons={clipboardToolbarButtons} />;
 };
 
-export default ClipboardToolbar;
+export default ToolbarClipboard;

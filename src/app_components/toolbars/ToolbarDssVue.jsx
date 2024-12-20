@@ -1,24 +1,9 @@
 import React from "react";
 import Toolbar from "./Toolbar";
+import { dssVueToolbarButtons } from "../../config/toolbarConfig";
 
-const DssVueToolbar = ({ isVisible }) => {
-  if (!isVisible) {
-    return null;
-  }
-
-  const dssVueToolbarButtons = [
-    {
-      label: "",
-      icon: "../../../resources/ssp/client/dss.gif",
-      tooltip: "HEC-DSSVue",
-    },
-  ];
-
-  return (
-    <div>
-      <Toolbar buttons={dssVueToolbarButtons} />
-    </div>
-  );
+const ToolbarDssVue = () => {
+  return <Toolbar buttons={dssVueToolbarButtons} />;
 };
 
-export default DssVueToolbar;
+export default ToolbarDssVue;
