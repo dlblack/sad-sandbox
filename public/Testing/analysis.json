@@ -1,0 +1,44 @@
+{
+  "Peak Flow Frequency": [
+    {
+      "name": "Test",
+      "description": "Discharge for the Sacramento River, 31Dec1999 24:00 - 01Jan2000 23:00",
+      "selectedDataset": "Dummy Discharge 1",
+      "step2Value": "",
+      "regionalSkew": "",
+      "regionalSkewMSE": "",
+      "step3Value": "",
+      "frequencies": []
+    },
+    {
+      "name": "Testing",
+      "description": "Discharge for the Sacramento River, 31Dec1999 24:00 - 01Jan2000 23:00",
+      "selectedDataset": "Dummy Discharge 1",
+      "step2Value": "",
+      "regionalSkew": "",
+      "regionalSkewMSE": "",
+      "step3Value": "",
+      "frequencies": []
+    },
+    {
+      "name": "Testing Friendly Type",
+      "description": "Discharge for the Sacramento River, 31Dec1999 24:00 - 01Jan2000 23:00",
+      "selectedDataset": "Dummy Discharge 1",
+      "step2Value": "",
+      "regionalSkew": "",
+      "regionalSkewMSE": "",
+      "step3Value": "",
+      "frequencies": []
+    }
+  ],
+  "Balanced Hydrograph Analysis": [
+    {
+      "name": "Newer Test",
+      "description": "Description Test"
+    },
+    {
+      "name": "Test",
+      "description": ""
+    }
+  ]
+}

@@ -6,7 +6,7 @@ function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, ch
 
   return (
     <div
-      className="modal-container"
+      className="card-container"
       style={{
         left: x,
         top: y,
@@ -14,24 +14,21 @@ function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, ch
         height: `${height}px`,
         position: "absolute",
         zIndex: 1050,
-        border: "1px solid #ccc",
-        borderRadius: "0.25rem",
-        boxShadow: "0 0.5rem 1rem rgba(0, 0, 0, 0.15)",
         overflow: "hidden",
       }}
     >
-      <div className="modal-content" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        {/* Modal Header */}
+      <div className="card h-100 d-flex flex-column">
+        {/* Card Header */}
         <div
-          className={`modal-header ${modalStyle}`}
+          className={`card-header d-flex align-items-center justify-content-between ${modalStyle}`}
           onMouseDown={(e) => onDragStart(id, e)}
           style={{
             cursor: "move",
-            padding: "10px",
+            padding: "4px 10px 4px 10px",
             borderBottom: "1px solid #dee2e6",
           }}
         >
-          <h5 className="modal-title">{type}</h5>
+          <h6 className="card-title mb-0">{type}</h6>
           <button
             type="button"
             className="btn-close"
@@ -45,8 +42,8 @@ function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, ch
           ></button>
         </div>
 
-        {/* Modal Body */}
-        <div className="modal-body" style={{ flex: 1, overflow: "auto", padding: "1px" }}>
+        {/* Card Body */}
+        <div className="card-body flex-grow-1 overflow-auto p-2" style={{ flex: 1, overflow: "auto", padding: "1px" }}>
           {children}
         </div>
       </div>
