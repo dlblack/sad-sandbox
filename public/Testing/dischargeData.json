@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Dummy Discharge 1",
+    "description": "Discharge for the Sacramento River, 31Dec1999 24:00 - 01Jan2000 23:00",
+    "filepath": "./DummyPrecip1.dss",
+    "pathname": "/Central Valley/Sacramento/Flow/31Dec1999-01Jan2000/1Hour/Obs/"
+  },
+  {
+    "name": "Dummy Discharge 2",
+    "description": "Discharge for the American River, 31Dec1999 24:00 - 01Jan2000 23:00",
+    "filepath": "./DummyPrecip1.dss",
+    "pathname": "/Central Valley/American/Flow/31Dec1999-01Jan2000/1Hour/Obs/"
+  },
+  {
+    "name": "Dummy Discharge 3",
+    "description": "Discharge for the Feather River, 31Dec1999 24:00 - 01Jan2000 23:00",
+    "filepath": "./DummyPrecip1.dss",
+    "pathname": "/Central Valley/Feather/Flow/31Dec1999-01Jan2000/1Hour/Obs/"
+  }
+]

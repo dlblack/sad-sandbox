@@ -1,5 +1,5 @@
 {
-  "name": "hec-ssp",
+  "name": "hec-sad",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "feather-route-matcher": "4.0.0",
+    "leaflet": "^1.9.4",
     "npm-check": "6.0.1",
     "plotly.js-dist-min": "2.26.0",
     "react": "18.2.0",
