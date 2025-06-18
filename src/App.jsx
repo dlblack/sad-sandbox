@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { StyleContext } from "./styles/StyleContext";
 import Navbar from "./app_components/navbar";
-import ToolbarContainer from "./app_components/toolbars/ToolbarContainer";
-import Divider from "./app_components/toolbars/Divider";
 import DockableFrame from "./app_components/dockable/DockableFrame";
 import { componentMetadata, DEFAULT_COMPONENT_SIZE } from "./utils/componentMetadata";
 import { componentDisplayNames } from "./utils/componentDisplayNames";
@@ -15,12 +13,6 @@ function groupAnalysesByType(analysesObj = {}) {
 
 function App() {
   const { appBackgroundStyle } = useContext(StyleContext);
-
-  // UI
-  const [standardToolbarVisible, setStandardToolbarVisible] = useState(true);
-  const [clipboardToolbarVisible, setClipboardToolbarVisible] = useState(true);
-  const [mapsToolbarVisible, setMapsToolbarVisible] = useState(true);
-  const [dssVueToolbarVisible, setDssVueToolbarVisible] = useState(true);
 
   // Analyses are fetched from the backend
   const [analyses, setAnalyses] = useState({});
@@ -149,37 +141,8 @@ function App() {
     <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh" }}>
       <div>
         <Navbar
-          toggleStandardToolbar={() => setStandardToolbarVisible((prev) => !prev)}
-          toggleClipboardToolbar={() => setClipboardToolbarVisible((prev) => !prev)}
-          toggleMapsToolbar={() => setMapsToolbarVisible((prev) => !prev)}
-          toggleDssVueToolbar={() => setDssVueToolbarVisible((prev) => !prev)}
-          isStandardToolbarDisplayed={standardToolbarVisible}
-          isClipboardToolbarDisplayed={clipboardToolbarVisible}
-          isMapsToolbarDisplayed={mapsToolbarVisible}
-          isDssVueToolbarDisplayed={dssVueToolbarVisible}
           addComponent={addComponent}
         />
-        <div style={{ display: "flex", alignItems: "stretch" }}>
-          <ToolbarContainer
-            activeToolbar="standardtoolbar"
-            isVisible={standardToolbarVisible}
-          />
-          <Divider />
-          <ToolbarContainer
-            activeToolbar="clipboardtoolbar"
-            isVisible={clipboardToolbarVisible}
-          />
-          <Divider />
-          <ToolbarContainer
-            activeToolbar="mapstoolbar"
-            isVisible={mapsToolbarVisible}
-          />
-          <Divider />
-          <ToolbarContainer
-            activeToolbar="dssvuetoolbar"
-            isVisible={dssVueToolbarVisible}
-          />
-        </div>
       </div>
 
       <div style={{ flex: 1, overflow: "hidden" }}>

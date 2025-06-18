@@ -4,20 +4,11 @@ import avatarImage from "../assets/images/avatar.jpeg";
 import logo from "../assets/images/logo.png"
 
 function Navbar({
-  toggleStandardToolbar,
-  toggleClipboardToolbar,
-  toggleMapsToolbar,
-  toggleDssVueToolbar,
-  isStandardToolbarDisplayed,
-  isClipboardToolbarDisplayed,
-  isMapsToolbarDisplayed,
-  isDssVueToolbarDisplayed,
   addComponent,
 }) {
   const { navbarStyle } = useContext(StyleContext);
   
   const [showMenu, setShowMenu] = useState(false);
-
 
   const menuClass = ["collapse navbar-collapse", showMenu ? "show" : ""].join(
     " "
@@ -396,33 +387,6 @@ function Navbar({
               <span className="material-icons" title="Tools">settings</span>
             </a>
             <div className="dropdown-menu dropdown-menu-end">
-              {/* Toolbars submenu */}
-              <div className="dropdown dropstart">
-                <a
-                  className="dropdown-item dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  Toolbars
-                </a>
-                <div className="dropdown-menu">
-                  <a className="dropdown-item" href="#" onClick={toggleStandardToolbar}>
-                    Standard {isStandardToolbarDisplayed && "✓"}
-                  </a>
-                  <a className="dropdown-item" href="#" onClick={toggleClipboardToolbar}>
-                    Clipboard {isClipboardToolbarDisplayed && "✓"}
-                  </a>
-                  <a className="dropdown-item" href="#" onClick={toggleMapsToolbar}>
-                    Maps {isMapsToolbarDisplayed && "✓"}
-                  </a>
-                  <a className="dropdown-item" href="#" onClick={toggleDssVueToolbar}>
-                    DssVue {isDssVueToolbarDisplayed && "✓"}
-                  </a>
-                </div>
-              </div>
               {/* Components submenu */}
               <div className="dropdown dropstart">
                 <a
