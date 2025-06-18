@@ -25,3 +25,6 @@ dist-ssr
 
 # Configuration files
 map_api.js
+
+# Testing path
+/public/Testing/*
