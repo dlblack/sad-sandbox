@@ -1,8 +1,7 @@
-export const dockableTitles = {
-  ComponentContent: "Contents",
-  Map: "Map Viewer",
-  Messages: "Messages",
-  StyleSelector: "Style Selector",
+export const componentDisplayNames = {
+  Map: "Map Window",
+  ComponentContent: "Contents tree panel",
+  ComponentMessages: "Messages Panel",
 
   // Data
   ManualDataEntryEditor: "Manual Data Entry",

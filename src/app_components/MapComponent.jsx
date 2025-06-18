@@ -11,7 +11,7 @@ function MapComponent() {
   useEffect(() => {
     if (mapRef.current && !mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current).setView(
-        [38.5758, -121.4788],
+        [38.5435, -121.7408],
         13
       );
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

@@ -1,0 +1,32 @@
+{
+  "Peak Flow Frequency": [
+    {
+      "name": "Feather River",
+      "description": "Discharge for the Feather River, 31Dec1999 24:00 - 01Jan2000 23:00",
+      "selectedDataset": "Dummy Discharge 3",
+      "step2Value": "Use Regional Skew",
+      "regionalSkew": "4.5",
+      "regionalSkewMSE": "4.9",
+      "step3Value": "Compute Expected Probability Curve using Numerical Integration (EMA)",
+      "frequencies": [
+        "0.1",
+        "0.2",
+        "0.5",
+        "1.0",
+        "2.0",
+        "5.0",
+        "10.0",
+        "20.0",
+        "50.0",
+        "80.0",
+        "99.0"
+      ]
+    }
+  ],
+  "Bulletin 17 Analysis": [
+    {
+      "name": "Bulletin 17 test",
+      "description": "Test of an incomplete analysis wizard."
+    }
+  ]
+}
