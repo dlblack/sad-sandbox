@@ -128,8 +128,8 @@ function VolumeFreqAnalysisWizard(props) {
   }
 
   return (
-    <div className={`${style} d-flex flex-column h-100`}>
-      <div className="card-body d-flex flex-column h-100 p-3">
+    <div className={`${style} wizard-fixed-size`}>
+      <div className="wizard-step-area">
         <form
           className="card-text h-100 d-flex flex-column p-3"
           onSubmit={e => e.preventDefault()}
@@ -161,7 +161,7 @@ function VolumeFreqAnalysisWizard(props) {
           )}
 
           {/* Step content */}
-          <div className="flex-grow-1">{renderStep()}</div>
+          <div className="flex-grow-1 d-flex flex-column">{renderStep()}</div>
 
           {/* Navigation buttons */}
           <WizardNavigation

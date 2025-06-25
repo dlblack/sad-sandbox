@@ -1,10 +1,10 @@
 import React from "react";
-import MapComponent from "../app_components/MapComponent";
+import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentContent from "../app_components/ComponentContent";
 import StyleSelectorComponent from "../app_components/StyleSelectorComponent";
 
-import ManualDataEntryEditor from "../app_components/data/ManualDataEntry";
+import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor";
 
 import PeakFlowFreqWizard from "../app_components/analysis/PeakFlowFreqWizard";
 import Bulletin17AnalysisWizard from "../app_components/analysis/Bulletin17AnalysisWizard";
@@ -25,20 +25,20 @@ import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizar
 export const dockableContentFactory = (type, props= {}) => {
   switch (type) {
     case "ComponentContent":
-      return <ComponentContent analyses={props.analyses} />;
-    case "Map":
-      return <MapComponent />;
-    case "Messages":
+      return <ComponentContent analyses={props.analyses} data={props.data} />;
+    case "ComponentMap":
+      return <ComponentMap />;
+    case "ComponentMessage":
       return <ComponentMessage {...props} />;
     case "StyleSelector":
       return <StyleSelectorComponent />;
 
     case "ManualDataEntryEditor":
-      return <ManualDataEntryEditor {...props} />;
+      return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave} />;
 
     // Analysis
     case "PeakFlowFreqWizard":
-      return <PeakFlowFreqWizard {...props } analyses={props.analyses} />;
+      return <PeakFlowFreqWizard {...props } analyses={props.analyses} data={props.data} />;
     case "Bulletin17AnalysisWizard":
       return <Bulletin17AnalysisWizard {...props} />;
     case "GeneralFreqAnalysisWizard":

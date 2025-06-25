@@ -1,7 +1,6 @@
-// messageUtil.js
+import { getText } from "./TextStore";
 
 function formatTimestamp(date = new Date()) {
-  // Ensure 'date' is a Date object
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d)) return "";
 
@@ -21,7 +20,8 @@ function formatTimestamp(date = new Date()) {
   return `${day}${month}${year} ${timeStr}`;
 }
 
-export function makeMessage(msg, type = "info", extra = {}) {
+export function makeMessage(id, args = [], type = "info", extra = {}) {
+  const msg = getText(id, args);
   const timestamp = formatTimestamp();
   return {
     text: `${timestamp}: ${msg}`,

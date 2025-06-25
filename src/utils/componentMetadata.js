@@ -1,20 +1,14 @@
 function dataEditor(entityName) {
   return {
     entityName,
-    openVerb: "Opened new",
-    noun: "editor",
-    createVerb: "Created",
-    width: 600,
-    height: 650
+    width: 750,
+    height: 850
   };
 }
 
 function wizard(entityName) {
   return {
     entityName,
-    openVerb: "Opened new",
-    noun: "wizard",
-    createVerb: "Created",
     width: 600,
     height: 650
   };
@@ -22,6 +16,8 @@ function wizard(entityName) {
 
 export const componentMetadata = {
   Map: { width: 500, height: 500 },
+  // Set the Messages window default width to 40% and default height to 10%
+  Messages: { width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.1) },
 
   // Data editors
   ManualDataEntryEditor: dataEditor("Manual Data Entry"),

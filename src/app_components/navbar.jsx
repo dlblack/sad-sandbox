@@ -17,7 +17,6 @@ function Navbar({
   const navbarClass = `navbar navbar-expand-lg ${navbarStyle || "bg-primary"}`;
 
   const handleOpenComponent = (type) => {
-    console.log(`[Navbar] Attempting to open: ${type}`);
     addComponent(type);
   };
 

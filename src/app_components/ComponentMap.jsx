@@ -3,7 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { StyleContext } from "../styles/StyleContext";
 
-function MapComponent() {
+function ComponentMap() {
   const { style } = useContext(StyleContext);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -31,4 +31,4 @@ function MapComponent() {
   return <div ref={mapRef} className="map-window" style={{ width: "100%", height: "100%" }} />;
 }
 
-export default MapComponent;
+export default ComponentMap;
