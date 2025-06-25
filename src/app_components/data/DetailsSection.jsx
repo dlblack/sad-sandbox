@@ -57,19 +57,19 @@ function DetailsSection({
         <div className="d-flex gap-2 mb-2 flex-wrap w-100">
           <div className="d-flex flex-column flex-grow-1">
             <label className="form-label font-xs">Start Date</label>
-            <input className="form-control form-control-sm" placeholder="01Jan2000" value={startDate} onChange={e => setStartDate(e.target.value)} />
+            <input className="form-control form-control-sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
           </div>
           <div className="d-flex flex-column flex-grow-1">
             <label className="form-label font-xs">Start Time</label>
-            <input className="form-control form-control-sm" placeholder="13:00" value={startTime} onChange={e => setStartTime(e.target.value)} />
+            <input className="form-control form-control-sm" value={startTime} onChange={e => setStartTime(e.target.value)} />
           </div>
           <div className="d-flex flex-column flex-grow-1">
             <label className="form-label font-xs">End Date</label>
-            <input className="form-control form-control-sm" placeholder="02Jan2000" value={endDate} onChange={e => setEndDate(e.target.value)} />
+            <input className="form-control form-control-sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
           </div>
           <div className="d-flex flex-column flex-grow-1">
             <label className="form-label font-xs">End Time</label>
-            <input className="form-control form-control-sm" placeholder="13:00" value={endTime} onChange={e => setEndTime(e.target.value)} />
+            <input className="form-control form-control-sm" value={endTime} onChange={e => setEndTime(e.target.value)} />
           </div>
           <div className="d-flex flex-column flex-grow-1">
             <label className="form-label font-xs">Units</label>
