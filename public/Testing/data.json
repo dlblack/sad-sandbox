@@ -1,0 +1,42 @@
+{
+  "Precipitation": [
+    {
+      "name": "American River Precip",
+      "description": "Incremental precip for the American River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/precip.dss",
+      "pathname": "/Sacramento/American River/Precipitation///Obs/"
+    },
+    {
+      "name": "Feather River Precip",
+      "description": "Incremental precip for the Feather River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/precip.dss",
+      "pathname": "/Sacramento/Feather River/Precipitation///Obs/"
+    },
+    {
+      "name": "Sacramento River Precip",
+      "description": "Incremental precip for the Sacramento River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/precip.dss",
+      "pathname": "/Sacramento/Sacramento River/Precipitation///Obs/"
+    }
+  ],
+  "Discharge": [
+    {
+      "name": "American River Discharge",
+      "description": "Discharge for the American River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/discharge.dss",
+      "pathname": "/Sacramento/American River/Flow///Obs/"
+    },
+    {
+      "name": "Feather River Discharge",
+      "description": "Discharge for the Feather River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/discharge.dss",
+      "pathname": "/Sacramento/Feather River/Flow///Obs/"
+    },
+    {
+      "name": "Sacramento River Discharge",
+      "description": "Discharge for the Sacramento River, 01Jan2000 00:00 - 05Jan2000 00:00.",
+      "filepath": "C:/Testing/discharge.dss",
+      "pathname": "/Sacramento/Sacramento River/Flow///Obs/"
+    }
+  ]
+}

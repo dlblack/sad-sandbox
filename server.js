@@ -14,13 +14,11 @@ const PORT = 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Path to the analyses file
+// === Analyses ===
 const analysesFile = path.join(__dirname, "public", "Testing", "analysis.json");
 
-// Read analyses with robust error handling
 function readAnalyses() {
   if (!fs.existsSync(analysesFile)) {
-    // Create file with an empty object if missing
     fs.writeFileSync(analysesFile, JSON.stringify({}, null, 2));
     return {};
   }
@@ -28,32 +26,23 @@ function readAnalyses() {
     const content = fs.readFileSync(analysesFile, "utf-8");
     return JSON.parse(content);
   } catch (err) {
-    // Log and return safe fallback (but DO NOT overwrite)
     console.error(`Error reading or parsing analysis.json: ${err}`);
     return {};
   }
 }
 
-// Write analyses with robust error handling
 function writeAnalyses(data) {
   try {
-    const sortedKeys = Object.keys(data).sort((a, b) => a.localeCompare(b));
-    const sorted = {};
-    for (const key of sortedKeys) {
-      sorted[key] = data[key];
-    }
     fs.writeFileSync(analysesFile, JSON.stringify(data, null, 2));
   } catch (err) {
     console.error(`Error writing analysis.json: ${err}`);
   }
 }
 
-// Get analyses
 app.get("/api/analyses", (req, res) => {
   res.json(readAnalyses());
 });
 
-// Add new analysis
 app.post("/api/analyses", (req, res) => {
   const { type, data } = req.body;
   if (!type || !data) {
@@ -61,15 +50,63 @@ app.post("/api/analyses", (req, res) => {
     return;
   }
   let analyses = readAnalyses();
-  // Ensure type exists
   if (!analyses[type]) analyses[type] = [];
   analyses[type].push(data);
-  // Sort by name within type
+  // Optional: sort by name
   analyses[type] = analyses[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   writeAnalyses(analyses);
   res.json({ success: true });
 });
 
+// === Data ===
+const dataFile = path.join(__dirname, "public", "Testing", "data.json");
+
+// Read data.json
+function readData() {
+  if (!fs.existsSync(dataFile)) {
+    fs.writeFileSync(dataFile, JSON.stringify({}, null, 2));
+    return {};
+  }
+  try {
+    const content = fs.readFileSync(dataFile, "utf-8");
+    return JSON.parse(content);
+  } catch (err) {
+    console.error(`Error reading or parsing data.json: ${err}`);
+    return {};
+  }
+}
+
+// Write data.json
+function writeData(data) {
+  try {
+    fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error(`Error writing data.json: ${err}`);
+  }
+}
+
+// Get all data
+app.get("/api/data", (req, res) => {
+  res.json(readData());
+});
+
+// Add new data
+app.post("/api/data", (req, res) => {
+  const { type, data } = req.body;
+  if (!type || !data) {
+    res.status(400).json({ error: "Invalid payload" });
+    return;
+  }
+  let allData = readData();
+  if (!allData[type]) allData[type] = [];
+  allData[type].push(data);
+  allData[type] = allData[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  writeData(allData);
+  res.json({ success: true });
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`API server running at http://localhost:${PORT}/api/analyses`);
+  console.log(`API server running at http://localhost:${PORT}/api/data`);
 });

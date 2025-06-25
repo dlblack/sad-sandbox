@@ -1,57 +1,41 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import TreeNode from "./TreeNode";
 import { StyleContext } from "../styles/StyleContext";
+// import { addEphemeralKeys } from "../utils/ephemeralKeys"; // Only needed if you use it in App
 
-function ComponentContent({ analyses = {} }) {
+function ComponentContent({ analyses = {}, data = {} }) {
   const { style } = useContext(StyleContext);
-
-  const [precipData, setPrecipData] = useState([]);
-  useEffect(() => {
-    fetch("Testing/precipData.json")
-    .then((response) => response.json())
-    .then((data) => setPrecipData(data))
-    .catch(() => setPrecipData([]));
-  }, []);
-
-  const [dischargeData, setDischargeData] = useState([]);
-  useEffect(() => {
-    fetch("Testing/dischargeData.json")
-    .then((response) => response.json())
-    .then((data) => setDischargeData(data))
-    .catch(() => setDischargeData([]));
-  }, []);
 
   return (
     <div className={`${style}`}>
       {/* Maps */}
-      <TreeNode label="Maps">
+      <TreeNode label="Maps" isTopLevel>
         <TreeNode></TreeNode>
       </TreeNode>
 
       {/* Data */}
-      <TreeNode label="Data">
-        <TreeNode label="Precipitation">
-          {precipData.map((item, idx) => (
-            <TreeNode key={idx} label={item.name} />
-          ))}
-        </TreeNode>
-        <TreeNode label="Discharge">
-          {dischargeData.map((item, idx) => (
-            <TreeNode key={idx} label={item.name} />
-          ))}
-        </TreeNode>
+      <TreeNode label="Data" isTopLevel>
+        {Object.entries(data).map(([parameter, datasets]) => (
+          <TreeNode key={parameter} label={parameter}>
+            {(datasets || []).map((item, idx) => (
+              <TreeNode
+                key={item.__tempKey || `${item.name}-${idx}`}
+                label={item.name}
+              />
+            ))}
+          </TreeNode>
+        ))}
       </TreeNode>
 
       {/* Analysis */}
-      <TreeNode label="Analysis">
+      <TreeNode label="Analysis" isTopLevel>
         {Object.entries(analyses).map(([folder, items]) => (
           <TreeNode key={folder} label={folder}>
             {Array.isArray(items) ? (
-              items.map((item) => (
-                <TreeNode key={item.name} label={item.name} />
+              items.map((item, idx) => (
+                <TreeNode key={`${item.name}-${idx}`} label={item.name} />
               ))
             ) : (
-              // fallback in case items is not an array
               <TreeNode key="empty" label="(No analyses)" />
             )}
           </TreeNode>

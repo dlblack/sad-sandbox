@@ -1,10 +1,10 @@
 export const componentDisplayNames = {
-  Map: "Map Window",
+  ComponentMap: "Map Window",
   ComponentContent: "Contents tree panel",
-  ComponentMessages: "Messages Panel",
+  ComponentMessage: "Messages Panel",
 
   // Data
-  ManualDataEntryEditor: "Manual Data Entry",
+  ManualDataEntryEditor: "Manual Data Entry Editor",
 
   // Analysis
   PeakFlowFreqWizard: "Peak Flow Frequency",

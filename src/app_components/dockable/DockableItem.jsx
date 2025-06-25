@@ -1,49 +1,36 @@
 import React, { useContext } from "react";
 import { StyleContext } from "../../styles/StyleContext";
 
-function DockableItem({ id, x, y, width, height, type, onRemove, onDragStart, children }) {
+function DockableItem({ id, type, onRemove, children, dragHandleProps, isDragging, width, height }) {
   const { modalStyle } = useContext(StyleContext);
 
   return (
-    <div
-      className="card-container"
-      style={{
-        left: x,
-        top: y,
-        width: `${width}px`,
-        height: `${height}px`,
-        position: "absolute",
-        zIndex: 1050,
-        overflow: "hidden",
-      }}
-    >
+    <div className="card-container dockable-item" style={{ width: width ? `${width}px` : undefined, height: height ? `${height}px` : undefined }}>
       <div className="card h-100 d-flex flex-column">
-        {/* Card Header */}
+        {/* Card Header as Drag Handle */}
         <div
           className={`card-header d-flex align-items-center justify-content-between ${modalStyle}`}
-          onMouseDown={(e) => onDragStart(id, e)}
-          style={{
-            cursor: "move",
-            padding: "4px 10px 4px 10px",
-            borderBottom: "1px solid #dee2e6",
-          }}
         >
-          <h6 className="card-title mb-0">{type}</h6>
+          <div className="drag-handle" 
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          {...dragHandleProps}
+          >
+            <h6 className="card-title mb-0" style={{ cursor: "grab" }}>
+              {type}
+            </h6>
+          </div>
           <button
             type="button"
-            className="btn-close"
-            onClick={() => onRemove(id)}
-            aria-label="Close"
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
+            className="btn-close dockable-item-close-btn"
+            onClick={e => {
+              e.stopPropagation();
+              onRemove(id);
             }}
+            aria-label="Close"
           ></button>
         </div>
-
         {/* Card Body */}
-        <div className="card-body flex-grow-1 overflow-auto p-2" style={{ flex: 1, overflow: "auto", padding: "1px" }}>
+        <div className="card-body flex-grow-1 overflow-auto p-2">
           {children}
         </div>
       </div>

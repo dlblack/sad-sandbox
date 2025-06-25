@@ -4,6 +4,9 @@ import WizardNavigation from "./WizardNavigation";
 import { componentDisplayNames } from "../../utils/componentDisplayNames";
 
 function PeakFlowFreqWizard(props) {
+  const dischargeData = 
+    props.data?.Discharge || props.data?.discharge || [];
+
   const SKEW_OPTIONS = {
     option1: "Use Station Skew",
     option2: "Use Weighted Skew",
@@ -23,14 +26,6 @@ function PeakFlowFreqWizard(props) {
   const [description, setDescription] = useState("");
   const [selectedDataset, setSelectedDataset] = useState("");
 
-  const [dischargeData, setDischargeData] = useState([]);
-  useEffect(() => {
-    fetch("Testing/dischargeData.json")
-      .then((response) => response.json())
-      .then((data) => setDischargeData(data))
-      .catch(() => setDischargeData([]));
-  }, []);
-  
   useEffect(() => {
     if (dischargeData.length > 0 && !selectedDataset) {
       setSelectedDataset(dischargeData[0].name);
@@ -387,8 +382,8 @@ function PeakFlowFreqWizard(props) {
   const isLastStep = step === 5;
 
   return (
-    <div className={`${style} d-flex flex-column h-100`}>
-      <div className="card-body d-flex flex-column h-100 p-3">
+    <div className={`${style} wizard-fixed-size`}>
+      <div className="wizard-step-area">
         <form 
           className="card-text h-100 d-flex flex-column p-3"
           onSubmit={e => e.preventDefault()}
@@ -420,7 +415,7 @@ function PeakFlowFreqWizard(props) {
           )}
   
           {/* Step content */}
-          <div className="flex-grow-1">{renderStep()}</div>
+          <div className="flex-grow-1 d-flex flex-column">{renderStep()}</div>
   
           {/* Navigation buttons */}
           <WizardNavigation

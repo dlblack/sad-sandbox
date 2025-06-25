@@ -14,26 +14,31 @@ function groupAnalysesByType(analysesObj = {}) {
 function App() {
   const { appBackgroundStyle } = useContext(StyleContext);
 
-  // Analyses are fetched from the backend
+  // Analyses (unchanged)
   const [analyses, setAnalyses] = useState({});
+  // NEW: Data (time series, precipitation/discharge/etc.)
+  const [data, setData] = useState({});
 
-  // Messages etc.
+  // Messages, DockableFrames, etc.
   const [messages, setMessages] = useState([]);
   const [messageType, setMessageType] = useState("info");
-
-  // Containers for DockableFrame
-  const [containers, setContainers] = useState({
-    ComponentContent: { x: 10, y: 10, width: 300, height: 300, type: "ComponentContent" },
-    Map: { x: 1000, y: 10, width: 500, height: 500, type: "Map" },
-    Messages: { x: 400, y: 650, width: 1020, height: 200, type: "Messages" },
-  });
-
-  // ----- LOAD analyses on mount -----
+  const [containers, setContainers] = useState([
+    { id: "ComponentContent", type: "ComponentContent", ...componentMetadata.ComponentContent },
+    { id: "ComponentMap", type: "ComponentMap", ...componentMetadata.Map },
+    { id: "ComponentMessage", type: "ComponentMessage", ...componentMetadata.Messages },
+  ]);
+  
+  // ----- LOAD analyses & data on mount -----
   useEffect(() => {
     fetch("/api/analyses")
       .then(res => res.json())
       .then(data => setAnalyses(groupAnalysesByType(data)))
       .catch(() => setAnalyses({}));
+
+    fetch("/api/data")
+      .then(res => res.json())
+      .then(data => setData(data))
+      .catch(() => setData({}));
   }, []);
 
   // ----- ADD analysis and persist -----
@@ -46,26 +51,52 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: friendlyType, data: valuesObj }),
       });
-  
+
       // Fetch, update, etc.
       fetch("/api/analyses")
         .then(res => res.json())
         .then(data => setAnalyses(groupAnalysesByType(data)))
         .catch(() => {});
-  
-      setContainers(prev => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
+
+      setContainers(prev => prev.filter(c => c.id !== id));
       setMessages(prev => [
         ...prev,
-        makeMessage(`Created ${friendlyType} "${valuesObj.name}".`, "success"),
+        makeMessage(10002, [friendlyType, valuesObj.name], "success"),
       ]);
     } catch (err) {
       setMessages(prev => [
         ...prev,
-        makeMessage("Something went wrong.", "danger"),
+        makeMessage(10003, [], "danger"),
+      ]);
+      setMessageType("danger");
+    }
+  };
+
+  // ----- ADD new data (for time series, discharge, precipitation, etc.) -----
+  const handleDataSave = async (category, valuesObj, id) => {
+    // category = "Precipitation", "SWE", "discharge", etc.
+    try {
+      await fetch("/api/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: category, data: valuesObj }),
+      });
+  
+      // Re-fetch
+      fetch("/api/data")
+        .then(res => res.json())
+        .then(data => setData(data))
+        .catch(() => {});
+  
+      setContainers(prev => prev.filter(c => c.id !== id));
+      setMessages(prev => [
+        ...prev,
+        makeMessage(20002, [category, valuesObj.name], "success"),
+      ]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        makeMessage(20003, [], "danger"),
       ]);
       setMessageType("danger");
     }
@@ -73,47 +104,46 @@ function App() {
   
   // ----- Dockable windows -----
   const addComponent = (type) => {
-    const existingKey = Object.keys(containers).find(
-      (key) => containers[key].type === type
-    );
-    if (existingKey) {
-      alert(`${componentMetadata[type]?.entityName || type} is already open.`);
+    const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
+
+    if (containers.some(c => c.type === type)) {
+      setMessages(prev => [
+        ...prev,
+        makeMessage(
+          10010,
+          [meta.entityName || type],
+          "text-warning"
+        )
+      ]);
       return;
     }
 
-    const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
-    const noun = meta.noun ? ` ${meta.noun}` : "";
+    setMessages(prev => [...prev, componentMetadata[type]?.entityName || type]);
 
     const newComponentId = `${type}-${Date.now()}`;
     const newComponent = {
-      [newComponentId]: {
-        x: 320,
-        y: 10,
-        width: meta.width,
-        height: meta.height,
-        type,
-      },
+      id: newComponentId,
+      type,
+      width: meta.width,
+      height: meta.height
     };
 
-    setContainers((prev) => ({ ...prev, ...newComponent }));
+    setContainers(prev => [...prev, newComponent]);
 
+    const noun = meta.noun ? ` ${meta.noun}` : "";
     setMessages(prev => [
       ...prev,
-      makeMessage(
-        `${meta.openVerb || "Opened"} ${meta.entityName || type}${noun}.`,
-        "text-body-secondary"
-      ),
-    ]);    
+      makeMessage(10001, [meta.entityName || type, noun], "text-body-secondary"),
+    ]);   
   };
 
-  const removeComponent = (id) => {
-    setContainers((prev) => {
-      const updatedContainers = { ...prev };
-      delete updatedContainers[id];
-      return updatedContainers;
+  const removeComponent = id => {
+    setContainers(prev => {
+      const filtered = prev.filter(c => c.id !== id);
+      return filtered;
     });
   };
-
+  
   const onDragStart = (id, event) => {
     const container = containers[id];
     const startX = event.clientX - container.x;
@@ -148,13 +178,16 @@ function App() {
       <div style={{ flex: 1, overflow: "hidden" }}>
         <DockableFrame
           containers={containers}
+          setContainers={setContainers}
           removeComponent={removeComponent}
           onDragStart={onDragStart}
           messages={messages}
           messageType={messageType}
           setMessageType={setMessageType}
           analyses={analyses}
+          data={data}
           onWizardFinish={handleWizardFinish}
+          onDataSave={handleDataSave}
         />
       </div>
     </div>
