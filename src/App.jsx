@@ -24,8 +24,7 @@ function App() {
   const [messageType, setMessageType] = useState("info");
   const [containers, setContainers] = useState([
     { id: "ComponentContent", type: "ComponentContent", ...componentMetadata.ComponentContent },
-    { id: "ComponentMap", type: "ComponentMap", ...componentMetadata.Map },
-    { id: "ComponentMessage", type: "ComponentMessage", ...componentMetadata.Messages },
+    { id: "ComponentMessage", type: "ComponentMessage", ...componentMetadata.ComponentMessage },
   ]);
   
   // ----- LOAD analyses & data on mount -----

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleContext } from "../../styles/StyleContext";
 import MetadataSection from "./MetadataSection";
 import FieldsSection from "./FieldsSection";
@@ -7,6 +7,39 @@ import DetailsSection from "./DetailsSection";
 import DataIntervalComboBox, { INTERVAL_OPTIONS } from "../editor_components/combo_boxes/DataIntervalComboBox";
 
 // Utilities
+// Converts a JS Date to HEC-Julian Day (days since 31Dec1899, midnight)
+function toJulianDay(date) {
+  // HEC Julian day: days since 31Dec1899 midnight
+  // JavaScript Date UTC: ms since 1Jan1970
+  const msPerDay = 86400000;
+  const JS_EPOCH = Date.UTC(1970, 0, 1);          // Jan 1 1970
+  const HEC_EPOCH = Date.UTC(1899, 11, 31, 0, 0); // Dec 31 1899 midnight
+  return (date.getTime() - HEC_EPOCH) / msPerDay;
+}
+
+function getDefaultFilepath(parameter) {
+  if (!parameter) return "";
+  
+  const key = parameter.trim().toLowerCase();
+
+  const exceptions = {
+    flow: "discharge",
+    discharge: "discharge",
+    "snow water equivalent": "swe",
+    swe: "swe",
+  };
+
+  if (exceptions[key]) {
+    return `public/Testing/${exceptions[key]}.dss`;
+  }
+
+  const filename = key
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "");
+
+  return `public/Testing/${filename}.dss`;
+}
+
 function getSelectedIntervalOption(value) {
   return INTERVAL_OPTIONS.find(opt => opt.value === value);
 }
@@ -58,6 +91,7 @@ function ManualDataEntryEditor(props) {
   const [datasetName, setDatasetName] = useState("");
   const [description, setDescription] = useState("");
   const [studyDssFile, setStudyDssFile] = useState("");
+  const [filepathTouched, setFilepathTouched] = useState(false);
 
   // ---- FIELD STATE (combo fields, middle panel) ----
   const [dataType, setDataType] = useState("");
@@ -118,10 +152,28 @@ function ManualDataEntryEditor(props) {
     !studyDssFile.trim() ||
     !parameter.trim();
 
+
   // ---- SAVE HANDLER ----
+  const dataRowsFiltered = dataRows.filter(row => row.value !== "" && !isNaN(Number(row.value)));
+  const values = dataRowsFiltered.map(row => Number(row.value));
+  const dateTimes = dataRowsFiltered.map(row => row.dateTime);
+  const startDateTime = dateTimes[0];
+  const interval = dataInterval;
+
   const handleSave = (e) => {
     e.preventDefault();
     if (props.onDataSave) {
+      const values = dataRows
+        .filter(row => row.value !== "" && !isNaN(Number(row.value)))
+        .map(row => Number(row.value));
+  
+      const times = dataRows
+        .filter(row => row.dateTime !== "")
+        .map(row => {
+          const dt = new Date(row.dateTime.replace(/(\d{2})([A-Za-z]{3})(\d{4})/, '$1 $2 $3'));
+          return toJulianDay(dt);
+        });
+  
       props.onDataSave(
         paramCategory,
         {
@@ -129,14 +181,18 @@ function ManualDataEntryEditor(props) {
           description,
           filepath: studyDssFile,
           pathname,
+          startDateTime,
+          interval,
+          values,
+          times,
         },
         props.id
       );
     }
   };
-
+  
   // ---- AUTO-POPULATE TABLE ----
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       dataType === "TimeSeries" &&
       startDate && startTime &&
@@ -169,55 +225,65 @@ function ManualDataEntryEditor(props) {
     }
   }, [dataType, startDate, startTime, endDate, endTime, dataInterval]);
 
+  useEffect(() => {
+    if (!filepathTouched && parameter) {
+      setStudyDssFile(getDefaultFilepath(parameter));
+    }
+  }, [parameter, filepathTouched]);
+
   return (
-    <div className={`${style} wizard-fixed-size`}>
-      <MetadataSection
-        datasetName={datasetName} setDatasetName={setDatasetName}
-        description={description} setDescription={setDescription}
-        studyDssFile={studyDssFile} setStudyDssFile={setStudyDssFile}
-      />
-      
-      <div className="manual-entry-fields-container border rounded">
-        <div className="manual-entry-fields-left">
-          <FieldsSection
-            dataType={dataType} setDataType={setDataType}
-            parameter={parameter} setParameter={setParameter}
-            dataUnit={dataUnit} setDataUnit={setDataUnit}
-            dataInterval={dataInterval} setDataInterval={setDataInterval}
+    <div className={`${style} wizard-fixed-size manual-entry-main`}>
+      <div className="manual-entry-content">
+        <MetadataSection
+          datasetName={datasetName} setDatasetName={setDatasetName}
+          description={description} setDescription={setDescription}
+          studyDssFile={studyDssFile} setStudyDssFile={(val) => {
+            setStudyDssFile(val);
+            setFilepathTouched(true);
+          }}
+        />
+        
+        <div className="manual-entry-fields-container border rounded">
+          <div className="manual-entry-fields-left">
+            <FieldsSection
+              dataType={dataType} setDataType={setDataType}
+              parameter={parameter} setParameter={setParameter}
+              dataUnit={dataUnit} setDataUnit={setDataUnit}
+              dataInterval={dataInterval} setDataInterval={setDataInterval}
+            />
+          </div>
+          <TableSection
+            dataRows={dataRows}
+            handleRowChange={handleRowChange}
+            handleValueChange={handleValueChange}
           />
         </div>
-        <TableSection
-          dataRows={dataRows}
-          handleRowChange={handleRowChange}
-          handleValueChange={handleValueChange}
-        />
-      </div>
 
-      {dataType === "TimeSeries" && (
-        <DetailsSection
-          partA={partA} setPartA={setPartA}
-          partB={partB} setPartB={setPartB}
-          partC={partC}
-          partD={partD}
-          partE={partE}
-          partF={partF} setPartF={setPartF}
-          pathname={pathname}
-          startDate={startDate} setStartDate={setStartDate}
-          startTime={startTime} setStartTime={setStartTime}
-          endDate={endDate} setEndDate={setEndDate}
-          endTime={endTime} setEndTime={setEndTime}
-          startUnits={startUnits}
-          startType={startType} setStartType={setStartType}
-        />
-      )}
+        <div className="manual-entry-details">
+          {dataType === "TimeSeries" && (
+            <DetailsSection
+              partA={partA} setPartA={setPartA}
+              partB={partB} setPartB={setPartB}
+              partC={partC}
+              partD={partD}
+              partE={partE}
+              partF={partF} setPartF={setPartF}
+              pathname={pathname}
+              startDate={startDate} setStartDate={setStartDate}
+              startTime={startTime} setStartTime={setStartTime}
+              endDate={endDate} setEndDate={setEndDate}
+              endTime={endTime} setEndTime={setEndTime}
+              startUnits={startUnits}
+              startType={startType} setStartType={setStartType}
+            />
+          )}
+        </div>
+
+      </div>
 
       {/* Save Button at bottom right of full editor */}
       <div
         className="wizard-footer d-flex justify-content-end"
-        style={{
-          padding: "10px 18px",
-          borderTop: "1px solid #333",
-        }}
       >
         <button
           type="button"

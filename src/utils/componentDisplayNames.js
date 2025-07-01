@@ -2,6 +2,7 @@ export const componentDisplayNames = {
   ComponentMap: "Map Window",
   ComponentContent: "Contents tree panel",
   ComponentMessage: "Messages Panel",
+  ComponentStyleSelector: "Style Selector",
 
   // Data
   ManualDataEntryEditor: "Manual Data Entry Editor",

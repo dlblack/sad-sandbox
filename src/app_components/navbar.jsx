@@ -130,10 +130,13 @@ function Navbar({
                 Maps
               </a>
               <div className="dropdown-menu">
-                <a
+              <a
                   className="dropdown-item"
                   href="#"
-                  // TODO
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenComponent("ComponentMap");
+                  }}
                 >
                   Open Map Window
                 </a>
@@ -355,16 +358,18 @@ function Navbar({
           </ul>
           
           {/* Search bar */}
-          <form className="d-flex mx-2" role="search" style={{ minWidth: "45%" }}>
+          <form className="d-flex mx-2" role="search" style={{ maxHeight: "2.8vh", minWidth: "45%" }}>
             <input
               className="form-control"
               type="search"
               placeholder="Search"
               aria-label="Search"
-              style={{ minWidth: "45%" }}
             />
-            <button className="btn btn-outline-light ms-2" type="submit">
-              <span className="material-icons" style={{ fontSize: 20 }}>search</span>
+            <button 
+              className="btn btn-outline-light ms-2 d-flex align-items-center justify-content-center" 
+              type="submit"
+            >
+              <span className="material-icons">search</span>
             </button>
           </form>
 
@@ -404,20 +409,30 @@ function Navbar({
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      handleOpenComponent("Map");
+                      handleOpenComponent("ComponentContent");
                     }}
                   >
-                    Open Map Window
+                    Contents
                   </a>
                   <a
                     className="dropdown-item"
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      handleOpenComponent("StyleSelector");
+                      handleOpenComponent("ComponentMessage");
                     }}
                   >
-                    Open Style Selector
+                    Messages
+                  </a>
+                  <a
+                    className="dropdown-item"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleOpenComponent("ComponentStyleSelector");
+                    }}
+                  >
+                    Style Selector
                   </a>
                 </div>
               </div>

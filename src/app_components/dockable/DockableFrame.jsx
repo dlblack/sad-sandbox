@@ -60,6 +60,8 @@ function DockableFrame({
             <SortableDockableItem
               key={container.id}
               {...container}
+              
+              expandToContents={container.type === "ComponentContent"}
               type={dockableTitles[container.type] || container.type}
               onRemove={removeComponent}
               onDragStart={onDragStart}
