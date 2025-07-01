@@ -111,7 +111,7 @@ function App() {
   };
   
   // ----- Dockable windows -----
-  const addComponent = (type, id, otherProps) => {
+  const addComponent = (type, optionalProps = {}) => {
     const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
 
     if (containers.some(c => c.type === type)) {
@@ -129,20 +129,15 @@ function App() {
     setMessages(prev => [...prev, componentMetadata[type]?.entityName || type]);
 
     const newComponentId = `${type}-${Date.now()}`;
-    const newComponent = {
-      id: newComponentId,
-      type,
-      width: meta.width,
-      height: meta.height
-    };
-
     setContainers(prev => [
       ...prev, 
       {
-        id,
+        id: newComponentId,
         type,
         dockZone: getDefaultDockZone(type),
-        ...otherProps
+        width: meta.width,
+        height: meta.height,
+        ...optionalProps,
       }
     ]);
 
@@ -184,14 +179,12 @@ function App() {
   };
 
   return (
-    <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh" }}>
+    <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <div>
-        <Navbar
-          addComponent={addComponent}
-        />
+        <Navbar addComponent={addComponent}/>
       </div>
 
-      <div style={{ flex: 1, overflow: "hidden" }}>
+      <div style={{ flex: 1, minHeight: 0 }}>
         <DockableFrame
           containers={containers}
           setContainers={setContainers}

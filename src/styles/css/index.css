@@ -49,27 +49,26 @@ html, body, #root, .app-container {
 .dockable-frame {
   display: grid;
   grid-template-areas:
-    "w  center   e"
-    "w  center e"
-    "s  s   s";
-  grid-template-columns: 15% 1fr 20%;
+    "w center e"
+    "w center e"
+    "s s s";
+  grid-template-columns: auto 1fr auto;
   grid-template-rows: 80px 1fr 23%;
-  height: calc(100vh - var(--navbar-height, 56px));;
+  height: 100%;
   width: 100vw;
   position: relative;
   gap: 0;
 }
 
 /* Map zones to grid areas */
-.dock-zone-n  { grid-area: n; }
 .dock-zone-w  { grid-area: w; }
 .dock-zone-center { grid-area: center; }
 .dock-zone-e  { grid-area: e; }
 .dock-zone-s  { grid-area: s; }
 
 .dock-zone {
-  min-width: 0;
-  min-height: 0;
+  min-width: 48px;
+  min-height: 48px;
   border: 1px solid #e0e0e0;
   background: transparent;
   position: relative;
@@ -484,6 +483,30 @@ table.wizard-frequency-table > tbody > tr:nth-child(even) > td {
 }
 table.wizard-frequency-table > tbody > tr > td {
   color: #fff !important;
+}
+
+/* ComponentStyleSelector */
+.style-selector-compact {
+  font-size: 1.4vh !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  min-height: 26px !important;
+  height: 26px !important;
+  line-height: 1.1 !important;
+  border-radius: 0.15rem !important;
+}
+
+.style-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.style-selector-label {
+  min-width: 110px;
+  margin-bottom: 0;
+  font-size: 1.4vh;
 }
 
 

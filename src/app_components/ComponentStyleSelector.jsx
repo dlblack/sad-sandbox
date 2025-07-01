@@ -43,14 +43,14 @@ function ComponentStyleSelector() {
             </label>
             <select
               id="appBackgroundStyleSelect"
-              className="form-control form-control-sm flex-grow-1"
+              className="form-control form-control-sm style-selector-compact flex-grow-1"
               value={selectedAppBackgroundStyle}
               onChange={handleAppBackgroundStyleChange}
             >
               <option value="bg-primary">Primary</option>
               <option value="bg-secondary">Secondary</option>
-              <option value="bg-light">Light</option>
-              <option value="bg-dark">Dark</option>
+              <option value="bg-dark">Light</option>
+              <option value="bg-light">Dark</option>
               <option value="bg-danger text-white">Danger</option>
               <option value="bg-warning text-white">Warning</option>
               <option value="bg-info text-white">Info</option>
@@ -64,7 +64,7 @@ function ComponentStyleSelector() {
             </label>
             <select
               id="navbarStyleSelect"
-              className="form-control form-control-sm flex-grow-1"
+              className="form-control form-control-sm style-selector-compact flex-grow-1"
               value={selectedNavbarStyle}
               onChange={handleNavbarStyleChange}
             >
@@ -81,14 +81,14 @@ function ComponentStyleSelector() {
             </label>
             <select
               id="modalStyleSelect"
-              className="form-control form-control-sm flex-grow-1"
+              className="form-control form-control-sm style-selector-compact flex-grow-1"
               value={selectedModalStyle}
               onChange={handleModalStyleChange}
             >
               <option value="bg-primary text-white">Primary</option>
               <option value="bg-secondary text-white">Secondary</option>
-              <option value="bg-light text-dark">Light</option>
-              <option value="bg-dark text-white">Dark</option>
+              <option value="bg-dark text-dark">Light</option>
+              <option value="bg-light text-white">Dark</option>
               <option value="bg-danger text-white">Danger</option>
               <option value="bg-warning text-white">Warning</option>
               <option value="bg-info text-white">Info</option>
