@@ -19,12 +19,21 @@ function App() {
   // NEW: Data (time series, precipitation/discharge/etc.)
   const [data, setData] = useState({});
 
+  const getDefaultDockZone = (type) => {
+    switch (type) {
+      case "ComponentContent": return "W";
+      case "ComponentMessage": return "S";
+      case "ComponentStyleSelector": return "E";
+      default: return "CENTER";
+    }
+  };
+
   // Messages, DockableFrames, etc.
   const [messages, setMessages] = useState([]);
   const [messageType, setMessageType] = useState("info");
   const [containers, setContainers] = useState([
-    { id: "ComponentContent", type: "ComponentContent", ...componentMetadata.ComponentContent },
-    { id: "ComponentMessage", type: "ComponentMessage", ...componentMetadata.ComponentMessage },
+    { id: "ComponentContent", type: "ComponentContent", dockZone: getDefaultDockZone("ComponentContent"), ...componentMetadata.ComponentContent },
+    { id: "ComponentMessage", type: "ComponentMessage", dockZone: getDefaultDockZone("ComponentMessage"), ...componentMetadata.ComponentMessage },
   ]);
   
   // ----- LOAD analyses & data on mount -----
@@ -102,7 +111,7 @@ function App() {
   };
   
   // ----- Dockable windows -----
-  const addComponent = (type) => {
+  const addComponent = (type, id, otherProps) => {
     const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
 
     if (containers.some(c => c.type === type)) {
@@ -127,7 +136,15 @@ function App() {
       height: meta.height
     };
 
-    setContainers(prev => [...prev, newComponent]);
+    setContainers(prev => [
+      ...prev, 
+      {
+        id,
+        type,
+        dockZone: getDefaultDockZone(type),
+        ...otherProps
+      }
+    ]);
 
     const noun = meta.noun ? ` ${meta.noun}` : "";
     setMessages(prev => [
