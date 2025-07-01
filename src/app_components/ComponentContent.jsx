@@ -1,18 +1,16 @@
 import React, { useContext } from "react";
 import TreeNode from "./TreeNode";
 import { StyleContext } from "../styles/StyleContext";
-// import { addEphemeralKeys } from "../utils/ephemeralKeys"; // Only needed if you use it in App
 
 function ComponentContent({ analyses = {}, data = {} }) {
   const { style } = useContext(StyleContext);
 
   return (
-    <div className={`${style}`}>
+    <div className={`component-content-root component-content-card${style}`}>
       {/* Maps */}
       <TreeNode label="Maps" isTopLevel>
         <TreeNode></TreeNode>
       </TreeNode>
-
       {/* Data */}
       <TreeNode label="Data" isTopLevel>
         {Object.entries(data).map(([parameter, datasets]) => (
@@ -26,7 +24,6 @@ function ComponentContent({ analyses = {}, data = {} }) {
           </TreeNode>
         ))}
       </TreeNode>
-
       {/* Analysis */}
       <TreeNode label="Analysis" isTopLevel>
         {Object.entries(analyses).map(([folder, items]) => (

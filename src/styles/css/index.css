@@ -1,3 +1,4 @@
+/* Spinner (unchanged) */
 .lds-facebook {
   display: inline-block;
   position: relative;
@@ -12,56 +13,188 @@
   background: #fff;
   animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
 }
-.lds-facebook div:nth-child(1) {
-  left: 8px;
-  animation-delay: -0.24s;
-}
-.lds-facebook div:nth-child(2) {
-  left: 32px;
-  animation-delay: -0.12s;
-}
-.lds-facebook div:nth-child(3) {
-  left: 56px;
-  animation-delay: 0;
-}
+.lds-facebook div:nth-child(1) { left: 8px; animation-delay: -0.24s; }
+.lds-facebook div:nth-child(2) { left: 32px; animation-delay: -0.12s; }
+.lds-facebook div:nth-child(3) { left: 56px; animation-delay: 0; }
 @keyframes lds-facebook {
-  0% {
-    top: 8px;
-    height: 64px;
-  }
-  50%,
-  100% {
-    top: 24px;
-    height: 32px;
-  }
+  0% { top: 8px; height: 64px; }
+  50%,100% { top: 24px; height: 32px; }
 }
 
-.font-xs {
-  font-size: 12px !important;
+.font-xs { font-size: 12px !important; }
+
+html, body, #root, .app-container {
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
-/* Tables */
-.manual-entry-main {
+.app-container {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Navbar at top */
+.thin-navbar {
+  max-height: 4vh;
+  padding: 0 !important;
+  font-size: 0.85rem;
+  z-index: 2000;
+}
+
+/* Dockable frame fills remaining space.
+   NOTE: Now allows horizontal overflow for expanding cards! */
+.dockable-frame-container {
   flex: 1 1 0%;
   min-height: 0;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-sizing: border-box;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
-.manual-entry-metadata {
-  padding-bottom: 10px;
+/* All dockable items: cards that can be sized by parent via style */
+.dockable-item, .card-container, .card {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  min-height: 100px;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: var(--card-bg, #222);  /* Dark card background by default */
+  border-radius: 8px;
+  box-shadow: 0 2px 6px #0002;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex: 0 0 auto;
 }
 
+/* ----------- Only for the ComponentContent card: expand horizontally as needed ----------- */
+.dockable-item.component-content-card,
+.card-container.component-content-card,
+.card.component-content-card,
+.component-content-root {
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+  box-sizing: border-box;
+  background: var(--card-bg, #222) !important;
+}
+
+/* ----------- ComponentContent/Tree CSS ----------- */
+.component-content-root {
+  width: auto;
+  height: auto;
+  min-width: 220px;
+  min-height: 60px;
+  max-width: none;
+  max-height: none;
+  overflow: visible !important;
+  background: inherit;
+  box-sizing: border-box;
+}
+.tree-node {
+  display: block;
+  min-width: max-content !important;
+  width: auto !important;
+  white-space: nowrap;
+  overflow: visible !important;
+  margin-bottom: 2px;
+}
+.tree-label {
+  display: block;
+  min-width: max-content !important;
+  white-space: nowrap;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  font-size: 1.3vh;
+}
+.tree-children {
+  margin-left: 20px;
+  min-width: max-content !important;
+  width: auto !important;
+  overflow: visible !important;
+}
+
+/* General Card layout */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-height: 2.5vh;
+  padding: 4px 10px;
+  border-bottom: 1px solid #8e8e8e;
+  user-select: none;
+}
+.drag-handle {
+  max-height: 2.5vh;
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+.dockable-item-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.card-title {
+  font-size: 1.5vh;
+  font-weight: light;
+  color: #f1f1f1;
+}
+
+/* Card body fills rest of card */
+.card-body, .wizard-fixed-size, .manual-entry-main {
+  flex: 1 1 0%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* ----------- ManualDataEntryEditor CSS ----------- */
+.manual-entry-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  max-height: 100%;
+}
+.manual-entry-content {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.manual-entry-metadata { padding-bottom: 10px; }
 .manual-entry-fields-container {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   width: 100%;
   min-height: 0;
-  flex: 1 1 0%;
+  flex: 0 0 auto;
+  gap: 8px;
 }
-
 .manual-entry-fields-left {
   width: 100%;
   min-width: 0;
@@ -71,38 +204,41 @@
   flex-direction: column;
   justify-content: flex-start;
 }
-
+.manual-entry-fields-left, .manual-entry-table-panel {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .manual-entry-details {
   width: 100%;
   flex-shrink: 0;
-  overflow: auto;
+  min-height: 53%;
+  overflow: visible;
 }
-
+.manual-entry-details:empty { background: #2a2a2a; }
 .manual-entry-table-panel {
   width: 90%;
   min-width: 0;
-  max-width: 100%;  
+  max-width: 100%;
   overflow-x: auto;
   overflow-y: auto;
   max-height: 90%;
   margin-top: 17px;
 }
-
 .manual-entry-fields-left .form-control,
 .manual-entry-fields-left .form-select {
   width: 100% !important;
   min-width: 0;
   max-width: 100%;
 }
-
+/* Table Styles */
 .manual-entry-table {
-  width: 100%;
+  width: 300px;
   min-width: 0;
   table-layout: fixed;
   font-size: 0.8em;
-  width: 300px;
-  background: #f8f9fa;
+  background: #222;
   border-collapse: collapse;
+  color: #eee;
 }
 .manual-entry-th,
 .manual-entry-input {
@@ -110,32 +246,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .manual-entry-th {
   width: 140px;
   padding: 0.2rem 0.3rem;
   text-align: center;
   font-weight: bold;
-  background: #222;
-  color: #000;
+  background: #111;
+  color: #fff;
   font-size: 1em;
 }
-
 .manual-entry-table th,
 .manual-entry-table td {
-  border: 1px solid #999;
+  border: 1px solid #444;
 }
-
 .manual-entry-input {
   font-size: 0.9em;
   height: 22px;
   padding: 2px 6px;
   width: 130px;
   background: transparent;
+  color: #eee;
   box-shadow: none;
-
-
-  /* Remove number spinner for all browsers */
+  border: none;
   -moz-appearance: textfield;
 }
 .manual-entry-input[type=number]::-webkit-outer-spin-button,
@@ -143,228 +275,34 @@
   -webkit-appearance: none;
   margin: 0;
 }
+input[type=number] { -moz-appearance: textfield; }
 
-.card-body {
-  flex: 1;
-  padding: 1px;
-  max-height: 100%;
-  overflow: auto;
-}
-
-.card-header {
-  cursor: default;
-  padding: 4px 10px;
-  border-bottom: 1px solid #dee2e6;
-  user-select: none;
-}
-
-.drag-handle {
-  min-height: 32px;
-  display: flex;
-  flex: 1;
-  align-items: center;
-}
-
-.dockable-item-close-btn {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-
-/* Navbar */
-.thin-navbar {
-  min-height: 32px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  font-size: 0.92rem;
-  z-index: 2000;
-}
-
-
-.dropdown-menu.dropdown-menu-start {
-  right: 100%;
-  left: auto;
-}
-
-/* Project Tree Styling */
-.project-tree {
-  font-family: Arial, sans-serif;
-  color: white;
-  width: 100%;
-}
-
-.tree-node {
-  position: relative;
-}
-
-.tree-label {
-  cursor: pointer;
-  display: inline-block;
-}
-
-.tree-label.expanded::before {
-  content: "";
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 5px;
-}
-
-.tree-label:not(.expanded)::before {
-  content: "";
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 5px;
-}
-
-.tree-label.expanded::before,
-.tree-label:not(.expanded)::before {
-  content: "";
-  display: inline-block;
-  vertical-align: middle;
-  width: 16px;
-  height: 16px;
-}
-
-.tree-children {
-  margin-left: 20px;
-}
-
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-/* Toolbar styling */
-.toolbar-row {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.btn-secondary,
-.no-icon {
-  max-height: 40px;
-  min-height: 40px;
-  max-width: 40px;
-  min-width: 40px;
-  padding: 1px 1px 1px 1px;
-  line-height: 1;
-}
-
-.divider {
-  width: 1px;
-  background-color: #272b30;
-  margin: 0 1px;
-  height: 100%;
-}
-
-/* Dockable */
-.gray-box {
-  background-color: lightgray;
-}
-
-.dockable-frame-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  align-items: stretch;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  padding: 8px;
-}
-
-.dockable-item {
-  flex: 1 1 300px;
-  min-width: 250px;
-  max-width: 100%;
-  background: var(--card-bg, #fff);
-  border-radius: 8px;
-  box-shadow: 0 2px 6px #0002;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.dockable-item, .card-container, .card {
-  min-width: 350px;
-  min-height: 325px;
-}
-
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
-input[type=number] { 
-  -moz-appearance: textfield; 
-}
-
-
-/* Wizards */
-/* Wizard core structure */
-/* Wizard main container */
-.wizard-fixed-size {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  height: 100%;
-  min-height: 0;
-  max-height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Card body fills all vertical space */
-.wizard-card-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 0;
-}
-
-/* Form fills all space, column layout */
-.wizard-form {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  height: 100%;
-  padding: 0;
-}
-
-.wizard-step-area {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-y: hidden;
-  padding: 24px;
-}
-
-/* Step content takes all space and scrolls if needed */
-.wizard-step-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: hidden;
-  padding: 24px;
-}
-
-/* Wizard footer */
+/* Footer Button */
 .wizard-footer {
   flex-shrink: 0;
   width: 100%;
-  padding: 12px 5px;
+  padding: 10px 18px;
   z-index: 10;
-  border-top: 1px solid #f7f5f5;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background: inherit;
+  margin: 0;
+}
+.wizard-footer-inner {
+  width: 100%;
   display: flex;
   justify-content: space-between;
 }
-
-.wizard-footer .btn {
-  min-width: 90px;
+.wizard-footer .btn.btn-compact { 
+  min-width: 54px;
+  min-height: 28px;
+  max-width: 100px;
+  max-height: 32px;
+  padding: 2px 10px;
+  font-size: 0.95em;
+  line-height: 1;
 }
 
 .wizard-circles-row {
@@ -417,15 +355,12 @@ input[type=number] {
   white-space: normal;
 }
 
-/* Table styles */
 .wizard-frequency-table {
   font-size: 0.8em;
-  width: 180px;
-  background: #f8f9fa;
+  width: 25%;
 }
 .wizard-frequency-table th {
-  width: 140px;
-  padding: 0.2rem 0.3rem;
+  width: 25%;
   text-align: center;
   font-weight: bold;
   background: #222;
@@ -433,16 +368,63 @@ input[type=number] {
   font-size: 1em;
 }
 .wizard-frequency-table tr {
-  height: 28px;
+  height: 10%;
 }
 .wizard-frequency-table td {
   padding: 0.1rem 0.3rem;
 }
+
+.wizard-frequency-table input,
 .wizard-frequency-input {
-  font-size: 0.9em;
-  height: 22px;
-  padding: 2px 6px;
-  width: 90px;
-  background: transparent;
+  background: transparent !important;
+  color: #fff !important;
+  border: none;
   box-shadow: none;
+}
+
+.wizard-frequency-table input:focus,
+.wizard-frequency-input:focus,
+.wizard-frequency-table input:active,
+.wizard-frequency-input:active {
+  background: transparent !important;
+  color: #fff !important;
+  outline: 1px solid #5bc0de;
+  box-shadow: none !important;
+}
+
+/* Force dark stripes on wizard-frequency-table */
+table.wizard-frequency-table > tbody > tr:nth-child(odd) > td {
+  background: #484949 !important;
+}
+table.wizard-frequency-table > tbody > tr:nth-child(even) > td {
+  background: #343639 !important;
+}
+table.wizard-frequency-table > tbody > tr > td {
+  color: #fff !important;
+}
+
+
+/* Miscellaneous */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] { 
+  -moz-appearance: textfield; 
+}
+.gray-box { background: #444; }
+.project-tree {
+  font-family: Arial, sans-serif;
+  color: white;
+  width: 100%;
+}
+
+.component-messages {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.message-text {
+  font-size: 1.5vh;;
 }

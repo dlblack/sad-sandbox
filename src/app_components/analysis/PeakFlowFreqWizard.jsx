@@ -287,7 +287,7 @@ function PeakFlowFreqWizard(props) {
           return (
             <>
               <div className="mb-2"><strong>Edit the frequencies in the table below.</strong></div>
-              <table className="table table-sm table-striped compact-table wizard-frequency-table">
+              <table className="table table-sm compact-table wizard-frequency-table">
                 <thead>
                   <tr>
                     <th>
@@ -382,10 +382,11 @@ function PeakFlowFreqWizard(props) {
   const isLastStep = step === 5;
 
   return (
-    <div className={`${style} wizard-fixed-size`}>
-      <div className="wizard-step-area">
+    <div className={`${style} wizard-fixed-size`} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div className="wizard-step-area" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <form 
-          className="card-text h-100 d-flex flex-column p-3"
+          className="card-text d-flex flex-column h-100 p-3"
+          style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
           onSubmit={e => e.preventDefault()}
         >
           {step >= 2 && (
@@ -415,20 +416,22 @@ function PeakFlowFreqWizard(props) {
           )}
   
           {/* Step content */}
-          <div className="flex-grow-1 d-flex flex-column">{renderStep()}</div>
-  
-          {/* Navigation buttons */}
-          <WizardNavigation
-            step={step}
-            setStep={setStep}
-            numSteps={progressSteps.length + 1}
-            onFinish={handleWizardFinish}
-            disableNext={step === 1 && (isDuplicateName || !nameTrimmed)}
-          />
+          <div className="flex-grow-1 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
+            {renderStep()}
+          </div>
         </form>
       </div>
+      <div className="wizard-footer">
+        <WizardNavigation
+          step={step}
+          setStep={setStep}
+          numSteps={progressSteps.length + 1}
+          onFinish={handleWizardFinish}
+          disableNext={step === 1 && (isDuplicateName || !nameTrimmed)}
+        />
+      </div>
     </div>
-  );
+  );  
 }
 
 export default PeakFlowFreqWizard;

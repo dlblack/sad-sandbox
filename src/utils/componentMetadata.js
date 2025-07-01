@@ -1,8 +1,8 @@
 function dataEditor(entityName) {
   return {
     entityName,
-    width: 750,
-    height: 850
+    width: Math.round(window.innerWidth * 0.38),
+    height: Math.round(window.innerHeight * 0.88)
   };
 }
 
@@ -15,14 +15,15 @@ function wizard(entityName) {
 }
 
 export const componentMetadata = {
-  Map: { width: 500, height: 500 },
-  // Set the Messages window default width to 40% and default height to 10%
-  Messages: { width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.1) },
+  ComponentContent: { entityName: "Contents", width: `auto`, height: Math.round(window.innerHeight * 0.2) },
+  ComponentMap: { entityName: "Map", width: Math.round(window.innerWidth * 0.3), height: Math.round(window.innerHeight * 0.3) },
+  ComponentMessage: { entityName: "Messages", width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.2) },
+  ComponentStyleSelector: { entityName: "Style Selector", width: Math.round(window.innerWidth * 0.2), height: Math.round(window.innerHeight * 0.2) },
 
   // Data editors
   ManualDataEntryEditor: dataEditor("Manual Data Entry"),
 
-  // Analysis Wizards (DRY, via wizard())
+  // Analysis Wizards
   Bulletin17AnalysisWizard: wizard("Bulletin 17 Analysis"),
   PeakFlowFreqWizard: wizard("Peak Flow Frequency"),
   GeneralFreqAnalysisWizard: wizard("General Frequency Analysis"),
@@ -40,4 +41,4 @@ export const componentMetadata = {
   CopulaAnalysisWizard: wizard("Copula Analysis"),
 };
 
-export const DEFAULT_COMPONENT_SIZE = { width: 300, height: 300 };
+export const DEFAULT_COMPONENT_SIZE = { width: Math.round(window.innerWidth * 0.1), height: Math.round(window.innerHeight * 0.1) };

@@ -2,7 +2,7 @@ import React from "react";
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentContent from "../app_components/ComponentContent";
-import StyleSelectorComponent from "../app_components/StyleSelectorComponent";
+import ComponentStyleSelector from "../app_components/ComponentStyleSelector";
 
 import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor";
 
@@ -30,8 +30,8 @@ export const dockableContentFactory = (type, props= {}) => {
       return <ComponentMap />;
     case "ComponentMessage":
       return <ComponentMessage {...props} />;
-    case "StyleSelector":
-      return <StyleSelectorComponent />;
+    case "ComponentStyleSelector":
+      return <ComponentStyleSelector />;
 
     case "ManualDataEntryEditor":
       return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave} />;
