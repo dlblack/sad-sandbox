@@ -4,7 +4,7 @@ import { dockableTitles } from "../../utils/dockableTitles";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 
 const DOCK_ZONES = [
-  "N", "E", "S", "W", "CENTER"
+  "E", "S", "W", "CENTER"
 ];
 
 // Helper to render a docked item with drag logic
