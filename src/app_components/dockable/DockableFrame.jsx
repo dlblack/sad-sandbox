@@ -1,86 +1,116 @@
 import React, { useState } from "react";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import DockableItem from "./DockableItem";
 import { dockableTitles } from "../../utils/dockableTitles";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 
-function SortableDockableItem({ id, ...props }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : 1,
-    opacity: isDragging ? 0.7 : 1,
+const DOCK_ZONES = [
+  "N", "E", "S", "W", "CENTER"
+];
+
+// Helper to render a docked item with drag logic
+function DraggableDockableItem({ container, onRemove }) {
+  const { id, type, isDragging } = container;
+
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData("dockable-item-id", id);
+    e.dataTransfer.effectAllowed = "move";
   };
+
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <DockableItem {...props} id={id} dragHandleProps={listeners} isDragging={isDragging} />
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      className={`dockable-drag-wrapper${isDragging ? " dragging" : ""}`}
+    >
+      <DockableItem
+        {...container}
+        type={dockableTitles[type] || type}
+        onRemove={onRemove}
+      >
+        {container.content}
+      </DockableItem>
     </div>
   );
 }
 
-function DockableFrame({ 
+export default function DockableFrame({
   containers,
   setContainers,
   removeComponent,
-  onDragStart,
-  messages,
-  messageType,
-  setMessageType,
   onWizardFinish,
   onDataSave,
-  addAnalysis,
+  messages,
   analyses,
-  data
+  data,
 }) {
-  const containerIds = containers.map(c => c.id);
+  const [hoveredZone, setHoveredZone] = useState(null);
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  // Only needed for initial creation if you don't already set dockZone
+  // Example add handler:
+  // addComponent(type) => setContainers([...containers, {id, type, dockZone: getDefaultDockZone(type), ...}]);
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      const oldIndex = containers.findIndex(c => c.id === active.id);
-      const newIndex = containers.findIndex(c => c.id === over.id);
-      setContainers(arrayMove(containers, oldIndex, newIndex));
-    }
-  };
+  // Generate content for each container
+  const containersWithContent = containers.map((c) => ({
+    ...c,
+    content: dockableContentFactory(c.type, {
+      id: c.id,
+      type: c.type,
+      onFinish: onWizardFinish,
+      onDataSave,
+      messages,
+      analyses,
+      data,
+    }),
+  }));
+
+  function handleDrop(e, zone) {
+    e.preventDefault();
+    const itemId = e.dataTransfer.getData("dockable-item-id");
+    setContainers((prev) =>
+      prev.map((c) =>
+        c.id === itemId ? { ...c, dockZone: zone } : c
+      )
+    );
+    setHoveredZone(null);
+  }
+
+  function handleDragOver(e, zone) {
+    e.preventDefault();
+    setHoveredZone(zone);
+  }
+
+  function handleDragLeave(e, zone) {
+    e.preventDefault();
+    // Only clear if leaving the current hovered zone
+    if (hoveredZone === zone) setHoveredZone(null);
+  }
+
+  // Helper to render all items in a zone
+  function renderZone(zone) {
+    return (
+      <div
+        key={zone}
+        className={`dock-zone dock-zone-${zone.toLowerCase()}${hoveredZone === zone ? " hovered" : ""}`}
+        onDrop={(e) => handleDrop(e, zone)}
+        onDragOver={(e) => handleDragOver(e, zone)}
+        onDragLeave={(e) => handleDragLeave(e, zone)}
+      >
+        {containersWithContent
+          .filter((c) => c.dockZone === zone)
+          .map((c) => (
+            <DraggableDockableItem
+              key={c.id}
+              container={c}
+              onRemove={removeComponent}
+            />
+          ))}
+      </div>
+    );
+  }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={containerIds} strategy={verticalListSortingStrategy}>
-        <div className="dockable-frame-container">
-          {containers.map(container => (
-            <SortableDockableItem
-              key={container.id}
-              {...container}
-              
-              expandToContents={container.type === "ComponentContent"}
-              type={dockableTitles[container.type] || container.type}
-              onRemove={removeComponent}
-              onDragStart={onDragStart}
-              >
-                {dockableContentFactory(container.type, {
-                  id: container.id,
-                  type: container.type,
-                  onFinish: onWizardFinish,
-                  onDataSave,
-                  messages,
-                  analyses,
-                  data,
-                })}
-            </SortableDockableItem>
-          ))}
-        </div>
-      </SortableContext>
-    </DndContext>
+    <div className="dockable-frame">
+      {DOCK_ZONES.map(renderZone)}
+    </div>
   );
 }
-
-export default DockableFrame;

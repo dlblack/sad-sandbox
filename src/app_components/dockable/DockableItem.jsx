@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { StyleContext } from "../../styles/StyleContext";
 
 function DockableItem({
@@ -14,10 +14,18 @@ function DockableItem({
   className
 }) {
   const { modalStyle } = useContext(StyleContext);
+  const [expanded, setExpanded] = useState(false);
 
-  // For expandToContents, only set min sizes
-  // For all others, set both width and height
-  const containerStyle = expandToContents
+  const containerStyle = expanded
+    ? {
+      position: "absolute",
+      zIndex: 100,
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    }
+  : expandToContents
     ? {
         width: width ? `${width}px` : undefined,
         minWidth: width ? `${width}px` : undefined,
@@ -32,7 +40,7 @@ function DockableItem({
       };
 
   return (
-    <div className={`card-container dockable-item${expandToContents ? " expand-to-contents" : ""}${className ? " " + className : ""}`} style={containerStyle}>
+    <div className={`card-container dockable-item${expanded ? " expanded" : ""}${expandToContents ? " expand-to-contents" : ""}${className ? " " + className : ""}`} style={containerStyle}>
       <div className="card d-flex flex-column" style={expandToContents ? { minHeight: "100%", height: "auto" } : { height: "100%" }}>
         <div
           className={`card-header d-flex align-items-center justify-content-between ${modalStyle}`}
@@ -46,17 +54,34 @@ function DockableItem({
               {type}
             </div>
           </div>
-          <button
-            type="button"
-            className="dockable-item-close-btn"
-            onClick={e => {
-              e.stopPropagation();
-              onRemove(id);
-            }}
-            aria-label="Close"
-          >
-            &#10005;
-          </button>
+          <div style={{ display: "flex" }}>
+            <button
+              type="button"
+              className="dockable-item-header-btn dockable-item-expand-btn"
+              onClick={e => {
+                e.stopPropagation();
+                setExpanded(exp => !exp);
+                e.currentTarget.blur(); // Remove focus highlight
+              }}
+              aria-label={expanded ? "Restore" : "Expand"}
+              title={expanded ? "Restore" : "Expand"}
+            >
+              {expanded ? "▭" : "▢"}
+            </button>
+            <button
+              type="button"
+              className="dockable-item-header-btn dockable-item-close-btn"
+              onClick={e => {
+                e.stopPropagation();
+                onRemove(id);
+                e.currentTarget.blur(); // Remove focus highlight
+              }}
+              aria-label="Close"
+              title="Close"
+            >
+              ×
+            </button>
+          </div>
         </div>
         <div className="card-body flex-grow-1 overflow-auto p-2">
           {children}

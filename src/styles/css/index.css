@@ -45,8 +45,64 @@ html, body, #root, .app-container {
   z-index: 2000;
 }
 
-/* Dockable frame fills remaining space.
-   NOTE: Now allows horizontal overflow for expanding cards! */
+/* Dockable frame fills remaining space. */
+.dockable-frame {
+  display: grid;
+  grid-template-areas:
+    "w  center   e"
+    "w  center e"
+    "s  s   s";
+  grid-template-columns: 15% 1fr 20%;
+  grid-template-rows: 80px 1fr 23%;
+  height: calc(100vh - var(--navbar-height, 56px));;
+  width: 100vw;
+  position: relative;
+  gap: 0;
+}
+
+/* Map zones to grid areas */
+.dock-zone-n  { grid-area: n; }
+.dock-zone-w  { grid-area: w; }
+.dock-zone-center { grid-area: center; }
+.dock-zone-e  { grid-area: e; }
+.dock-zone-s  { grid-area: s; }
+
+.dock-zone {
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #e0e0e0;
+  background: transparent;
+  position: relative;
+  overflow: auto;
+  transition: background 0.2s, border-color 0.2s;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dock-zone.center {
+  background: #fff;
+}
+
+.dock-zone.hovered {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  z-index: 2;
+}
+
+.dockable-drag-wrapper.dragging {
+  opacity: 0.7;
+  z-index: 10;
+}
+
+.dockable-drag-wrapper {
+  /* so DockableItem doesn't expand to fill entire zone by default */
+  display: inline-block;
+  min-width: 200px;
+  max-width: 100%;
+}
+
 .dockable-frame-container {
   flex: 1 1 0%;
   min-height: 0;
@@ -142,11 +198,38 @@ html, body, #root, .app-container {
   flex: 1;
   align-items: center;
 }
-.dockable-item-close-btn {
-  background: transparent;
+.dockable-item-header-btn {
+  background: none;
   border: none;
+  color: #444;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0 px;
+  margin-left: 1px;
+  border-radius: 1px;
   cursor: pointer;
+  height: 1.4em;
+  width: 1.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.dockable-item-expand-btn:hover,
+.dockable-item-expand-btn:focus {
+  background: #cce4f7;
+  color: #195889;
+}
+.dockable-item-close-btn:hover,
+.dockable-item-close-btn:focus {
+  background: #ffd6d6;
+  color: #d12d2d;
+}
+.dockable-item-header-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+
 .card-title {
   font-size: 1.5vh;
   font-weight: light;
