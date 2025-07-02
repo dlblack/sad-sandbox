@@ -156,6 +156,65 @@ app.post("/api/data", (req, res) => {
   });
 });
 
+// --- Rename Data ---
+app.patch("/api/data/:category/:index", (req, res) => {
+  const { category, index } = req.params;
+  const { name } = req.body;
+  let allData = readData();
+  if (!allData[category] || !allData[category][index]) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  allData[category][index].name = name;
+  writeData(allData);
+  res.json({ success: true });
+});
+
+
+// --- Rename Analyses ---
+app.patch("/api/analyses/:folder/:index", (req, res) => {
+  const { folder, index } = req.params;
+  const { name } = req.body;
+  let analyses = readAnalyses();
+  if (!analyses[folder] || !analyses[folder][index]) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  analyses[folder][index].name = name;
+  writeAnalyses(analyses);
+  res.json({ success: true });
+});
+
+
+// --- Delete from Data ---
+app.delete("/api/data/:category/:index", (req, res) => {
+  const { category, index } = req.params;
+  let allData = readData();
+  if (!allData[category] || !allData[category][index]) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  allData[category].splice(index, 1);
+  if (allData[category].length === 0) {
+    delete allData[category];
+  }
+  writeData(allData);
+  res.json({ success: true });
+});
+
+// --- Delete from Analyses ---
+app.delete("/api/analyses/:folder/:index", (req, res) => {
+  const { folder, index } = req.params;
+  let analyses = readAnalyses();
+  if (!analyses[folder] || !analyses[folder][index]) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  analyses[folder].splice(index, 1);
+  if (analyses[folder].length === 0) {
+    delete analyses[folder];
+  }
+  writeAnalyses(analyses);
+  res.json({ success: true });
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`API server running at http://localhost:${PORT}/api/analyses`);

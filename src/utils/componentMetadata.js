@@ -2,7 +2,7 @@ function dataEditor(entityName) {
   return {
     entityName,
     width: Math.round(window.innerWidth * 0.38),
-    height: Math.round(window.innerHeight * 0.88)
+    height: Math.round(window.innerHeight * 0.7)
   };
 }
 

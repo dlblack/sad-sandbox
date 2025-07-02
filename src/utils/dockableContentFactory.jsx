@@ -25,7 +25,14 @@ import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizar
 export const dockableContentFactory = (type, props= {}) => {
   switch (type) {
     case "ComponentContent":
-      return <ComponentContent analyses={props.analyses} data={props.data} />;
+      return <ComponentContent 
+        maps={props.maps}
+        data={props.data}
+        analyses={props.analyses}
+        onSaveAsNode={props.onSaveAsNode}
+        onRenameNode={props.onRenameNode}
+        onDeleteNode={props.onDeleteNode}
+      />;
     case "ComponentMap":
       return <ComponentMap />;
     case "ComponentMessage":
