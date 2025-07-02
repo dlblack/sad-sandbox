@@ -14,10 +14,9 @@ function groupAnalysesByType(analysesObj = {}) {
 function App() {
   const { appBackgroundStyle } = useContext(StyleContext);
 
-  // Analyses (unchanged)
-  const [analyses, setAnalyses] = useState({});
-  // NEW: Data (time series, precipitation/discharge/etc.)
+  const [maps, setMaps] = useState({});
   const [data, setData] = useState({});
+  const [analyses, setAnalyses] = useState({});
 
   const getDefaultDockZone = (type) => {
     switch (type) {
@@ -80,9 +79,7 @@ function App() {
     }
   };
 
-  // ----- ADD new data (for time series, discharge, precipitation, etc.) -----
   const handleDataSave = async (category, valuesObj, id) => {
-    // category = "Precipitation", "SWE", "discharge", etc.
     try {
       await fetch("/api/data", {
         method: "POST",
@@ -154,6 +151,128 @@ function App() {
       return filtered;
     });
   };
+
+  const handleSaveAsNode = (section, pathArr, newName, newDesc, itemObj) => {
+    if (section === "data") {
+      const [category, idx] = pathArr;
+      const itemObj = data[category][idx];
+      const newItem = { ...itemObj, name: newName, description: newDesc };
+      fetch(`/api/data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: category, data: newItem }),
+      })
+        .then(() => fetch("/api/data"))
+        .then(res => res.json())
+        .then(data => setData(data));
+    }
+    if (section === "analyses") {
+      const [folder, idx] = pathArr;
+      const itemObj = data[folder][idx];
+      const newItem = { ...itemObj, name: newName, description: newDesc };
+      fetch(`/api/analyses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: folder, data: newItem }),
+      })
+        .then(() => fetch("/api/analyses"))
+        .then(res => res.json())
+        .then(data => setAnalyses(data));
+    }
+  };  
+
+  const handleRenameNode = (section, pathArr, newName) => {
+    if (section === "maps") {
+      const [category, idx] = pathArr;
+      setData(prev => {
+        const mapsCopy = { ...prev };
+        mapsCopy[category] = mapsCopy[category].map((item, i) =>
+          i === idx ? { ...item, name: newName } : item
+        );
+        return mapsCopy;
+      });
+      fetch(`/api/data/${encodeURIComponent(category)}/${idx}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName })
+      })
+        .then(() => fetch("/api/data"))
+        .then(res => res.json())
+        .then(data => setData(data));
+    }
+    if (section === "data") {
+      const [category, idx] = pathArr;
+      setData(prev => {
+        const dataCopy = { ...prev };
+        dataCopy[category] = dataCopy[category].map((item, i) =>
+          i === idx ? { ...item, name: newName } : item
+        );
+        return dataCopy;
+      });
+      fetch(`/api/data/${encodeURIComponent(category)}/${idx}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName })
+      })
+        .then(() => fetch("/api/data"))
+        .then(res => res.json())
+        .then(data => setData(data));
+    }
+    if (section === "analyses") {
+      const [folder, idx] = pathArr;
+      setAnalyses(prev => {
+        const analysesCopy = { ...prev };
+        analysesCopy[folder] = analysesCopy[folder].map((item, i) =>
+          i === idx ? { ...item, name: newName } : item
+        );
+        return analysesCopy;
+      });
+      fetch(`/api/analyses/${encodeURIComponent(folder)}/${idx}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName })
+      })
+        .then(() => fetch("/api/analyses"))
+        .then(res => res.json())
+        .then(data => setAnalyses(data));
+    }
+  };  
+
+  const handleDeleteNode = (section, pathArr) => {
+    if (section === "maps") {
+      setMaps(prev => prev.filter((_, i) => i !== pathArr[0]));
+    }
+    if (section === "data") {
+      setData(prev => {
+        const dataCopy = { ...prev };
+        const [param, idx] = pathArr;
+        dataCopy[param] = dataCopy[param].filter((_, i) => i !== idx);
+        return dataCopy;
+      });
+      fetch(`/api/data/${encodeURIComponent(category)}/${idx}`, { method: "DELETE" })
+        .then(res => res.json())
+        .then(() => {
+          fetch("/api/data")
+            .then(res => res.json())
+            .then(data => setData(data));
+        });
+    }
+    if (section === "analyses") {
+      const [folder, idx] = pathArr;
+      setAnalyses(prev => {
+        const analysesCopy = { ...prev };
+        analysesCopy[folder] = analysesCopy[folder].filter((_, i) => i !== idx);
+        return analysesCopy;
+      });
+      fetch(`/api/analyses/${encodeURIComponent(folder)}/${idx}`, { method: "DELETE" })
+        .then(res => res.json())
+        .then(() => {
+          fetch("/api/analyses")
+            .then(res => res.json())
+            .then(data => setAnalyses(data));
+        });
+    }
+  };  
   
   const onDragStart = (id, event) => {
     const container = containers[id];
@@ -193,8 +312,12 @@ function App() {
           messages={messages}
           messageType={messageType}
           setMessageType={setMessageType}
-          analyses={analyses}
+          onSaveAsNode={handleSaveAsNode}
+          onRenameNode={handleRenameNode}
+          onDeleteNode={handleDeleteNode}
+          maps={maps}
           data={data}
+          analyses={analyses}
           onWizardFinish={handleWizardFinish}
           onDataSave={handleDataSave}
         />

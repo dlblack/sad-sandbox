@@ -40,16 +40,15 @@ export default function DockableFrame({
   onWizardFinish,
   onDataSave,
   messages,
-  analyses,
+  onSaveAsNode,
+  onRenameNode,
+  onDeleteNode,
+  maps,
   data,
+  analyses,
 }) {
   const [hoveredZone, setHoveredZone] = useState(null);
 
-  // Only needed for initial creation if you don't already set dockZone
-  // Example add handler:
-  // addComponent(type) => setContainers([...containers, {id, type, dockZone: getDefaultDockZone(type), ...}]);
-
-  // Generate content for each container
   const containersWithContent = containers.map((c) => ({
     ...c,
     content: dockableContentFactory(c.type, {
@@ -58,8 +57,12 @@ export default function DockableFrame({
       onFinish: onWizardFinish,
       onDataSave,
       messages,
-      analyses,
+      onSaveAsNode,
+      onRenameNode,
+      onDeleteNode,
+      maps,
       data,
+      analyses,
     }),
   }));
 
