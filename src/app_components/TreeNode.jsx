@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import SaveAsDialog from "../dialogs/SaveAsDialog";
 import { FaFolder, FaFolderOpen } from "react-icons/fa";
+import dssIcon from '../assets/images/dss.gif';
 
 const hasRealChildren = (children) => {
   if (!children) return false;
@@ -13,23 +14,52 @@ const hasRealChildren = (children) => {
   });
 };
 
-const TreeNode = ({ 
-  label, 
-  children, 
+function getNodeBadgeOrIcon(label, isLeaf, type, section) {
+  if (isLeaf && section === "data") {
+    return (
+      <img
+        src={dssIcon}
+        alt="Data"
+        className="tree-data-icon"
+        style={{ width: 16, height: 16, marginRight: 4, verticalAlign: "middle" }}
+      />
+    );
+  }
+
+  if (isLeaf && section === "analysis") {
+    if (label === "Bulletin 17 Analysis") {
+      return <span className="tree-badge" style={{ color: "#4287f5", fontWeight: "bold" }}>B17</span>;
+    }
+    if (label === "Peak Flow Frequency") {
+      return <span className="tree-badge" style={{ color: "#25c379", fontWeight: "bold" }}>PFF</span>;
+    }
+  }
+  return null;
+}
+
+const TreeNode = ({
+  label,
+  children,
   isTopLevel = false,
   onSaveAs,
   type,
+  section,
   description,
   onRename,
   onDelete,
   canDelete = false,
+  parentLabel,
 }) => {
   const hasContent = hasRealChildren(children);
+  const isLeaf = !hasContent;
+
   const [expanded, setExpanded] = useState(false);
   const [menu, setMenu] = useState(null);
   const [saveAsDialogOpen, setSaveAsDialogOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(label);
+
+  const badge = getNodeBadgeOrIcon(parentLabel, isLeaf, type, section);
 
   const ref = useRef();
 
@@ -49,19 +79,19 @@ const TreeNode = ({
   const handleSaveAs = () => {
     setMenu(null);
     setSaveAsDialogOpen(true);
-  }
+  };
 
   const handleSaveAsConfirm = (newName, newDesc) => {
     setSaveAsDialogOpen(false);
     onSaveAs && onSaveAs(newName, newDesc);
-  }
+  };
 
   const handleSaveAsCancel = () => setSaveAsDialogOpen(false);
 
   const handleRename = () => {
     setMenu(null);
     setRenaming(true);
-  }
+  };
 
   const handleRenameSubmit = (e) => {
     e.preventDefault();
@@ -78,29 +108,26 @@ const TreeNode = ({
   const handleDelete = () => {
     setMenu(null);
     onDelete?.();
-  }
-
-  const toggleExpanded = () => {
-    if (hasContent) setExpanded(!expanded);
   };
 
   const LabelTag = isTopLevel && hasContent ? "strong" : "span";
 
   return (
-    <div className="tree-node" ref={ref} style={{ position: "relative" }}>
-     <span
+    <div className={`tree-node${isTopLevel ? " top-level" : ""}`} ref={ref}>
+      <span
         className={`tree-label ${expanded ? "expanded" : ""}`}
         onClick={hasContent ? () => setExpanded(!expanded) : undefined}
         onContextMenu={handleContextMenu}
-        style={{ 
-          cursor: hasContent ? "pointer" : "default", 
-          userSelect: "none", 
-          display: "flex", 
-          alignItems: "center", 
-          gap: "4px" 
+        style={{
+          cursor: hasContent ? "pointer" : "default",
+          userSelect: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px"
         }}
       >
         {hasContent && (expanded ? <FaFolderOpen color="#f6b73c" /> : <FaFolder color="#f6b73c" />)}
+        {badge}
         {renaming ? (
           <form onSubmit={handleRenameSubmit}>
             <input
