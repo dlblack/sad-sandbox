@@ -14,21 +14,24 @@ function ComponentContent({ analyses = {}, data = {}, maps = [], onSaveAsNode, o
               <TreeNode
                 key={mapObj.id || mapObj.name || idx}
                 label={mapObj.name}
+                parentLabel="Maps"
                 canDelete={true}
                 onDelete={() => onDeleteNode("maps", [idx])}
                 onRename={(newName) => onRenameNode("maps", [idx], newName)}
               />
             ))
-          : <TreeNode label="(No maps)" />}
+          : <TreeNode label="(No maps)" parentLabel="Maps" />}
       </TreeNode>
       {/* Data */}
-      <TreeNode label="Data" isTopLevel>
+      <TreeNode label="Data" isTopLevel section="data">
         {Object.entries(data).map(([parameter, datasets]) => (
-          <TreeNode key={parameter} label={parameter}>
+          <TreeNode key={parameter} label={parameter} section="data">
             {(datasets || []).map((item, idx) => (
               <TreeNode
                 key={item.__tempKey || `${item.name}-${idx}`}
                 label={item.name}
+                type={parameter}
+                section="data"
                 onSaveAs={(newName, newDesc) =>
                   onSaveAsNode("analyses", [parameter, idx], newName, newDesc, item)
                 }
@@ -43,25 +46,27 @@ function ComponentContent({ analyses = {}, data = {}, maps = [], onSaveAsNode, o
         ))}
       </TreeNode>
       {/* Analysis */}
-      <TreeNode label="Analysis" isTopLevel>
+      <TreeNode label="Analysis" isTopLevel section="analysis">
         {Object.entries(analyses).map(([folder, items]) => (
-          <TreeNode key={folder} label={folder}>
+          <TreeNode key={folder} label={folder} section="analysis">
             {Array.isArray(items) && items.length
               ? items.map((item, idx) => (
                   <TreeNode
                     key={`${item.name}-${idx}`}
                     label={item.name}
+                    parentLabel={folder}
                     onSaveAs={(newName, newDesc) =>
                       onSaveAsNode("analyses", [folder, idx], newName, newDesc, item)
                     }
                     type={folder}
+                    section="analysis"
                     description={item.description}
                     onRename={(newName) => onRenameNode("analyses", [folder, idx], newName)}
                     canDelete={true}
                     onDelete={() => onDeleteNode("analyses", [folder, idx])}
                   />
                 ))
-              : <TreeNode label="(No analyses)" />}
+              : <TreeNode label="(No analyses)" section="analysis" />}
           </TreeNode>
         ))}
       </TreeNode>
