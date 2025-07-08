@@ -10,27 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "feather-route-matcher": "4.0.0",
     "leaflet": "^1.9.4",
-    "npm-check": "6.0.1",
-    "plotly.js-dist-min": "2.26.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-grid-layout": "1.4.2",
-    "react-icons": "^5.5.0",
-    "react-leaflet": "4.2.1",
-    "react-resizable": "3.0.5",
-    "react-tooltip": "5.21.3"
+    "npm-check": "^6.0.1",
+    "plotly.js-dist-min": "3.0.1",
+    "react": "^19.1.0",
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
-    "@types/react": "18.2.21",
-    "@types/react-dom": "18.2.7",
-    "@vitejs/plugin-react": "4.0.4",
-    "vite": "4.5.2"
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "vite": "7.0.3"
   }
 }
