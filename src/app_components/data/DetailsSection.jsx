@@ -58,40 +58,86 @@ function DetailsSection({
       </div>
 
       {/* Start/End Info */}
-      <div className="startinfo-section p-1 border rounded" style={{ width: "100%" }}>
-        <div className="d-flex gap-2 mb-1 flex-nowrap">
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>Start Date</label>
-            <input className="form-control form-control-sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
-          </div>
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>Start Time</label>
-            <input className="form-control form-control-sm" value={startTime} onChange={e => setStartTime(e.target.value)} />
-          </div>
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>End Date</label>
-            <input className="form-control form-control-sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
-          </div>
+      <div
+        className="startinfo-section p-1 border rounded"
+        style={{
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          rowGap: "0.5em",
+          columnGap: "1em",
+          alignItems: "center",
+        }}
+      >
+        {/* First Row */}
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>
+            Start Date
+          </label>
+          <input
+            className="form-control form-control-sm"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+          />
         </div>
-        <div className="d-flex gap-2 mb-1 flex-nowrap">
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>End Time</label>
-            <input className="form-control form-control-sm" value={endTime} onChange={e => setEndTime(e.target.value)} />
-          </div>
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 38 }}>Units</label>
-            <input className="form-control form-control-sm" maxLength={10} value={startUnits} disabled />
-          </div>
-          <div className="compact-field d-flex align-items-center flex-grow-1">
-            <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 38 }}>Type</label>
-            <select className="form-select form-select-sm" value={startType} onChange={e => setStartType(e.target.value)}>
-              <option value="">Select...</option>
-              <option value="PerAver">PER-AVER</option>
-              <option value="PerCum">PER-CUM</option>
-              <option value="InstVal">INST-VAL</option>
-              <option value="InstCum">INST-CUM</option>
-            </select>
-          </div>
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>
+            Start Time
+          </label>
+          <input
+            className="form-control form-control-sm"
+            value={startTime}
+            onChange={e => setStartTime(e.target.value)}
+          />
+        </div>
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 38 }}>
+            Units
+          </label>
+          <input
+            className="form-control form-control-sm"
+            maxLength={10}
+            value={startUnits}
+            disabled
+          />
+        </div>
+
+        {/* Second Row */}
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>
+            End Date
+          </label>
+          <input
+            className="form-control form-control-sm"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 58 }}>
+            End Time
+          </label>
+          <input
+            className="form-control form-control-sm"
+            value={endTime}
+            onChange={e => setEndTime(e.target.value)}
+          />
+        </div>
+        <div className="compact-field d-flex align-items-center">
+          <label className="form-label font-xs compact-label mb-0 me-1" style={{ minWidth: 38 }}>
+            Type
+          </label>
+          <select
+            className="form-select form-select-sm"
+            value={startType}
+            onChange={e => setStartType(e.target.value)}
+          >
+            <option value="">Select...</option>
+            <option value="PerAver">PER-AVER</option>
+            <option value="PerCum">PER-CUM</option>
+            <option value="InstVal">INST-VAL</option>
+            <option value="InstCum">INST-CUM</option>
+          </select>
         </div>
       </div>
     </div>

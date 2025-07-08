@@ -323,7 +323,6 @@ html, body, #root, .app-container {
 .manual-entry-details {
   width: 100%;
   flex-shrink: 0;
-  min-height: 53%;
   overflow: visible;
 }
 .manual-entry-details:empty { background: #2a2a2a; }
@@ -333,8 +332,11 @@ html, body, #root, .app-container {
   max-width: 100%;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 90%;
-  margin-top: 17px;
+  margin-top: 1em;
+  min-height: 25vh;
+  max-height: 25vh;
+  box-sizing: border-box;
+  padding-bottom: 0.5em;
 }
 .manual-entry-fields-left .form-control,
 .manual-entry-fields-left .form-select {

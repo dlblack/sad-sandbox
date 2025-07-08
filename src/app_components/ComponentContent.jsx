@@ -35,7 +35,6 @@ function ComponentContent({ analyses = {}, data = {}, maps = [], onSaveAsNode, o
                 onSaveAs={(newName, newDesc) =>
                   onSaveAsNode("analyses", [parameter, idx], newName, newDesc, item)
                 }
-                type={parameter}
                 description={item.description}
                 onRename={(newName) => onRenameNode("data", [parameter, idx], newName)}
                 canDelete={true}
