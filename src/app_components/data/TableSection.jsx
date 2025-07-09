@@ -19,6 +19,8 @@ function TableSection({ dataRows, handleRowChange, handleValueChange }) {
                   onChange={e => handleRowChange(idx, "dateTime", e.target.value)}
                   pattern="\d{2}[A-Za-z]{3}\d{4} \d{2}:\d{2}"
                   autoComplete="off"
+                  tabIndex={-1}     // <-- Remove from tab order
+                  readOnly={!!row.dateTime} // Optional: make uneditable if value exists
                 />
               </td>
               <td>
@@ -29,6 +31,7 @@ function TableSection({ dataRows, handleRowChange, handleValueChange }) {
                   value={row.value}
                   onChange={e => handleValueChange(idx, e.target.value)}
                   style={{ MozAppearance: "textfield" }}
+                  // No tabIndex: tabbable as normal
                 />
               </td>
             </tr>

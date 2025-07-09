@@ -1,4 +1,5 @@
 import React from "react";
+import { normalizeTimeInput } from "../../utils/timeUtils";
 
 function DetailsSection({
   partA, setPartA,
@@ -88,6 +89,7 @@ function DetailsSection({
             className="form-control form-control-sm"
             value={startTime}
             onChange={e => setStartTime(e.target.value)}
+            onBlur={e => setStartTime(normalizeTimeInput(e.target.value))}
           />
         </div>
         <div className="compact-field d-flex align-items-center">
@@ -121,6 +123,7 @@ function DetailsSection({
             className="form-control form-control-sm"
             value={endTime}
             onChange={e => setEndTime(e.target.value)}
+            onBlur={e => setEndTime(normalizeTimeInput(e.target.value))}
           />
         </div>
         <div className="compact-field d-flex align-items-center">

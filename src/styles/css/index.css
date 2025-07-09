@@ -46,18 +46,42 @@ html, body, #root, .app-container {
 
 /* Dockable frame fills remaining space. */
 .dockable-frame {
-  display: grid;
-  grid-template-areas:
-    "w center e"
-    "w center e"
-    "s s s";
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: 80px 1fr 23%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   height: 100%;
-  width: 100vw;
-  position: relative;
-  gap: 0;
+  overflow: hidden;
 }
+
+.dockable-frame-row {
+  display: flex;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dock-splitter {
+  background: #eee;
+  width: 2px;
+  cursor: col-resize;
+  z-index: 2;
+  user-select: none;
+  transition: background 0.2s;
+}
+.dock-splitter-horizontal {
+  background: #eee;
+  height: 2px;
+  width: 100%;
+  cursor: row-resize;
+  z-index: 3;
+  user-select: none;
+  transition: background 0.2s;
+}
+.dock-splitter:hover,
+.dock-splitter-horizontal:hover {
+  background: #bbb;
+}
+
 
 /* Map zones to grid areas */
 .dock-zone-w  { grid-area: w; }
@@ -72,11 +96,12 @@ html, body, #root, .app-container {
   background: transparent;
   position: relative;
   overflow: auto;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.1s, border-color 0.1s;
   padding: 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .dock-zone.center {
@@ -87,6 +112,27 @@ html, body, #root, .app-container {
   background: #e3f2fd;
   border-color: #2196f3;
   z-index: 2;
+}
+
+.dock-zone-s {
+  flex-direction: row;
+  height: 240px;
+  min-height: 120px;
+  max-height: 340px;
+  width: 100%;
+}
+
+.dock-zone-w, .dock-zone-e {
+  min-width: 120px;
+  max-width: 420px;
+  width: 240px;
+  flex-direction: column;
+}
+
+.dock-zone-center {
+  flex: 1 1 0%;
+  min-width: 200px;
+  flex-direction: row;
 }
 
 .dockable-drag-wrapper.dragging {
@@ -115,15 +161,20 @@ html, body, #root, .app-container {
   justify-content: flex-start;
 }
 
+
 /* All dockable items: cards that can be sized by parent via style */
+.dockable-header-btns {
+  display: flex;
+  gap: 0;
+  align-items: center;
+}
+
 .dockable-item, .card-container, .card {
   display: flex;
   flex-direction: column;
   min-width: 200px;
   min-height: 100px;
-  max-width: 100vw;
-  max-height: 100vh;
-  background: var(--card-bg, #222);  /* Dark card background by default */
+  background: var(--card-bg, #222);
   border-radius: 8px;
   box-shadow: 0 2px 6px #0002;
   overflow: hidden;
@@ -131,14 +182,137 @@ html, body, #root, .app-container {
   flex: 0 0 auto;
 }
 
+.dockable-item.focused {
+  outline: 2px solid #dfe9f6;
+  box-shadow: 0 0 0 2px #a6c8ff;
+  z-index: 11 !important;
+}
+.dockable-item.expanded {
+  z-index: 100 !important;
+}
+
+.card-container.dockable-item {
+  position: relative;
+  min-width: 180px;
+  min-height: 120px;
+  max-width: 900px;
+  max-height: 800px;
+  z-index: 1;
+  outline: none;
+  transition: box-shadow 0.15s;
+  box-shadow: 0 2px 12px #0002;
+}
+
+.card-container.dockable-item.focused {
+  z-index: 10;
+  box-shadow: 0 0 0 2px #7e8081, 0 2px 16px #0004;
+}
+
+.card-container.dockable-item.expanded {
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+}
+
+.card-container.dockable-item.expand-to-contents {
+  height: auto;
+}
+
+.card.d-flex.flex-column {
+  height: 100%;
+}
+
+/* Header Styles */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 16px;
+  font-size: 0.85em;
+  padding: 4px 12px 4px 10px;
+  border-bottom: 1px solid #292929;
+  background: #212529;
+  color: #eee;
+}
+
+.drag-handle {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.card-title.mb-0 {
+  font-size: 1em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Dockable Header Buttons */
+.dockable-item-header-btn {
+  background: none;
+  border: none;
+  color: #eee;
+  padding: 2px 7px;
+  margin-left: 4px;
+  font-size: 1.16em;
+  border-radius: 4px;
+  transition: background 0.14s;
+}
+
+.dockable-item-header-btn:hover, .dockable-item-header-btn:focus {
+  background: #333;
+  color: #fff;
+}
+
+.dockable-item-close-btn {
+  font-size: 1.24em;
+}
+
+.dockable-item-expand-btn {
+  font-size: 1.10em;
+  padding-right: 3px;
+}
+
+.card-body.flex-grow-1.overflow-auto.p-2 {
+  overflow: auto;
+  padding: 10px;
+  background: #1a1a1a;
+  color: #e2e2e2;
+  font-size: 1em;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Resize handle */
+.custom-resize-handle {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 15px;
+  height: 15px;
+  cursor: se-resize;
+  background: transparent;
+  z-index: 15;
+}
+
+
 /* ----------- Only for the ComponentContent card: expand horizontally as needed ----------- */
 .dockable-item.component-content-card,
 .card-container.component-content-card,
 .card.component-content-card,
 .component-content-root {
-  width: auto !important;
-  min-width: max-content !important;
-  max-width: none !important;
   flex: 0 0 auto !important;
   overflow: visible !important;
   box-sizing: border-box;
@@ -281,10 +455,7 @@ html, body, #root, .app-container {
 .manual-entry-main {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
   min-height: 0;
-  max-height: 100%;
 }
 .manual-entry-content {
   flex: 1 1 0%;

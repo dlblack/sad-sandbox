@@ -63,14 +63,7 @@ java -version
 After cloning the repo, from the project root directory run:
 npm install
 
-2. Start the Frontend (Vite Dev Server)
-
-From the project root, run:
-npm run dev
-
-This starts the Vite development server at http://localhost:5173
-
-3. Start the Backend Server
+2. Start the Backend Server
 
 Open a new terminal window or tab, then run:
 cd server
@@ -81,10 +74,19 @@ The backend Express server runs on http://localhost:5000
 Note: The backend server uses Java for DSS file operations.
 Make sure you have Java installed and available in your PATH.
 
-4. Access the App
+3. Start the Frontend
 
-Open your browser and go to:
-http://localhost:5173
+The App interface can be opened in a web browser using Vite or as a standalone application using Electron.
+
+To open in a browser, open a new terminal at the project root, and run:
+npm run dev
+
+This starts the Vite development server at http://localhost:5173
+
+To open as a standalone application, open a new terminal at the project root, and run:
+npm run electron
+
+There will be visual differences in the interface appearance, but functionality is unchanged.
 
 ---
 

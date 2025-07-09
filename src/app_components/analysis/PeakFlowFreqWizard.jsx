@@ -77,7 +77,10 @@ function PeakFlowFreqWizard(props) {
         },
         props.id                   // id: the unique id for this wizard
       );
-    }    
+    }
+    if (props.onRemove) {
+      props.onRemove();
+    }   
   };    
 
   const progressSteps = [
@@ -382,7 +385,7 @@ function PeakFlowFreqWizard(props) {
   const isLastStep = step === 5;
 
   return (
-    <div className={`${style} wizard-fixed-size`} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className={`${style} wizard-fixed-size`} style={{ height: "100%" }}>
       <div className="wizard-step-area" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <form 
           className="card-text d-flex flex-column h-100 p-3"
