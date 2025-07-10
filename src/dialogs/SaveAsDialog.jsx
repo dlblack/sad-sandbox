@@ -1,44 +1,96 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { StyleContext } from "../styles/StyleContext";
+import "../styles/css/SaveAsDialog.css";
 
 function SaveAsDialog({ type, oldName, oldDescription, onConfirm, onCancel }) {
   const { modalStyle } = useContext(StyleContext);
   const [name, setName] = useState("");
-  const [desc, setDesc] = useState(""); // description defaults to empty
+  const [desc, setDesc] = useState("");
   const inputRef = useRef();
+  const dialogRef = useRef();
 
+  // Prevent background scroll
   useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = origOverflow; };
   }, []);
 
+  // Focus input on mount
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Focus trap for Tab and Shift+Tab, ESC to close
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCancel();
+      }
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll(
+          'input:not([disabled]), textarea, button:not([disabled]), [tabindex="0"]'
+        );
+        if (!focusable.length) return;
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault(); last.focus();
+        }
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [onCancel]);
+
+  // Refocus dialog if overlay is clicked
+  function handleOverlayMouseDown(e) {
+    if (dialogRef.current && !dialogRef.current.contains(e.target)) {
+      e.stopPropagation();
+      inputRef.current?.focus();
+    }
+  }
+
+  // Block any background pointer events
+  function handleOverlayPointer(e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  // Prevent modal card clicks from bubbling to overlay
+  function stopPropagation(e) { e.stopPropagation(); }
+
   return (
-    <div className="saveas-modal-overlay">
-      <div 
+    <div
+      className="saveas-modal-overlay"
+      onMouseDown={handleOverlayMouseDown}
+      onClick={handleOverlayPointer}
+      onWheel={handleOverlayPointer}
+      onMouseMove={handleOverlayPointer}
+      onPointerDown={handleOverlayPointer}
+      tabIndex={-1}
+    >
+      <div
         className="card saveas-dialog-card"
-        style={{
-          minWidth: 340,
-          minHeight: 320,
-          maxWidth: "96vw",
-          boxShadow: "0 8px 32px #0002",
-          borderRadius: 8,
-          overflow: "hidden",
-          fontFamily: "var(--bs-body-font-family"
-        }}
+        ref={dialogRef}
+        onClick={stopPropagation}
+        onMouseDown={stopPropagation}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
       >
-        <div className={`card-header d-flex justify-content-between align-items-center px-3 py-2 ${modalStyle || ""}`}>
-          <span className="fw-normal" style={{ color: "#f1f1f1", fontFamily: "var(--bs-body-font-family)", fontSize: "1.5vh", fontWeight: "var(--bs-body-font-weight)" }}>
+        <div className={`saveas-dialog-header ${modalStyle || ""}`}>
+          <span>
             Save {type} As
           </span>
           <button
-            className="dockable-item-close-btn dockable-item-header-btn"
+            className="saveas-dialog-close dockable-item-close-btn dockable-item-header-btn"
             aria-label="Close"
             type="button"
-            tabIndex={-1}
-            style={{ marginLeft: "8px", fontSize: "1.1em" }}
+            tabIndex={0}
             onClick={onCancel}
-          >
-            ×
-          </button>
+          >×</button>
         </div>
         <form
           onSubmit={e => {
@@ -46,38 +98,22 @@ function SaveAsDialog({ type, oldName, oldDescription, onConfirm, onCancel }) {
             onConfirm(name.trim(), desc.trim());
           }}
         >
-          <div
-            className="card-body pt-3 pb-2 px-3"
-            style={{
-              background: "#222",
-              color: "#eee",
-              fontFamily: "var(--bs-body-font-family)",
-              paddingTop: "16px",
-              paddingBottom: "8px",
-              minHeight: 160,
-            }}
-          >
-            <div className="style-selector-row mb-2">
-              <label className="style-selector-label" style={{ minWidth: 110 }}>Old Name:</label>
+          <div className="saveas-dialog-body">
+            <div className="saveas-dialog-row">
+              <label className="saveas-dialog-label">Old Name:</label>
               <input
                 type="text"
-                className="form-control form-control-sm style-selector-compact"
+                className="saveas-dialog-oldname form-control form-control-sm"
                 value={oldName}
                 disabled
-                style={{
-                  background: "#fff",
-                  color: "#888",
-                  border: "1px solid #bbb",
-                  fontSize: "1.4vh",
-                  opacity: 0.7
-                }}
+                tabIndex={-1}
               />
             </div>
-            <div className="style-selector-row mb-2">
-              <label className="style-selector-label" style={{ minWidth: 110 }}>Name:</label>
+            <div className="saveas-dialog-row">
+              <label className="saveas-dialog-label">Name:</label>
               <input
                 type="text"
-                className="form-control form-control-sm style-selector-compact"
+                className="saveas-dialog-input form-control form-control-sm"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 ref={inputRef}
@@ -85,18 +121,13 @@ function SaveAsDialog({ type, oldName, oldDescription, onConfirm, onCancel }) {
                 minLength={1}
                 maxLength={64}
                 placeholder="Enter new name"
-                style={{
-                  background: "#fff",
-                  color: "#222",
-                  fontSize: "1.4vh"
-                }}
               />
             </div>
-            <div className="style-selector-row mb-2 align-items-start">
-              <label className="style-selector-label" style={{ minWidth: 110, marginTop: "4px" }}>Description:</label>
+            <div className="saveas-dialog-row" style={{ alignItems: "start" }}>
+              <label className="saveas-dialog-label" style={{ marginTop: "4px" }}>Description:</label>
               <textarea
                 rows={3}
-                className="form-control"
+                className="saveas-dialog-textarea form-control"
                 value={desc}
                 onChange={e => setDesc(e.target.value)}
                 placeholder="Enter description"
@@ -104,26 +135,17 @@ function SaveAsDialog({ type, oldName, oldDescription, onConfirm, onCancel }) {
               />
             </div>
           </div>
-          <div
-            className="card-footer d-flex justify-content-end gap-2 py-2 px-3"
-            style={{
-              background: "#222",
-              color: "#eee",
-              borderTop: "1px solid #333"
-            }}
-          >
+          <div className="saveas-dialog-footer">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              style={{ minWidth: 54, minHeight: 28, fontSize: "0.95em" }}
+              className="saveas-dialog-btn btn btn-secondary btn-sm"
               onClick={onCancel}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-primary btn-sm"
-              style={{ minWidth: 54, minHeight: 28, fontSize: "0.95em" }}
+              className="saveas-dialog-btn btn btn-primary btn-sm"
               disabled={!name.trim()}
             >
               OK
@@ -131,26 +153,6 @@ function SaveAsDialog({ type, oldName, oldDescription, onConfirm, onCancel }) {
           </div>
         </form>
       </div>
-      <style>{`
-        .saveas-modal-overlay {
-          position: fixed; inset: 0;
-          background: rgba(0,0,0,0.22);
-          z-index: 3200;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .saveas-dialog-card {
-          min-width: 340px;
-          max-width: 96vw;
-          box-shadow: 0 8px 32px #0002;
-          border-radius: 8px;
-          overflow: hidden;
-          animation: modalfadein 0.13s cubic-bezier(.46,1.26,.5,1.1);
-        }
-        @keyframes modalfadein {
-          from { transform: scale(.98) translateY(20px); opacity: 0; }
-          to   { transform: scale(1)   translateY(0);    opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }

@@ -2,12 +2,15 @@
   "name": "hec-sad",
   "private": true,
   "version": "1.0.0",
+  "main": "electron-main.js",
   "type": "module",
   "scripts": {
     "check-deps": "npm-check",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "set ELECTRON_START_URL=http://localhost:5173 && electron .",
+    "electron-build": "npm run build && electron ."
   },
   "dependencies": {
     "body-parser": "^2.2.0",
@@ -18,12 +21,14 @@
     "plotly.js-dist-min": "3.0.1",
     "react": "^19.1.0",
     "react-dom": "19.1.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-resizable": "^3.0.5"
   },
   "devDependencies": {
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "electron": "^37.2.0",
     "vite": "7.0.3"
   }
 }

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { StyleContext } from "../styles/StyleContext";
-import avatarImage from "../assets/images/avatar.jpeg";
-import logo from "../assets/images/logo.png"
+import avatarImage from "../../assets/images/avatar.jpeg";
+import logo from "../../assets/images/logo.png"
 
 function Navbar({
   addComponent,

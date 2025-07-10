@@ -1,8 +1,8 @@
 function dataEditor(entityName) {
   return {
     entityName,
-    width: Math.round(window.innerWidth * 0.38),
-    height: Math.round(window.innerHeight * 0.7)
+    width: 650,
+    height: 620
   };
 }
 
@@ -15,7 +15,7 @@ function wizard(entityName) {
 }
 
 export const componentMetadata = {
-  ComponentContent: { entityName: "Contents", width: `auto`, height: Math.round(window.innerHeight * 0.2) },
+  ComponentContent: { entityName: "Contents", width: Math.round(window.innerWidth * 0.15), height: Math.round(window.innerHeight * 0.2) },
   ComponentMap: { entityName: "Map", width: Math.round(window.innerWidth * 0.3), height: Math.round(window.innerHeight * 0.3) },
   ComponentMessage: { entityName: "Messages", width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.2) },
   ComponentStyleSelector: { entityName: "Style Selector", width: Math.round(window.innerWidth * 0.2), height: Math.round(window.innerHeight * 0.2) },

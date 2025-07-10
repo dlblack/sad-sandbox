@@ -1,0 +1,84 @@
+.tree-node {
+  /* You can add vertical margin/padding if you want spacing between nodes */
+}
+
+.tree-node.top-level {
+  /* Optionally style the top-level nodes differently */
+}
+
+.tree-label {
+  cursor: default;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1em;
+  min-height: 28px;
+  padding: 2px 0 2px 4px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+.tree-label.expanded {
+  /* Optional: highlight expanded nodes */
+}
+.tree-label.pointer {
+  cursor: pointer;
+}
+.tree-data-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.tree-badge {
+  font-weight: bold;
+  font-size: 0.98em;
+  margin-right: 3px;
+}
+
+.tree-badge.b17 {
+  color: #4287f5;
+}
+.tree-badge.pff {
+  color: #25c379;
+}
+
+/* Context Menu */
+.tree-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background: rgb(173, 175, 174);
+  color: #000;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 18px #000, 0 0 2px #fff;
+  padding: 2px 0;
+  font-size: 1em;
+  min-width: 110px;
+}
+.tree-context-menu .tree-menu-item {
+  color: #fff;
+  padding: 4px 12px;
+  font-size: 0.95em;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.tree-context-menu .tree-menu-item:hover {
+  background: #222;
+}
+.tree-context-menu .tree-menu-item:disabled,
+.tree-context-menu .tree-menu-item.not-allowed {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Rename Input */
+.tree-node input[type="text"] {
+  width: 100px;
+  font-size: 1em;
+  padding: 1px 4px;
+}

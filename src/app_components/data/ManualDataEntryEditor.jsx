@@ -189,8 +189,12 @@ function ManualDataEntryEditor(props) {
         props.id
       );
     }
+    // --- ADD THIS: ---
+    if (props.onRemove) {
+      props.onRemove();
+    }
   };
-  
+    
   // ---- AUTO-POPULATE TABLE ----
   useEffect(() => {
     if (

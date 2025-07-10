@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
+import crypto from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,7 +61,6 @@ app.post("/api/analyses", (req, res) => {
   let analyses = readAnalyses();
   if (!analyses[type]) analyses[type] = [];
   analyses[type].push(data);
-  // Optional: sort by name
   analyses[type] = analyses[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   writeAnalyses(analyses);
   res.json({ success: true });
@@ -101,22 +101,24 @@ app.get("/api/data", (req, res) => {
 app.post("/api/data", (req, res) => {
   const { type, data } = req.body;
   if (!type || !data) {
-    res.status(400).json({ error: "Invalid payload" });
-    return;
+    return res.status(400).json({ error: "Invalid payload" });
   }
 
-  // Split values/times out before saving to JSON
+  // Save metadata only (no values/times) always
   const { startDateTime, interval, values, times, ...dataForJson } = data;
-
-  // -- Save metadata only (no values/times) --
   let allData = readData();
   if (!allData[type]) allData[type] = [];
   allData[type].push(dataForJson);
   allData[type] = allData[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   writeData(allData);
 
-  // --- Write to DSS ---
-  // Prepare DSS input JSON (still send values/times to Java)
+  // Only proceed to DSS writing if times/values exist
+  if (!Array.isArray(values) || !Array.isArray(times) || !data.pathname || !data.filepath) {
+    // Respond immediately (it's just a metadata save)
+    return res.json({ success: true });
+  }
+
+  // --- Write to DSS only if real time series data ---
   const dssInput = {
     pathname: data.pathname,
     startDateTime,
@@ -124,14 +126,20 @@ app.post("/api/data", (req, res) => {
     values,
     times,
   };
-  const tmpInputPath = path.join(__dirname, "tmp_dss_input.json");
+
+  // Ensure tmp directory exists
+  const tmpDir = path.join(__dirname, "tmp");
+  if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+
+  // Unique filename
+  const uniqueId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
+  const tmpInputPath = path.join(tmpDir, `tmp_dss_input-${uniqueId}.json`);
   fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput));
 
   const dssFilePath = path.resolve(__dirname, "..", data.filepath);
   const classpath = getClassPath();
   const javaPath = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe"; // Update as needed
 
-  // Call the Java utility
   const javaProc = spawn(javaPath, [
     "-cp", classpath,
     "DssWriter",
@@ -139,21 +147,54 @@ app.post("/api/data", (req, res) => {
     dssFilePath
   ], { cwd: __dirname });
 
+  let responded = false;
+
+  // Utility to cleanup temp file
+  function cleanupTmpFile() {
+    try {
+      fs.unlinkSync(tmpInputPath);
+    } catch (e) {
+      // Ignore errors (file might not exist, permission issues, etc.)
+    }
+  }
+
   javaProc.stdout.on('data', (data) => {
     console.log(`Java STDOUT: ${data}`);
   });
   javaProc.stderr.on('data', (data) => {
     console.error(`Java STDERR: ${data}`);
-  });  
+  });
 
   javaProc.on("exit", (code) => {
     console.log("Java exited with code:", code);
-    if (code === 0) {
-      res.json({ success: true });
-    } else {
-      res.status(500).json({ error: "Failed to write DSS" });
+    cleanupTmpFile();
+    if (!responded) {
+      responded = true;
+      if (code === 0) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to write DSS" });
+      }
     }
   });
+
+  javaProc.on("error", (err) => {
+    console.error("Java process error:", err);
+    cleanupTmpFile();
+    if (!responded) {
+      responded = true;
+      res.status(500).json({ error: "Java process error" });
+    }
+  });
+
+  setTimeout(() => {
+    if (!responded) {
+      responded = true;
+      cleanupTmpFile();
+      res.status(500).json({ error: "Java process timeout" });
+      javaProc.kill();
+    }
+  }, 10000);
 });
 
 // --- Rename Data ---
