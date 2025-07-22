@@ -1,42 +1,166 @@
 {
   "Precipitation": [
     {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Precipitation",
       "name": "American River Precip",
-      "description": "Incremental precip for the American River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/precip.dss",
-      "pathname": "/Sacramento/American River/Precipitation///Obs/"
+      "description": "Incremental precip for the American River, 01Jan2000 00:00 - 02Jan2000 24:00.",
+      "filepath": "public/Testing/precip.dss",
+      "pathname": "/Sacramento/American River Precip/Precipitation/01Dec1999/1Hour/Manual/"
     },
     {
-      "name": "Feather River Precip",
-      "description": "Incremental precip for the Feather River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/precip.dss",
-      "pathname": "/Sacramento/Feather River/Precipitation///Obs/"
-    },
-    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Precipitation",
       "name": "Sacramento River Precip",
-      "description": "Incremental precip for the Sacramento River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/precip.dss",
-      "pathname": "/Sacramento/Sacramento River/Precipitation///Obs/"
+      "description": "Incremental precip for the Sacramento River, 01Jan2000 00:00 - 02Jan2000 24:00.",
+      "filepath": "public/Testing/precip.dss",
+      "pathname": "/Sacramento/Sacramento River Precip/Precipitation/01Dec1999/1Hour/Manual/"
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Precipitation",
+      "name": "Feather River Precip",
+      "description": "Incremental precip for the Feather River, 01Jan2000 00:00 - 02Jan2000 24:00.",
+      "filepath": "public/Testing/precip.dss",
+      "pathname": "/Sacramento/Yuba River Precip/Precipitation/01Dec1999/1Hour/Manual/"
     }
   ],
   "Discharge": [
     {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Discharge",
       "name": "American River Discharge",
-      "description": "Discharge for the American River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/discharge.dss",
-      "pathname": "/Sacramento/American River/Flow///Obs/"
+      "description": "Discharge for the American River, 01Jul2000 07:00 - 06Jul2000 06:45.",
+      "filepath": "public/Testing/discharge.dss",
+      "pathname": "/Sacramento/American River/FLOW/01Jul2025/15Minute/USGS/"
     },
     {
-      "name": "Feather River Discharge",
-      "description": "Discharge for the Feather River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/discharge.dss",
-      "pathname": "/Sacramento/Feather River/Flow///Obs/"
-    },
-    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Flow",
       "name": "Sacramento River Discharge",
-      "description": "Discharge for the Sacramento River, 01Jan2000 00:00 - 05Jan2000 00:00.",
-      "filepath": "C:/Testing/discharge.dss",
-      "pathname": "/Sacramento/Sacramento River/Flow///Obs/"
+      "description": "Discharge for the Sacramento River, 01Jul2000 07:00 - 06Jul2000 06:45.",
+      "filepath": "public/Testing/discharge.dss",
+      "pathname": "/Sacramento/Sacramento River/FLOW/01Jul2025/15Minute/USGS/"
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Flow",
+      "name": "TS DSS",
+      "description": "",
+      "filepath": "public/Testing/discharge.dss",
+      "pathname": "/Part A/Part B/Flow/01Dec1999/4HOUR/Part F/"
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "JSON",
+      "dataType": "Flow",
+      "name": "TS JSON",
+      "description": "",
+      "parameter": "Flow",
+      "units": "CFS",
+      "interval": "3HOUR",
+      "startDateTime": "01Jan2000 00:00",
+      "endDateTime": "01Jan2000 12:00",
+      "values": [
+        2,
+        4,
+        6,
+        8,
+        10
+      ],
+      "times": [
+        "01Jan2000 00:00",
+        "01Jan2000 03:00",
+        "01Jan2000 06:00",
+        "01Jan2000 09:00",
+        "01Jan2000 12:00"
+      ]
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Discharge",
+      "name": "Yuba River Discharge",
+      "description": "Discharge for the Feather River, 01Jul2000 07:00 - 06Jul2000 06:45.",
+      "filepath": "public/Testing/discharge.dss",
+      "pathname": "/Sacramento/Yuba River/FLOW/01Jul2025/15Minute/USGS/"
+    }
+  ],
+  "Elev-Stor": [
+    {
+      "structureType": "PairedData",
+      "dataFormat": "JSON",
+      "dataType": "Elev-Stor",
+      "name": "New JSON Test",
+      "description": "",
+      "yLabel": "Elev-Stor",
+      "yUnits": "acre-ft",
+      "xLabel": "Elevation",
+      "xUnits": "ft",
+      "rows": [
+        {
+          "x": "5",
+          "y": "10"
+        },
+        {
+          "x": "10",
+          "y": "100"
+        },
+        {
+          "x": "15",
+          "y": "1000"
+        },
+        {
+          "x": "20",
+          "y": "10000"
+        },
+        {
+          "x": "25",
+          "y": "100000"
+        }
+      ]
+    },
+    {
+      "structureType": "PairedData",
+      "dataFormat": "DSS",
+      "dataType": "Elev-Stor",
+      "name": "PD DSS",
+      "description": "",
+      "xLabel": "Elevation",
+      "xUnits": "ft",
+      "filepath": "public/Testing/elevstor.dss",
+      "pathname": "///Elev-Stor////"
+    },
+    {
+      "structureType": "PairedData",
+      "dataFormat": "JSON",
+      "dataType": "Elev-Stor",
+      "name": "PD JSON",
+      "description": "",
+      "yLabel": "Elev-Stor",
+      "yUnits": "acre-ft",
+      "xLabel": "Elevation",
+      "xUnits": "ft",
+      "rows": [
+        {
+          "x": "1",
+          "y": "3"
+        },
+        {
+          "x": "2",
+          "y": "9"
+        },
+        {
+          "x": "3",
+          "y": "27"
+        }
+      ]
     }
   ]
 }

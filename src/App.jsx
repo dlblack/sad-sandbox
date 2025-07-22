@@ -26,6 +26,10 @@ function App() {
   // Electron menu handlers
   useElectronMenus(addComponent);
 
+  const handleOpenComponent = (type, props = {}) => {
+    addComponent(type, { dockZone: "CENTER", ...props });
+  }
+
   return (
     <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {!isElectron() && <Navbar addComponent={addComponent} />}
@@ -44,8 +48,10 @@ function App() {
           maps={maps}
           data={data}
           analyses={analyses}
+          handleOpenComponent={handleOpenComponent}
           onWizardFinish={handleWizardFinish}
           onDataSave={handleDataSave}
+
         />
       </div>
     </div>

@@ -1,5 +1,5 @@
 import useAPI from "../app_hooks/useAPI";
-import Chart from "./chart";
+import Chart from "./Chart.jsx";
 import Loader from "./loader";
 
 function parseValues(values) {

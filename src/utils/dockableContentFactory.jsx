@@ -3,8 +3,10 @@ import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentContent from "../app_components/ComponentContent";
 import ComponentStyleSelector from "../app_components/ComponentStyleSelector";
+import PairedDataPlot from "../app_components/PairedDataPlot";
+import TimeSeriesPlot from "../app_components/TimeSeriesPlot";
 
-import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor";
+import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/ManualDataEntryEditor";
 
 import PeakFlowFreqWizard from "../app_components/analysis/PeakFlowFreqWizard";
 import Bulletin17AnalysisWizard from "../app_components/analysis/Bulletin17AnalysisWizard";
@@ -32,6 +34,7 @@ export const dockableContentFactory = (type, props= {}) => {
         onSaveAsNode={props.onSaveAsNode}
         onRenameNode={props.onRenameNode}
         onDeleteNode={props.onDeleteNode}
+        handleOpenComponent={props.handleOpenComponent}
       />;
     case "ComponentMap":
       return <ComponentMap />;
@@ -39,6 +42,15 @@ export const dockableContentFactory = (type, props= {}) => {
       return <ComponentMessage {...props} />;
     case "ComponentStyleSelector":
       return <ComponentStyleSelector />;
+    case "TimeSeriesPlot":
+      return <TimeSeriesPlot {...props} dataset={props.dataset } />;
+    case "PairedDataPlot":
+      return (
+          <PairedDataPlot
+              {...props}
+              dataset={props.dataset}
+          />
+      );
 
     case "ManualDataEntryEditor":
       return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave} />;

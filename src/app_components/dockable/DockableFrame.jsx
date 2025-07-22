@@ -48,6 +48,7 @@ function DraggableDockableItem({
       <DockableItem
         {...container}
         type={dockableTitles[type] || type}
+        title={container.dataset?.name || ""}
         onRemove={onRemove}
         width={container.width}
         height={container.height}
@@ -74,6 +75,7 @@ export default function DockableFrame({
   onSaveAsNode,
   onRenameNode,
   onDeleteNode,
+  handleOpenComponent,
   maps,
   data,
   analyses,
@@ -114,23 +116,31 @@ export default function DockableFrame({
   });
 
   // Get containers by zone
-  const containersWithContent = containers.map((c) => ({
-    ...c,
-    content: dockableContentFactory(c.type, {
-      id: c.id,
-      type: c.type,
-      onFinish: onWizardFinish,
-      onRemove: () => removeComponent(c.id),
-      onDataSave,
-      messages,
-      onSaveAsNode,
-      onRenameNode,
-      onDeleteNode,
-      maps,
-      data,
-      analyses,
-    }),
-  }));
+  const containersWithContent = containers.map((c) => {
+    const dataset = c.dataset || c.datasetRef || c;
+
+    return {
+      ...c,
+      dataset,
+      content: dockableContentFactory(c.type, {
+        ...c,
+        dataset, // Pass dataset explicitly
+        id: c.id,
+        type: c.type,
+        onFinish: onWizardFinish,
+        onRemove: () => removeComponent(c.id),
+        onDataSave,
+        messages,
+        onSaveAsNode,
+        onRenameNode,
+        onDeleteNode,
+        handleOpenComponent,
+        maps,
+        data,
+        analyses,
+      }),
+    };
+  });
 
   // Effect: auto-expand zone when a panel is added/moved
   useEffect(() => {

@@ -3,6 +3,8 @@ export const componentDisplayNames = {
   ComponentContent: "Contents tree panel",
   ComponentMessage: "Messages Panel",
   ComponentStyleSelector: "Style Selector",
+  PairedDataPlot: "Paired Data Plot",
+  TimeSeriesPlot: "Time Series Plot",
 
   // Data
   ManualDataEntryEditor: "Manual Data Entry Editor",

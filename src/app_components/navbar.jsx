@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import { StyleContext } from "../styles/StyleContext";
-import avatarImage from "../../assets/images/avatar.jpeg";
 import logo from "../../assets/images/logo.png"
 
 function Navbar({
@@ -16,12 +15,8 @@ function Navbar({
 
   const navbarClass = `navbar navbar-expand-lg ${navbarStyle || "bg-primary"}`;
 
-  const handleOpenComponent = (type) => {
-    addComponent(type);
-  };
-
-  const handleOpenImage = () => {
-    window.open(avatarImage, "_blank");
+  const handleOpenComponent = (type, optionalProps = {}) => {
+    addComponent(type, optionalProps);
   };
 
   return (
@@ -187,6 +182,26 @@ function Navbar({
                 >
                   Data Utilities
                 </a>
+                <a
+                  className="dropdown-item"
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpenComponent("PairedDataPlot");
+                  }}
+                >
+                  Plot JSON
+                </a>
+                  <a
+                      className="dropdown-item"
+                      href="#"
+                      onClick={(e) => {
+                          e.preventDefault();
+                          handleOpenComponent("PairedDataPlot", { dss: true });
+                      }}
+                  >
+                  Plot DSS
+              </a>
               </div>
             </li>
 
