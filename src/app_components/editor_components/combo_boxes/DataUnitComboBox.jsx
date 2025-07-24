@@ -1,6 +1,5 @@
 import React from "react";
 
-// This mapping drives available units per parameter
 const UNIT_OPTIONS = {
   Precipitation: [
     { value: "IncIn", label: "Incremental Inches" },

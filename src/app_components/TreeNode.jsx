@@ -59,6 +59,7 @@ const TreeNode = ({
   setRenameValue,
   saveAsDialogOpen,
   setSaveAsDialogOpen,
+  dataset,
 }) => {
   const hasContent = hasRealChildren(children);
   const isLeaf = !hasContent;
@@ -112,6 +113,18 @@ const TreeNode = ({
     onDelete?.();
   };
 
+  const handlePlot = () => {
+    setMenu?.(null);
+    if (section === "data" && dataset) {
+      console.log("Dispatching plot event for:", dataset.name);
+      window.dispatchEvent(
+          new CustomEvent("plotNodeData", {
+            detail: { dataset },
+          })
+      );
+    }
+  };
+
   const LabelTag = isTopLevel && hasContent ? "strong" : "span";
 
   return (
@@ -157,6 +170,11 @@ const TreeNode = ({
           >
             Delete
           </div>
+            {section === "data" && (
+                <div className="tree-menu-item" onClick={handlePlot}>
+                  Plot
+                </div>
+            )}
         </div>
       )}
       {saveAsDialogOpen === path && isBottomLevel && (

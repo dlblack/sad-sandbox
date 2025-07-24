@@ -12,6 +12,7 @@ function DockableItem({
   expandToContents = false,
   id,
   type,
+  title,
   onRemove,
   children,
   dragHandleProps,
@@ -113,7 +114,7 @@ function DockableItem({
           style={{ cursor: "grab" }}
         >
           <div className="card-title mb-0">
-            {type}
+            {type}{title ? ` - ${title}` : ""}
           </div>
         </div>
         <div className="dockable-header-btns">
@@ -212,7 +213,6 @@ function DockableItem({
       </div>
     </Resizable>
   );
-  // === END CHANGED
 }
 
 export default DockableItem;

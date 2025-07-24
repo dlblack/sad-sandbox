@@ -19,6 +19,8 @@ export const componentMetadata = {
   ComponentMap: { entityName: "Map", width: Math.round(window.innerWidth * 0.3), height: Math.round(window.innerHeight * 0.3) },
   ComponentMessage: { entityName: "Messages", width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.2) },
   ComponentStyleSelector: { entityName: "Style Selector", width: Math.round(window.innerWidth * 0.2), height: Math.round(window.innerHeight * 0.2) },
+  PairedDataPlot: { entityName: "Paired Data Plot", width: Math.round(window.innerWidth * 0.5), height: Math.round(window.innerHeight * 0.4) },
+  TimeSeriesPlot: { entityName: "Time Series Plot", width: Math.round(window.innerWidth * 0.5), height: Math.round(window.innerHeight * 0.4) },
 
   // Data editors
   ManualDataEntryEditor: dataEditor("Manual Data Entry"),

@@ -3,6 +3,8 @@ export const dockableTitles = {
   ComponentMap: "Map Viewer",
   ComponentMessage: "Messages",
   ComponentStyleSelector: "Style Selector",
+  PairedDataPlot: "Paired Data Plot",
+  TimeSeriesPlot: "Time Series Plot",
 
   // Data
   ManualDataEntryEditor: "Manual Data Entry",

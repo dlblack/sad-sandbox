@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyleContext } from "../../styles/StyleContext";
-import WizardNavigation from "./WizardNavigation";
+import WizardNavigation from "../common/WizardNavigation.jsx";
 import { componentDisplayNames } from "../../utils/componentDisplayNames";
 
 function PeakFlowFreqWizard(props) {
