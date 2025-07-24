@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { componentDisplayNames } from "../utils/componentDisplayNames";
+import { dockableTitles} from "@/utils/dockableTitles.js";
 import { makeMessage } from "../utils/messageUtils";
 
 function groupAnalysesByType(analysesObj = {}) {
@@ -157,7 +157,7 @@ export default function useAppData() {
 
     // Analysis wizard finish
     const handleWizardFinish = async (type, valuesObj, id) => {
-        const friendlyType = componentDisplayNames[type] || type;
+        const friendlyType = dockableTitles[type] || type;
         try {
             await fetch("/api/analyses", {
                 method: "POST",
