@@ -11,59 +11,115 @@ function getDefaultDockZone(type) {
   }
 }
 
-export default function useDockableContainers() {
+export default function useDockableContainers({ handleWizardFinish, handleDeleteNode }) {
   const [messages, setMessages] = useState([]);
   const [messageType, setMessageType] = useState("info");
-  const [containers, setContainers] = useState([
-    { id: "ComponentContent", type: "ComponentContent", dockZone: getDefaultDockZone("ComponentContent"), ...componentMetadata.ComponentContent },
-    { id: "ComponentMessage", type: "ComponentMessage", dockZone: getDefaultDockZone("ComponentMessage"), ...componentMetadata.ComponentMessage },
-  ]);
+
+  // Initialize with correct titles and metadata
+  const [containers, setContainers] = useState(() => {
+    return ["ComponentContent", "ComponentMessage"].map(type => {
+      const meta = componentMetadata[type] || {};
+      return {
+        id: type,
+        type,
+        title: meta.entityName || type,
+        dockZone: getDefaultDockZone(type),
+        width: meta.width || DEFAULT_COMPONENT_SIZE.width,
+        height: meta.height || DEFAULT_COMPONENT_SIZE.height,
+        ...meta
+      };
+    });
+  });
+
   const openComponentTypesRef = useRef(new Set());
 
-  // Add
   const addComponent = useCallback((type, optionalProps = {}) => {
-    if (containers.some(c => c.type === type)) return;
-    if (openComponentTypesRef.current.has(type)) return;
+    const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
+    const noun = meta.noun ? ` ${meta.noun}` : "";
+
+    if (containers.some(c => c.type === type) || openComponentTypesRef.current.has(type)) {
+      setMessages(prev => [
+        ...prev,
+        makeMessage(10010, [meta.entityName || type], "warning"),
+      ]);
+      return;
+    }
 
     openComponentTypesRef.current.add(type);
 
-    setMessages(prev => [...prev, componentMetadata[type]?.entityName || type]);
-
     const newComponentId = `${type}-${crypto.randomUUID()}`;
-    const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
-    const resolvedWidth = (typeof meta.width === "number" && meta.width > 0)
-      ? meta.width
-      : (typeof DEFAULT_COMPONENT_SIZE.width === "number" ? DEFAULT_COMPONENT_SIZE.width : 320);
-    const resolvedHeight = (typeof meta.height === "number" && meta.height > 0)
-      ? meta.height
-      : (typeof DEFAULT_COMPONENT_SIZE.height === "number" ? DEFAULT_COMPONENT_SIZE.height : 240);
+    const resolvedWidth = meta.width > 0 ? meta.width : (DEFAULT_COMPONENT_SIZE.width || 320);
+    const resolvedHeight = meta.height > 0 ? meta.height : (DEFAULT_COMPONENT_SIZE.height || 240);
 
     setContainers(prev => [
       ...prev,
       {
         id: newComponentId,
         type,
+        title: meta.entityName || type,
         dockZone: getDefaultDockZone(type),
         width: resolvedWidth,
         height: resolvedHeight,
+        ...meta,
         ...optionalProps,
-      }
+      },
     ]);
 
-    const noun = meta.noun ? ` ${meta.noun}` : "";
     setMessages(prev => [
       ...prev,
-      makeMessage(10001, [meta.entityName || type, noun], "text-body-secondary"),
+      makeMessage(10001, [meta.entityName || type, meta.category], "text-body-secondary"),
     ]);
-    setTimeout(() => openComponentTypesRef.current.delete(type), 100);
-  }, [containers, setMessages]);
 
-  // Remove
-  const removeComponent = id => {
-    setContainers(prev => prev.filter(c => c.id !== id));
+    setTimeout(() => openComponentTypesRef.current.delete(type), 100);
+  }, [containers]);
+
+  const wizardFinishWithMessages = useCallback(async (type, valuesObj, id) => {
+    const meta = componentMetadata[type] || {};
+    const name = valuesObj?.name || "";
+    setMessages(prev => [
+      ...prev,
+      makeMessage(10002, [meta.entityName || type, name], "success"),
+    ]);
+    if (handleWizardFinish) {
+      await handleWizardFinish(type, valuesObj, id);
+    }
+  }, [handleWizardFinish]);
+
+  const deleteNodeWithMessages = useCallback((section, pathArr, name) => {
+    setMessages(prev => [
+      ...prev,
+      makeMessage(10020, [name || "Unknown"], "danger"),
+    ]);
+    if (handleDeleteNode) {
+      handleDeleteNode(section, pathArr);
+    }
+  }, [handleDeleteNode]);
+
+  const removeComponent = (id) => {
+    setContainers((prev) => {
+      const removed = prev.find((c) => c.id === id);
+      if (!removed) return prev;
+
+      const meta = componentMetadata[removed.type] || {};
+      const entityName = meta.entityName || removed.type;
+
+      setMessages((prevMsgs) => {
+        const closedMsg = makeMessage(
+            10030,
+            [entityName, meta.category || ""],
+            "text-body-secondary"
+        );
+        const lastMsg = prevMsgs[prevMsgs.length - 1];
+        if (lastMsg?.text === closedMsg.text) {
+          return prevMsgs;
+        }
+        return [...prevMsgs, closedMsg];
+      });
+
+      return prev.filter((c) => c.id !== id);
+    });
   };
 
-  // Drag/Resize
   const onDragStart = (id, event) => {
     const container = containers.find(c => c.id === id);
     if (!container) return;
@@ -73,7 +129,9 @@ export default function useDockableContainers() {
     const onMouseMove = (moveEvent) => {
       const newX = moveEvent.clientX - startX;
       const newY = moveEvent.clientY - startY;
-      setContainers(prev => prev.map(c => c.id === id ? { ...c, x: newX, y: newY } : c));
+      setContainers(prev =>
+          prev.map(c => c.id === id ? { ...c, x: newX, y: newY } : c)
+      );
     };
 
     const onMouseUp = () => {
@@ -86,7 +144,12 @@ export default function useDockableContainers() {
   };
 
   return {
-    containers, setContainers, messages, setMessages, messageType, setMessageType,
-    addComponent, removeComponent, onDragStart
+    containers, setContainers,
+    messages, setMessages,
+    messageType, setMessageType,
+    addComponent, removeComponent,
+    onDragStart,
+    handleWizardFinish: wizardFinishWithMessages,
+    handleDeleteNode: deleteNodeWithMessages,
   };
 }

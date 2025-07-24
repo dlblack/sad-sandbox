@@ -610,7 +610,7 @@ input[type=number] { -moz-appearance: textfield; }
   display: flex;
   justify-content: space-between;
 }
-.wizard-footer .btn.btn-compact { 
+.wizard-footer .btn.btn-compact {
   min-width: 54px;
   min-height: 28px;
   max-width: 100px;
@@ -753,13 +753,13 @@ table.wizard-frequency-table > tbody > tr > td {
 
 
 /* Miscellaneous */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
-input[type=number] { 
-  -moz-appearance: textfield; 
+input[type=number] {
+  -moz-appearance: textfield;
 }
 .gray-box { background: #444; }
 .project-tree {
@@ -773,6 +773,28 @@ input[type=number] {
   height: 100%;
 }
 
-.message-text {
-  font-size: 1.5vh;;
+.message {
+  font-weight: 100;
+  font-size: 1.25vh;
 }
+
+.message.info {
+  color: #6c757d;
+}
+
+.message.success {
+  color: #198754;
+}
+
+.message.danger {
+  color: #dc3545;
+}
+
+.message.warning {
+  color: #ffc107;
+}
+
+.message.text-body-secondary {
+  color: #6c757d;
+}
+

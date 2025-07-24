@@ -86,7 +86,7 @@ function ComponentContent({
                             label={mapObj.name}
                             parentLabel="Maps"
                             canDelete={true}
-                            onDelete={() => onDeleteNode("maps", [idx])}
+                            onDelete={() => onDeleteNode("maps", [idx], mapObj.name)}
                             onRename={(newName) => onRenameNode("maps", [idx], newName)}
                             expanded={!!expandedMap[makePath("Maps", mapObj.name)]}
                             onToggle={handleToggle}
@@ -155,7 +155,7 @@ function ComponentContent({
                                         onRenameNode("data", [parameter, idx], newName)
                                     }
                                     canDelete={true}
-                                    onDelete={() => onDeleteNode("data", [parameter, idx])}
+                                    onDelete={() => onDeleteNode("data", [parameter, idx], item.name)}
                                     expanded={!!expandedMap[makePath("Data", parameter, item.name)]}
                                     onToggle={handleToggle}
                                     path={makePath("Data", parameter, item.name)}
@@ -227,7 +227,7 @@ function ComponentContent({
                                             onRenameNode("analyses", [folder, idx], newName)
                                         }
                                         canDelete={true}
-                                        onDelete={() => onDeleteNode("analyses", [folder, idx])}
+                                        onDelete={() => onDeleteNode("analyses", [folder, idx], item.name)}
                                         expanded={!!expandedMap[makePath("Analysis", folder, item.name)]}
                                         onToggle={handleToggle}
                                         path={makePath("Analysis", folder, item.name)}
