@@ -32,7 +32,7 @@ export default function useElectronMenus(addComponent) {
     });
 
     window.electronAPI.onMenu("menu-help", (action) => {
-      if (action === "about-sad") {
+      if (action === "about-hec-neptune") {
         // Show About dialog, etc
       }
     });

@@ -1,5 +1,5 @@
 {
-  "name": "hec-sad",
+  "name": "hec-neptune",
   "private": true,
   "version": "1.0.0",
   "main": "electron-main.js",

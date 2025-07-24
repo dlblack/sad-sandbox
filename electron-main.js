@@ -97,7 +97,7 @@ function createWindow() {
         { label: "Install Example Data", click: () => win.webContents.send("menu-help", "install-example-data") },
         { type: "separator" },
         { label: "Terms and Conditions for Use", click: () => shell.openExternal("https://www.hec.usace.army.mil/software/terms_and_conditions.aspx") },
-        { label: "About SAD", click: () => win.webContents.send("menu-help", "about-sad") }
+        { label: "About HEC-Neptune", click: () => win.webContents.send("menu-help", "about-hec-neptune") }
       ]
     }
   ];

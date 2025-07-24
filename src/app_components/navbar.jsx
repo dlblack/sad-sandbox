@@ -510,7 +510,7 @@ function Navbar({
                 >
                   Terms and Conditions for Use
                 </a>
-                <a className="dropdown-item" href="#">About SAD</a>
+                <a className="dropdown-item" href="#">About HEC-Neptune</a>
               </div>
           </li>
           </ul>

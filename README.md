@@ -1,6 +1,6 @@
-# HEC-SAD Web Application
+# HEC-Neptune UI
 
-A web app for interactive data analysis and visualization, integrating React, Vite, Node.js/Express, and Java utilities for DSS file operations.
+A UI for interactive data analysis and visualization, integrating React, Vite, Node.js/Express, and Java utilities for DSS file operations.
 
 ---
 
@@ -109,7 +109,7 @@ There will be visual differences in the interface appearance, but functionality 
 ## Folder Structure
 
 ```
-sad-sandbox/
+hec-neptune/
 ├── index.html
 ├── package.json
 ├── public/
