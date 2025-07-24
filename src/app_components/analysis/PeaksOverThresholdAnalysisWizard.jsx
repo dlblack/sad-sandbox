@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { StyleContext } from "../../styles/StyleContext";
 import WizardNavigation from "../common/WizardNavigation.jsx";
-import { componentDisplayNames } from "../../utils/componentDisplayNames";
+import { dockableTitles} from "@/utils/dockableTitles.js";
 
 /**
  * GenericWizardTemplate
@@ -19,7 +19,7 @@ function PeaksOverThresholdAnalysisWizard(props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const displayType = componentDisplayNames[props.type] || props.type;
+  const displayType = dockableTitles[props.type] || props.type;
   const existingNames = (
     (props.analyses && props.analyses[displayType]) || []
   ).map(a => (a.name || "").trim().toLowerCase());
