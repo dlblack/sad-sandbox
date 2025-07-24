@@ -8,13 +8,13 @@ export default function ComponentMessage({ messages = [] }) {
   }, [messages]);
 
   return (
-    <div className="component-messages">
-      {messages.map((msg, idx) => (
-        <div key={idx} className={`message-row ${msg.type}`}>
-          <span className="message-text">{msg.text}</span>
-        </div>
-      ))}
-      <div ref={bottomRef} />
-    </div>
+      <div className="component-messages">
+        {messages.map((msg, i) => (
+            <div key={i} className={`message ${msg.type || "info"}`}>
+              {msg.text}
+            </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
   );
 }

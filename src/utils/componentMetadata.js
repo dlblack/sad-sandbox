@@ -1,6 +1,7 @@
 function dataEditor(entityName) {
   return {
     entityName,
+    category: "data editor",
     width: 650,
     height: 620
   };
@@ -9,18 +10,44 @@ function dataEditor(entityName) {
 function wizard(entityName) {
   return {
     entityName,
+    category: "wizard",
     width: 600,
     height: 650
   };
 }
 
 export const componentMetadata = {
-  ComponentContent: { entityName: "Contents", width: Math.round(window.innerWidth * 0.15), height: Math.round(window.innerHeight * 0.2) },
-  ComponentMap: { entityName: "Map", width: Math.round(window.innerWidth * 0.3), height: Math.round(window.innerHeight * 0.3) },
-  ComponentMessage: { entityName: "Messages", width: Math.round(window.innerWidth * 0.4), height: Math.round(window.innerHeight * 0.2) },
-  ComponentStyleSelector: { entityName: "Style Selector", width: Math.round(window.innerWidth * 0.2), height: Math.round(window.innerHeight * 0.2) },
-  PairedDataPlot: { entityName: "Paired Data Plot", width: Math.round(window.innerWidth * 0.5), height: Math.round(window.innerHeight * 0.4) },
-  TimeSeriesPlot: { entityName: "Time Series Plot", width: Math.round(window.innerWidth * 0.5), height: Math.round(window.innerHeight * 0.4) },
+  ComponentContent: {
+    entityName: "Contents",
+    category: "panel",
+    width: Math.round(window.innerWidth * 0.15),
+    height: Math.round(window.innerHeight * 0.2)
+  },
+  ComponentMap: {
+    entityName: "Map",
+    category: "panel",
+    width: Math.round(window.innerWidth * 0.3),
+    height: Math.round(window.innerHeight * 0.3)
+  },
+  ComponentMessage: {
+    entityName: "Messages",
+    category: "panel",
+    width: Math.round(window.innerWidth * 0.4),
+    height: Math.round(window.innerHeight * 0.2)
+  },
+  ComponentStyleSelector: {
+    entityName: "Style Selector",
+    category: "panel",
+    width: Math.round(window.innerWidth * 0.2),
+    height: Math.round(window.innerHeight * 0.2) },
+  PairedDataPlot: {
+    entityName: "Paired Data Plot",
+    width: Math.round(window.innerWidth * 0.5),
+    height: Math.round(window.innerHeight * 0.4) },
+  TimeSeriesPlot: {
+    entityName: "Time Series Plot",
+    width: Math.round(window.innerWidth * 0.5),
+    height: Math.round(window.innerHeight * 0.4) },
 
   // Data editors
   ManualDataEntryEditor: dataEditor("Manual Data Entry"),
@@ -43,4 +70,7 @@ export const componentMetadata = {
   CopulaAnalysisWizard: wizard("Copula Analysis"),
 };
 
-export const DEFAULT_COMPONENT_SIZE = { width: Math.round(window.innerWidth * 0.1), height: Math.round(window.innerHeight * 0.1) };
+export const DEFAULT_COMPONENT_SIZE = {
+  width: Math.round(window.innerWidth * 0.1),
+  height: Math.round(window.innerHeight * 0.1)
+};

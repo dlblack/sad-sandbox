@@ -10,51 +10,66 @@ import useElectronMenus from "./hooks/useElectronMenus";
 function App() {
   const { appBackgroundStyle } = useContext(StyleContext);
 
-  // App data (analyses, data, maps, data handlers)
+  // App data (maps, data, analyses)
   const {
-    maps, setMaps, data, setData, analyses, setAnalyses,
-    handleSaveAsNode, handleRenameNode, handleDeleteNode,
-    handleWizardFinish, handleDataSave
+    maps, setMaps,
+    data, setData,
+    analyses, setAnalyses,
+    handleSaveAsNode,
+    handleRenameNode,
+    handleDeleteNode,
+    handleWizardFinish,
+    handleDataSave,
   } = useAppData();
 
-  // Dockable container state and handlers
+  // Dockable containers + messages, pass appData handlers so they integrate
   const {
-    containers, setContainers, messages, setMessages, messageType, setMessageType,
-    addComponent, removeComponent, onDragStart
-  } = useDockableContainers();
+    containers, setContainers,
+    messages, setMessages,
+    messageType, setMessageType,
+    addComponent, removeComponent,
+    onDragStart,
+    handleWizardFinish: wizardFinishWithMessages,
+    handleDeleteNode: deleteNodeWithMessages,
+  } = useDockableContainers({
+    handleWizardFinish,   // integrate with saving analyses
+    handleDeleteNode,     // integrate with deleting
+  });
 
-  // Electron menu handlers
+  // Electron menu (opens components)
   useElectronMenus(addComponent);
 
   const handleOpenComponent = (type, props = {}) => {
     addComponent(type, { dockZone: "CENTER", ...props });
-  }
+  };
 
   return (
-    <div className={`app-container ${appBackgroundStyle}`} style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      {!isElectron() && <Navbar addComponent={addComponent} />}
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <DockableFrame
-          containers={containers}
-          setContainers={setContainers}
-          removeComponent={removeComponent}
-          onDragStart={onDragStart}
-          messages={messages}
-          messageType={messageType}
-          setMessageType={setMessageType}
-          onSaveAsNode={handleSaveAsNode}
-          onRenameNode={handleRenameNode}
-          onDeleteNode={handleDeleteNode}
-          maps={maps}
-          data={data}
-          analyses={analyses}
-          handleOpenComponent={handleOpenComponent}
-          onWizardFinish={handleWizardFinish}
-          onDataSave={handleDataSave}
-
-        />
+      <div
+          className={`app-container ${appBackgroundStyle}`}
+          style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        {!isElectron() && <Navbar addComponent={addComponent} />}
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <DockableFrame
+              containers={containers}
+              setContainers={setContainers}
+              removeComponent={removeComponent}
+              onDragStart={onDragStart}
+              messages={messages}
+              messageType={messageType}
+              setMessageType={setMessageType}
+              onSaveAsNode={handleSaveAsNode}
+              onRenameNode={handleRenameNode}
+              onDeleteNode={deleteNodeWithMessages}
+              maps={maps}
+              data={data}
+              analyses={analyses}
+              handleOpenComponent={handleOpenComponent}
+              onWizardFinish={wizardFinishWithMessages}
+              onDataSave={handleDataSave}
+          />
+        </div>
       </div>
-    </div>
   );
 }
 

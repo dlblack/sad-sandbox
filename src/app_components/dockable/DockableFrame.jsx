@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import DockableItem from "./DockableItem";
-import { dockableTitles } from "../../utils/dockableTitles";
+import { dockableTitles } from "@/utils/dockableTitles.js";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 
 const MIN_WIDTH = 120;
@@ -30,7 +30,7 @@ function DraggableDockableItem({
   draggingPanelId,
   setDraggingPanelId,
 }) {
-  const { id, type, isDragging, dockZone } = container;
+  const { id, type, isDragging} = container;
 
   // Drag handlers
   const handleDragStart = (e) => {
