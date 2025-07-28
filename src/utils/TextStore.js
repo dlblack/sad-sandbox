@@ -18,8 +18,8 @@ export function getText(id, args = []) {
   let template = TEXT_MESSAGES[id] || id;
   args.forEach((arg, i) => {
     template = typeof template === "string"
-        ? template.replace(new RegExp(`\\{${i}\\}`, "g"), arg ?? "")
-        : template;
+      ? template.replace(new RegExp(`\\{${i}\\}`, "g"), arg ?? "")
+      : template;
   });
   return template;
 }

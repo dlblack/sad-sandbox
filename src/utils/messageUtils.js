@@ -1,11 +1,11 @@
-import { getText } from "./TextStore";
+import {getText} from "./TextStore";
 
 function formatTimestamp(date = new Date()) {
   const d = typeof date === "string" ? new Date(date) : date;
   if (isNaN(d)) return "";
 
   const day = d.getDate().toString().padStart(2, "0");
-  const month = d.toLocaleString("en-US", { month: "short" });
+  const month = d.toLocaleString("en-US", {month: "short"});
   const year = d.getFullYear();
 
   // Format time as H:MM:SS AM/PM

@@ -1,5 +1,5 @@
 import Plotly from "plotly.js-dist-min";
-import { useEffect, useRef } from "react";
+import {useEffect, useRef} from "react";
 
 function Chart({
                  data,
@@ -19,8 +19,8 @@ function Chart({
 
     // Determine if X is a date (any element is string or looks like ISO date)
     const looksLikeDate =
-        (x && x.length > 0 && typeof x[0] === "string") ||
-        (Array.isArray(data) && data[0]?.x && typeof data[0].x[0] === "string");
+      (x && x.length > 0 && typeof x[0] === "string") ||
+      (Array.isArray(data) && data[0]?.x && typeof data[0].x[0] === "string");
 
     if (Array.isArray(data)) {
       plotData = data;
@@ -29,12 +29,12 @@ function Chart({
         title: layout?.title ?? title ?? "",
         xaxis: {
           ...(layout?.xaxis || {}),
-          title: { text: xLabel || layout?.xaxis?.title?.text || "" },
+          title: {text: xLabel || layout?.xaxis?.title?.text || ""},
           type: looksLikeDate ? "date" : "linear",
         },
         yaxis: {
           ...(layout?.yaxis || {}),
-          title: { text: yLabel || layout?.yaxis?.title?.text || "" }
+          title: {text: yLabel || layout?.yaxis?.title?.text || ""}
         }
       };
     } else if (x && y) {
@@ -43,13 +43,13 @@ function Chart({
         y,
         mode: "lines+markers",
         type: "scatter",
-        line: stepped ? { shape: "hv" } : {},
+        line: stepped ? {shape: "hv"} : {},
         ...rest,
       }];
       plotLayout = {
         title: title || "",
-        xaxis: { title: { text: xLabel || "" }, type: looksLikeDate ? "date" : "linear" },
-        yaxis: { title: { text: yLabel || "" } },
+        xaxis: {title: {text: xLabel || ""}, type: looksLikeDate ? "date" : "linear"},
+        yaxis: {title: {text: yLabel || ""}},
         ...layout,
       };
     } else {
@@ -60,7 +60,7 @@ function Chart({
     console.debug("DEBUG: Plot layout applied:", plotLayout);
 
     if (chartEl.current) {
-      Plotly.newPlot(chartEl.current, plotData, plotLayout, { responsive: true });
+      Plotly.newPlot(chartEl.current, plotData, plotLayout, {responsive: true});
     }
   }, [data, layout, x, y, title, xLabel, yLabel, stepped, rest]);
 

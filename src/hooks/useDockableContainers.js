@@ -1,17 +1,21 @@
-import { useState, useRef, useCallback } from "react";
-import { componentMetadata, DEFAULT_COMPONENT_SIZE } from "../utils/componentMetadata";
-import { makeMessage } from "../utils/messageUtils";
+import {useCallback, useRef, useState} from "react";
+import {componentMetadata, DEFAULT_COMPONENT_SIZE} from "../utils/componentMetadata";
+import {makeMessage} from "../utils/messageUtils";
 
 function getDefaultDockZone(type) {
   switch (type) {
-    case "ComponentContent": return "W";
-    case "ComponentMessage": return "S";
-    case "ComponentStyleSelector": return "E";
-    default: return "CENTER";
+    case "ComponentContent":
+      return "W";
+    case "ComponentMessage":
+      return "S";
+    case "ComponentStyleSelector":
+      return "E";
+    default:
+      return "CENTER";
   }
 }
 
-export default function useDockableContainers({ handleWizardFinish, handleDeleteNode }) {
+export default function useDockableContainers({handleWizardFinish, handleDeleteNode}) {
   const [messages, setMessages] = useState([]);
   const [messageType, setMessageType] = useState("info");
 
@@ -35,7 +39,6 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
 
   const addComponent = useCallback((type, optionalProps = {}) => {
     const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
-    const noun = meta.noun ? ` ${meta.noun}` : "";
 
     if (containers.some(c => c.type === type) || openComponentTypesRef.current.has(type)) {
       setMessages(prev => [
@@ -105,9 +108,9 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
 
       setMessages((prevMsgs) => {
         const closedMsg = makeMessage(
-            10030,
-            [entityName, meta.category || ""],
-            "text-body-secondary"
+          10030,
+          [entityName, meta.category || ""],
+          "text-body-secondary"
         );
         const lastMsg = prevMsgs[prevMsgs.length - 1];
         if (lastMsg?.text === closedMsg.text) {
@@ -130,7 +133,7 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
       const newX = moveEvent.clientX - startX;
       const newY = moveEvent.clientY - startY;
       setContainers(prev =>
-          prev.map(c => c.id === id ? { ...c, x: newX, y: newY } : c)
+        prev.map(c => c.id === id ? {...c, x: newX, y: newY} : c)
       );
     };
 

@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, {useMemo} from "react";
 import TableSectionStep from "./TableSectionStep";
-import { INTERVAL_OPTIONS } from "../../editor_components/combo_boxes/DataIntervalComboBox";
-import { generateDateTimeRows } from "../../../utils/timeUtils";
+import {INTERVAL_OPTIONS} from "../../editor_components/combo_boxes/DataIntervalComboBox";
+import {generateDateTimeRows} from "@/utils/timeUtils.js";
 
 // Utility: build rows for submission
 function updateDataRowsWithValues(autoDateTimes, dataRows) {
@@ -13,16 +13,14 @@ function updateDataRowsWithValues(autoDateTimes, dataRows) {
 }
 
 export default function TimeseriesDataEntryStep({
-  dataRows,
-  setDataRows,
-  startDate,
-  startTime,
-  endDate,
-  endTime,
-  dataInterval,
-  onBack,
-  onNext
-}) {
+                                                  dataRows,
+                                                  setDataRows,
+                                                  startDate,
+                                                  startTime,
+                                                  endDate,
+                                                  endTime,
+                                                  dataInterval,
+                                                }) {
   // Compute the intervalOpt from the dropdown value
   const intervalOpt = INTERVAL_OPTIONS.find(opt => opt.value === dataInterval);
 
@@ -43,14 +41,14 @@ export default function TimeseriesDataEntryStep({
     if (autoDateTimes.length > 0) {
       setDataRows(rows => updateDataRowsWithValues(autoDateTimes, rows));
     }
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [autoDateTimes.join("|")]);
 
   // Handlers
   function handleRowChange(idx, field, value) {
     setDataRows(rows => {
       const updated = [...rows];
-      if (!updated[idx]) updated[idx] = { dateTime: "", value: "" };
+      if (!updated[idx]) updated[idx] = {dateTime: "", value: ""};
       updated[idx][field] = value;
       return updated;
     });
@@ -62,9 +60,6 @@ export default function TimeseriesDataEntryStep({
       handleRowChange(idx, "value", value);
     }
   }
-
-  // Validation: require at least one value
-  const canContinue = dataRows.some(row => row.value && row.value !== "");
 
   return (
     <div>

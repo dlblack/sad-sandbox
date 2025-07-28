@@ -1,4 +1,3 @@
-import useAPI from "../app_hooks/useAPI";
 import Chart from "./Chart.jsx";
 import Loader from "./loader";
 
@@ -18,7 +17,7 @@ function parseValues(values) {
   return out;
 }
 
-function TimeseriesChart({ tsName, office }) {
+function TimeseriesChart({tsName, office}) {
   if (!tsName) return <p>Please select a timeseries...</p>;
 
   const measurements = useAPI("timeseries", {
@@ -26,7 +25,7 @@ function TimeseriesChart({ tsName, office }) {
     name: encodeURI(tsName),
   });
 
-  if (Array.isArray(measurements)) return <Loader />;
+  if (Array.isArray(measurements)) return <Loader/>;
 
   const [x, y] = parseValues(measurements.values, [
     (m) => {
@@ -42,7 +41,7 @@ function TimeseriesChart({ tsName, office }) {
 
   const data = [trace];
 
-  return <Chart data={data} />;
+  return <Chart data={data}/>;
 }
 
 export default TimeseriesChart;

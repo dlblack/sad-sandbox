@@ -12,7 +12,7 @@ function wizard(entityName) {
     entityName,
     category: "wizard",
     width: 600,
-    height: 650
+    height: 600
   };
 }
 
@@ -39,15 +39,18 @@ export const componentMetadata = {
     entityName: "Style Selector",
     category: "panel",
     width: Math.round(window.innerWidth * 0.2),
-    height: Math.round(window.innerHeight * 0.2) },
+    height: Math.round(window.innerHeight * 0.25)
+  },
   PairedDataPlot: {
     entityName: "Paired Data Plot",
     width: Math.round(window.innerWidth * 0.5),
-    height: Math.round(window.innerHeight * 0.4) },
+    height: Math.round(window.innerHeight * 0.4)
+  },
   TimeSeriesPlot: {
     entityName: "Time Series Plot",
     width: Math.round(window.innerWidth * 0.5),
-    height: Math.round(window.innerHeight * 0.4) },
+    height: Math.round(window.innerHeight * 0.4)
+  },
 
   // Data editors
   ManualDataEntryEditor: dataEditor("Manual Data Entry"),
@@ -71,6 +74,6 @@ export const componentMetadata = {
 };
 
 export const DEFAULT_COMPONENT_SIZE = {
-  width: Math.round(window.innerWidth * 0.1),
-  height: Math.round(window.innerHeight * 0.1)
+  width: Math.round(window.innerWidth * 0.2),
+  height: Math.round(window.innerHeight * 0.2)
 };
