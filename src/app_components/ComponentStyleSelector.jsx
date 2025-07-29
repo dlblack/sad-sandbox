@@ -1,24 +1,28 @@
-import React, { useContext, useState } from "react";
-import { StyleContext } from "../styles/StyleContext";
+import React, {useContext, useState} from "react";
+import {StyleContext} from "../styles/StyleContext";
 
 function ComponentStyleSelector() {
   const {
-    modalStyle,
-    navbarStyle,
     appBackgroundStyle,
-    toggleModalStyle,
-    toggleNavbarStyle,
+    navbarStyle,
+    componentHeaderStyle,
+    componentBackgroundStyle,
     toggleAppBackgroundStyle,
+    toggleNavbarStyle,
+    toggleComponentHeaderStyle,
+    toggleComponentBackgroundStyle,
   } = useContext(StyleContext);
 
-  const [selectedModalStyle, setSelectedModalStyle] = useState(modalStyle);
-  const [selectedNavbarStyle, setSelectedNavbarStyle] = useState(navbarStyle);
-  const [selectedAppBackgroundStyle, setSelectedAppBackgroundStyle] = useState(appBackgroundStyle);
 
-  const handleModalStyleChange = (event) => {
+  const [selectedAppBackgroundStyle, setSelectedAppBackgroundStyle] = useState(appBackgroundStyle);
+  const [selectedNavbarStyle, setSelectedNavbarStyle] = useState(navbarStyle);
+  const [selectedComponentHeaderStyle, setSelectedComponentHeaderStyle] = useState(componentHeaderStyle);
+  const [selectedComponentBackgroundStyle, setSelectedComponentBackgroundStyle] = useState(componentBackgroundStyle);
+
+  const handleAppBackgroundStyleChange = (event) => {
     const newStyle = event.target.value;
-    setSelectedModalStyle(newStyle);
-    toggleModalStyle(newStyle);
+    setSelectedAppBackgroundStyle(newStyle);
+    toggleAppBackgroundStyle(newStyle);
   };
 
   const handleNavbarStyleChange = (event) => {
@@ -27,15 +31,21 @@ function ComponentStyleSelector() {
     toggleNavbarStyle(newStyle);
   };
 
-  const handleAppBackgroundStyleChange = (event) => {
+  const handleComponentHeaderStyleChange = (event) => {
     const newStyle = event.target.value;
-    setSelectedAppBackgroundStyle(newStyle);
-    toggleAppBackgroundStyle(newStyle);
+    setSelectedComponentHeaderStyle(newStyle);
+    toggleComponentHeaderStyle(newStyle);
   };
 
+  const handleComponentBackgroundStyleChange = (event) => {
+    const newStyle = event.target.value;
+    setSelectedComponentBackgroundStyle(newStyle);
+    toggleComponentBackgroundStyle(newStyle);
+  }
+
   return (
-    <div className="card text-white mb-2">
-      <div className="card-body p-2">
+    <div className={`card text-white mb-2 ${componentBackgroundStyle}`}>
+      <div>
         <form>
           <div className="style-selector-row">
             <label htmlFor="appBackgroundStyleSelect" className="style-selector-label">
@@ -76,14 +86,35 @@ function ComponentStyleSelector() {
           </div>
 
           <div className="style-selector-row">
-            <label htmlFor="modalStyleSelect" className="style-selector-label">
-              Component Style
+            <label htmlFor="componentHeaderStyleSelect" className="style-selector-label">
+              Component Header Style
             </label>
             <select
-              id="modalStyleSelect"
+              id="componentHeaderStyleSelect"
               className="form-control form-control-sm style-selector-compact flex-grow-1"
-              value={selectedModalStyle}
-              onChange={handleModalStyleChange}
+              value={selectedComponentHeaderStyle}
+              onChange={handleComponentHeaderStyleChange}
+            >
+              <option value="bg-primary text-white">Primary</option>
+              <option value="bg-secondary text-white">Secondary</option>
+              <option value="bg-dark text-dark">Light</option>
+              <option value="bg-light text-white">Dark</option>
+              <option value="bg-danger text-white">Danger</option>
+              <option value="bg-warning text-white">Warning</option>
+              <option value="bg-info text-white">Info</option>
+              <option value="bg-success text-white">Success</option>
+            </select>
+          </div>
+
+          <div className="style-selector-row">
+            <label htmlFor="componentBackgroundStyleSelect" className="style-selector-label">
+              Component Background Style
+            </label>
+            <select
+              id="componentBackgroundStyleSelect"
+              className="form-control form-control-sm style-selector-compact flex-grow-1"
+              value={selectedComponentBackgroundStyle}
+              onChange={handleComponentBackgroundStyleChange}
             >
               <option value="bg-primary text-white">Primary</option>
               <option value="bg-secondary text-white">Secondary</option>

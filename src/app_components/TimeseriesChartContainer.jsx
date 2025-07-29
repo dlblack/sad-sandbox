@@ -1,9 +1,8 @@
-import useAPI from "../app_hooks/useAPI";
 import Loader from "./loader";
-import { useState } from "react";
-import TimeseriesChart from "./timeseries-chart";
+import {useState} from "react";
+import TimeseriesChart from "./TimeseriesChart.jsx";
 
-function TimeseriesChartContainer({ location }) {
+function TimeseriesChartContainer({location}) {
   const [tsChecked, setTsChecked] = useState("");
 
   const timeseries = useAPI("catalog/TIMESERIES", {
@@ -11,9 +10,8 @@ function TimeseriesChartContainer({ location }) {
     office: location["office-id"],
   });
 
-  if (Array.isArray(timeseries)) return <Loader />;
+  if (Array.isArray(timeseries)) return <Loader/>;
 
-  const data = [];
   return (
     <>
       <div className="col-3">
@@ -50,7 +48,7 @@ function TimeseriesChartContainer({ location }) {
         </div>
       </div>
       <div className="col-9">
-        <TimeseriesChart tsName={tsChecked} office={location["office-id"]} />
+        <TimeseriesChart tsName={tsChecked} office={location["office-id"]}/>
       </div>
     </>
   );

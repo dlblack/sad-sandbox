@@ -24,10 +24,10 @@ import LinearRegressionWizard from "../app_components/analysis/LinearRegressionW
 import QuantileMappingWizard from "../app_components/analysis/QuantileMappingWizard";
 import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizard";
 
-export const dockableContentFactory = (type, props= {}) => {
+export const dockableContentFactory = (type, props = {}) => {
   switch (type) {
     case "ComponentContent":
-      return <ComponentContent 
+      return <ComponentContent
         maps={props.maps}
         data={props.data}
         analyses={props.analyses}
@@ -37,27 +37,27 @@ export const dockableContentFactory = (type, props= {}) => {
         handleOpenComponent={props.handleOpenComponent}
       />;
     case "ComponentMap":
-      return <ComponentMap />;
+      return <ComponentMap/>;
     case "ComponentMessage":
       return <ComponentMessage {...props} />;
     case "ComponentStyleSelector":
-      return <ComponentStyleSelector />;
+      return <ComponentStyleSelector/>;
     case "TimeSeriesPlot":
-      return <TimeSeriesPlot {...props} dataset={props.dataset } />;
+      return <TimeSeriesPlot {...props} dataset={props.dataset}/>;
     case "PairedDataPlot":
       return (
-          <PairedDataPlot
-              {...props}
-              dataset={props.dataset}
-          />
+        <PairedDataPlot
+          {...props}
+          dataset={props.dataset}
+        />
       );
 
     case "ManualDataEntryEditor":
-      return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave} />;
+      return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave}/>;
 
     // Analysis
     case "PeakFlowFreqWizard":
-      return <PeakFlowFreqWizard {...props } analyses={props.analyses} data={props.data} />;
+      return <PeakFlowFreqWizard {...props} analyses={props.analyses} data={props.data}/>;
     case "Bulletin17AnalysisWizard":
       return <Bulletin17AnalysisWizard {...props} />;
     case "GeneralFreqAnalysisWizard":

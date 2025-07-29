@@ -1,6 +1,6 @@
 import React from "react";
 
-function WizardNavigation({ step, setStep, numSteps, onFinish, finishLabel = "Finish", disableNext }) {
+function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel = "Finish", disableNext}) {
   const isFirstStep = step === 1;
   const isLastStep = step === numSteps;
 

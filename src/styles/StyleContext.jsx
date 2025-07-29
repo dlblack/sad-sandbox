@@ -1,42 +1,50 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, {createContext, useEffect, useState} from "react";
 
 export const StyleContext = createContext();
 
-export const StyleProvider = ({ children }) => {
+export const StyleProvider = ({children}) => {
   // Retrieve saved styles from localStorage or use defaults
   const getDefaultStyle = (key, defaultValue) =>
     localStorage.getItem(key) || defaultValue;
 
-  const [modalStyle, setModalStyle] = useState(getDefaultStyle("modalStyle", "bg-secondary text-white"));
-  const [navbarStyle, setNavbarStyle] = useState(getDefaultStyle("navbarStyle", "bg-primary navbar-dark"));
   const [appBackgroundStyle, setAppBackgroundStyle] = useState(getDefaultStyle("appBackgroundStyle", "bg-light"));
+  const [navbarStyle, setNavbarStyle] = useState(getDefaultStyle("navbarStyle", "bg-primary navbar-dark"));
+  const [componentHeaderStyle, setComponentHeaderStyle] = useState(getDefaultStyle("componentHeaderStyle", "bg-secondary text-white"));
+  const [componentBackgroundStyle, setComponentBackgroundStyle] = useState(getDefaultStyle("componentBackgroundStyle", "bg-light"));
 
   // Update localStorage whenever styles change
   useEffect(() => {
-    localStorage.setItem("modalStyle", modalStyle);
-  }, [modalStyle]);
+    localStorage.setItem("appBackgroundStyle", appBackgroundStyle);
+  }, [appBackgroundStyle]);
 
   useEffect(() => {
     localStorage.setItem("navbarStyle", navbarStyle);
   }, [navbarStyle]);
 
   useEffect(() => {
-    localStorage.setItem("appBackgroundStyle", appBackgroundStyle);
-  }, [appBackgroundStyle]);
+    localStorage.setItem("componentHeaderStyle", componentHeaderStyle);
+  }, [componentHeaderStyle]);
 
-  const toggleModalStyle = (newStyle) => setModalStyle(newStyle);
-  const toggleNavbarStyle = (newStyle) => setNavbarStyle(newStyle);
+  useEffect(() => {
+    localStorage.setItem("componentBackgroundStyle", componentBackgroundStyle);
+  }, [componentBackgroundStyle]);
+
   const toggleAppBackgroundStyle = (newStyle) => setAppBackgroundStyle(newStyle);
+  const toggleNavbarStyle = (newStyle) => setNavbarStyle(newStyle);
+  const toggleComponentHeaderStyle = (newStyle) => setComponentHeaderStyle(newStyle);
+  const toggleComponentBackgroundStyle = (newStyle) => setComponentBackgroundStyle(newStyle);
 
   return (
     <StyleContext.Provider
       value={{
-        modalStyle,
-        navbarStyle,
         appBackgroundStyle,
-        toggleModalStyle,
-        toggleNavbarStyle,
+        navbarStyle,
+        componentHeaderStyle,
+        componentBackgroundStyle,
         toggleAppBackgroundStyle,
+        toggleNavbarStyle,
+        toggleComponentHeaderStyle,
+        toggleComponentBackgroundStyle,
       }}
     >
       {children}

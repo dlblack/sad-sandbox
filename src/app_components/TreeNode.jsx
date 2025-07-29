@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from "react";
+import React, {useContext, useEffect, useRef} from "react";
 import SaveAsDialog from "../dialogs/SaveAsDialog";
-import { FaFolder, FaFolderOpen } from "react-icons/fa";
+import {FaFolder, FaFolderOpen} from "react-icons/fa";
 import "../styles/css/TreeNode.css";
 import dssIcon from '../../assets/images/dss.gif';
+import {StyleContext} from "../styles/StyleContext";
 
 const hasRealChildren = (children) => {
   if (!children) return false;
@@ -37,30 +38,31 @@ function getNodeBadgeOrIcon(label, isLeaf, type, section) {
 }
 
 const TreeNode = ({
-  label,
-  children,
-  isTopLevel = false,
-  onSaveAs,
-  type,
-  section,
-  description,
-  onRename,
-  onDelete,
-  canDelete = false,
-  parentLabel,
-  expanded,
-  onToggle,
-  path,
-  menu,
-  setMenu,
-  renaming,
-  setRenaming,
-  renameValue,
-  setRenameValue,
-  saveAsDialogOpen,
-  setSaveAsDialogOpen,
-  dataset,
-}) => {
+                    label,
+                    children,
+                    isTopLevel = false,
+                    onSaveAs,
+                    type,
+                    section,
+                    description,
+                    onRename,
+                    onDelete,
+                    canDelete = false,
+                    parentLabel,
+                    expanded,
+                    onToggle,
+                    path,
+                    menu,
+                    setMenu,
+                    renaming,
+                    setRenaming,
+                    renameValue,
+                    setRenameValue,
+                    saveAsDialogOpen,
+                    setSaveAsDialogOpen,
+                    dataset,
+                  }) => {
+  const {componentBackgroundStyle} = useContext(StyleContext);
   const hasContent = hasRealChildren(children);
   const isLeaf = !hasContent;
   const isBottomLevel = isLeaf && canDelete;
@@ -78,7 +80,7 @@ const TreeNode = ({
   const handleContextMenu = (e) => {
     if (!isBottomLevel) return;
     e.preventDefault();
-    setMenu?.({ x: e.clientX, y: e.clientY, path });
+    setMenu?.({x: e.clientX, y: e.clientY, path});
   };
 
   const handleSaveAs = () => {
@@ -118,23 +120,21 @@ const TreeNode = ({
     if (section === "data" && dataset) {
       console.log("Dispatching plot event for:", dataset.name);
       window.dispatchEvent(
-          new CustomEvent("plotNodeData", {
-            detail: { dataset },
-          })
+        new CustomEvent("plotNodeData", {
+          detail: {dataset},
+        })
       );
     }
   };
 
-  const LabelTag = isTopLevel && hasContent ? "strong" : "span";
-
   return (
-    <div className={`tree-node${isTopLevel ? " top-level" : ""}`} ref={ref}>
+    <div className={`tree-node ${componentBackgroundStyle} ${isTopLevel ? " top-level" : ""}`} ref={ref}>
       <span
         className={`tree-label${expanded ? " expanded" : ""}${hasContent ? " pointer" : ""}`}
         onClick={hasContent ? () => onToggle(path) : undefined}
         onContextMenu={handleContextMenu}
       >
-        {hasContent && (expanded ? <FaFolderOpen color="#f6b73c" /> : <FaFolder color="#f6b73c" />)}
+        {hasContent && (expanded ? <FaFolderOpen color="#f6b73c"/> : <FaFolder color="#f6b73c"/>)}
         {badge}
         {renaming === path ? (
           <form onSubmit={handleRenameSubmit}>
@@ -145,14 +145,14 @@ const TreeNode = ({
               onChange={e => setRenameValue?.(e.target.value)}
               onBlur={handleRenameBlur}
             />
-          </form>        
+          </form>
         ) : (
-          <LabelTag>{label}</LabelTag>
+          <span>{label}</span>
         )}
       </span>
       {menu && menu.path === path && isBottomLevel && (
         <div
-          className="tree-context-menu pointer"
+          className={`tree-context-menu pointer ${componentBackgroundStyle} `}
           style={{
             top: menu.y,
             left: menu.x,
@@ -164,17 +164,17 @@ const TreeNode = ({
           <div className="tree-menu-item" onClick={handleRename}>
             Rename
           </div>
-          <div 
-            className={`tree-menu-item${canDelete ? "" : " not-allowed"}`} 
+          <div
+            className={`tree-menu-item${canDelete ? "" : " not-allowed"}`}
             onClick={canDelete ? handleDelete : undefined}
           >
             Delete
           </div>
-            {section === "data" && (
-                <div className="tree-menu-item" onClick={handlePlot}>
-                  Plot
-                </div>
-            )}
+          {section === "data" && (
+            <div className="tree-menu-item" onClick={handlePlot}>
+              Plot
+            </div>
+          )}
         </div>
       )}
       {saveAsDialogOpen === path && isBottomLevel && (

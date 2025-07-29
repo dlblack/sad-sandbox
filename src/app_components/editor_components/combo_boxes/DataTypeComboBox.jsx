@@ -1,11 +1,11 @@
 import React from "react";
 
 const DATA_TYPE_OPTIONS = [
-  { value: "TimeSeries", label: "Time Series" },
-  { value: "PairedData", label: "Paired Data" },
+  {value: "TimeSeries", label: "Time Series"},
+  {value: "PairedData", label: "Paired Data"},
 ];
 
-export default function DataTypeComboBox({ value, onChange, ...props }) {
+export default function DataTypeComboBox({value, onChange, ...props}) {
   return (
     <select
       className="form-select font-xs"
