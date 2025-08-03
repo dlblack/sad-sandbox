@@ -22,7 +22,7 @@ A UI for interactive data analysis and visualization, integrating React, Vite, N
   [Download and install VS Code](https://code.visualstudio.com/download).  
   (You may wish to rename/extract the folder as `C:\Programs\VSCode` to avoid path issues when downloading new versions.)
 
-- **Node.js v18 or higher (includes npm)**  
+- **Node.js v22.12.0 or higher (includes npm)**  
   [Download Node.js](https://nodejs.org/en/download)  
   (Install or extract to `C:\Node`.)
 
