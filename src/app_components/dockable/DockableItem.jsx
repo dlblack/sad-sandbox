@@ -192,9 +192,11 @@ function DockableItem({
       minConstraints={[MIN_WIDTH, MIN_HEIGHT]}
       maxConstraints={[MAX_WIDTH, MAX_HEIGHT]}
       onResize={handleResize}
+      resizeHandles={["s","e","se","n","w","ne","nw","sw"]}
+      axis="both"
       handle={(h, ref) => (
         <span
-          className={`custom-resize-handle custom-resize-handle-${h}`}
+          className={`react-resizable-handle react-resizable-handle-${h}`}
           ref={ref}
         />
       )}
