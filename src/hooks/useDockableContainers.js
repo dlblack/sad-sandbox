@@ -70,7 +70,7 @@ export default function useDockableContainers({handleWizardFinish, handleDeleteN
 
     setMessages(prev => [
       ...prev,
-      makeMessage(10001, [meta.entityName || type, meta.category], "text-body-secondary"),
+      makeMessage(10001, [meta.entityName || type, meta.category], "text-body"),
     ]);
 
     setTimeout(() => openComponentTypesRef.current.delete(type), 100);

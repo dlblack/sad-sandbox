@@ -16,14 +16,12 @@ export default function PairedDataTableStep({
                                             }) {
   useEffect(() => {
     if (rows.length < 8) setRows(ensureMinRows(rows, 8));
-    // eslint-disable-next-line
   }, []);
 
   function handleCellChange(idx, field, value) {
     const updated = [...rows];
     updated[idx][field] = value;
     setRows(updated);
-    // Auto-add row if last data row is filled
     if (
       idx === rows.length - 1 &&
       idx >= 3 &&

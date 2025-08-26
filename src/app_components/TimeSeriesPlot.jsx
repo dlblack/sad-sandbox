@@ -1,6 +1,7 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Chart from "./Chart";
 import Loader from "./Loader";
+import { TextStore } from "../utils/TextStore";
 
 async function loadDSSData(filepath, pathname) {
   const res = await fetch(`/api/read-dss?file=${encodeURIComponent(filepath)}&path=${encodeURIComponent(pathname)}`);
@@ -15,26 +16,28 @@ function normalizeTimeSeries(json) {
     if (typeof t === "string") {
       if (t.includes("T")) return t;
 
-      const parsed = new Date(t.replace(
-        /^(\d{2})([A-Za-z]{3})(\d{4}) (.+)$/,
-        (_, d, m, y, time) => `${d} ${m} ${y} ${time} UTC`
-      ));
+      const parsed = new Date(
+        t.replace(
+          /^(\d{2})([A-Za-z]{3})(\d{4}) (.+)$/,
+          (_, d, m, y, time) => `${d} ${m} ${y} ${time} UTC`
+        )
+      );
       return parsed.toISOString();
     }
     if (typeof t === "number") return t;
     return i;
   });
 
-  const y = values.map(v => Number(v));
+  const y = values.map((v) => Number(v));
   return {
     x,
     y,
-    yLabel: json.yLabel || "Value",
-    yUnits: json.yUnits || ""
+    yLabel: json.yLabel || TextStore.interface("TimeSeriesPlot_DefaultYLabel"),
+    yUnits: json.yUnits || "",
   };
 }
 
-function TimeSeriesPlot({dataset}) {
+function TimeSeriesPlot({ dataset }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,8 +54,8 @@ function TimeSeriesPlot({dataset}) {
           json = {
             times: dataset.times || [],
             values: dataset.values || [],
-            yLabel: dataset.parameter || "Value",
-            yUnits: dataset.units || ""
+            yLabel: dataset.parameter || TextStore.interface("TimeSeriesPlot_DefaultYLabel"),
+            yUnits: dataset.units || "",
           };
         }
         const normalized = normalizeTimeSeries(json);
@@ -72,9 +75,9 @@ function TimeSeriesPlot({dataset}) {
     };
   }, [dataset]);
 
-  if (loading) return <Loader/>;
+  if (loading) return <Loader />;
   if (!data || !Array.isArray(data.x) || !Array.isArray(data.y) || data.x.length === 0) {
-    return <div>Error: Invalid DSS TimeSeries data.</div>;
+    return <div>{TextStore.interface("TimeSeriesPlot_InvalidData")}</div>;
   }
 
   return (
@@ -82,8 +85,8 @@ function TimeSeriesPlot({dataset}) {
       x={data.x}
       y={data.y}
       title={dataset.name}
-      xLabel="Time"
-      yLabel={data.yLabel || dataset.units || ""}
+      xLabel={TextStore.interface("TimeSeriesPlot_XLabelTime")}
+      yLabel={data.yUnits ? `${data.yLabel} (${data.yUnits})` : data.yLabel || dataset.units || ""}
       stepped={true}
     />
   );

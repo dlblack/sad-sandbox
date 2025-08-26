@@ -729,12 +729,12 @@ select.form-select.font-xs {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 36px;
+    gap: 30px;
     margin-top: 6px;
 }
 
 .wizard-label {
-    width: 55px;
+    width: 60px;
     text-align: center;
     font-size: 0.7em;
     color: rgb(173, 175, 174);

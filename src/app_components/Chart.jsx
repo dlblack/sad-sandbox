@@ -9,7 +9,7 @@ function Chart({
                  title,
                  xLabel,
                  yLabel,
-                 stepped = false,  // Step mode only for TimeSeries
+                 stepped = false,
                  ...rest
                }) {
   const chartEl = useRef();
@@ -17,7 +17,6 @@ function Chart({
   useEffect(() => {
     let plotData, plotLayout;
 
-    // Determine if X is a date (any element is string or looks like ISO date)
     const looksLikeDate =
       (x && x.length > 0 && typeof x[0] === "string") ||
       (Array.isArray(data) && data[0]?.x && typeof data[0].x[0] === "string");

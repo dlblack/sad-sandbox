@@ -1,52 +1,55 @@
 import React from "react";
+import { TextStore } from "../../../utils/TextStore";
 
 const UNIT_OPTIONS = {
   Precipitation: [
-    {value: "IncIn", label: "Incremental Inches"},
-    {value: "IncMM", label: "Incremental Millimeters"},
-    {value: "CumIn", label: "Cumulative Inches"},
-    {value: "CumMM", label: "Cumulative Millimeters"},
+    { value: "IncIn", labelKey: "DataUnit_Precip_IncIn" },
+    { value: "IncMM", labelKey: "DataUnit_Precip_IncMM" },
+    { value: "CumIn", labelKey: "DataUnit_Precip_CumIn" },
+    { value: "CumMM", labelKey: "DataUnit_Precip_CumMM" },
   ],
   Flow: [
-    {value: "CFS", label: "Cubic Feet per Second (cfs)"},
-    {value: "CMS", label: "Cubic Meters per Second (cms)"},
+    { value: "CFS", labelKey: "DataUnit_Flow_CFS" },
+    { value: "CMS", labelKey: "DataUnit_Flow_CMS" },
   ],
   Stage: [
-    {value: "ft", label: "Feet"},
-    {value: "m", label: "Meters"},
+    { value: "ft", labelKey: "DataUnit_Stage_ft" },
+    { value: "m",  labelKey: "DataUnit_Stage_m"  },
   ],
   Elev: [
-    {value: "ft", label: "Feet"},
-    {value: "m", label: "Meters"},
+    { value: "ft", labelKey: "DataUnit_Elev_ft" },
+    { value: "m",  labelKey: "DataUnit_Elev_m"  },
   ],
   SWE: [
-    {value: "in", label: "Inches"},
-    {value: "mm", label: "Millimeters"},
+    { value: "in", labelKey: "DataUnit_SWE_in" },
+    { value: "mm", labelKey: "DataUnit_SWE_mm" },
   ],
   Temperature: [
-    {value: "F", label: "Fahrenheit"},
-    {value: "C", label: "Celsius"},
+    { value: "F", labelKey: "DataUnit_Temp_F" },
+    { value: "C", labelKey: "DataUnit_Temp_C" },
   ],
   Windspeed: [
-    {value: "mph", label: "Miles per Hour"},
-    {value: "kph", label: "Kilometers per Hour"},
-    {value: "mps", label: "Meters per Second"},
+    { value: "mph", labelKey: "DataUnit_Wind_mph" },
+    { value: "kph", labelKey: "DataUnit_Wind_kph" },
+    { value: "mps", labelKey: "DataUnit_Wind_mps" },
   ],
 };
 
-export default function DataUnitComboBox({parameter, value, onChange, ...props}) {
+export default function DataUnitComboBox({ parameter, value, onChange, ...props }) {
   const options = UNIT_OPTIONS[parameter] || [];
   return (
     <select
       className="form-select font-xs"
       value={value}
-      onChange={e => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value)}
       disabled={options.length === 0}
       {...props}
     >
-      <option value="">Select Data Unit</option>
-      {options.map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      <option value="">{TextStore.interface("DataUnit_Placeholder")}</option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {TextStore.interface(opt.labelKey)}
+        </option>
       ))}
     </select>
   );
