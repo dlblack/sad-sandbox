@@ -4,14 +4,13 @@ import DataInfoStepCommon from "./DataInfoStepCommon.jsx";
 import PairedDataTableStep from "./PairedDataTableStep";
 import TimeseriesDataEntryStep from "./TimeseriesDataEntryStep.jsx";
 import WizardNavigation from "../../common/WizardNavigation";
-import StructureSelector from "@/app_components/editor_components/combo_boxes/StructureSelector";
-import FormatSelector from "@/app_components/editor_components/combo_boxes/FormatSelector.jsx";
-import PairedCurveTypeComboBox, {
-  CURVE_TYPE_DEFAULTS
-} from "@/app_components/editor_components/combo_boxes/PairedCurveTypeComboBox.jsx";
-import {getParamCategory} from "@/utils/paramUtils.js";
-import {toJulianDay} from "@/utils/timeUtils.js";
-import {StyleContext} from "@/styles/StyleContext.jsx";
+import StructureSelector from "../../editor_components/combo_boxes/StructureSelector";
+import FormatSelector from "../../editor_components/combo_boxes/FormatSelector.jsx";
+import PairedCurveTypeComboBox, { CURVE_TYPE_DEFAULTS } from "../../editor_components/combo_boxes/PairedCurveTypeComboBox.jsx";
+import {getParamCategory} from "../../../utils/paramUtils.js";
+import {toJulianDay} from "../../../utils/timeUtils.js";
+import {StyleContext} from "../../../styles/StyleContext.jsx";
+import {TextStore} from "../../../utils/TextStore.js";
 
 // DSS date formatter
 function formatDssDate(dateStr) {
@@ -80,25 +79,21 @@ export default function ManualDataEntryEditor(props) {
   const [pairedXUnits, setPairedXUnits] = useState("");
   const [pairedRows, setPairedRows] = useState([{x: "", y: ""}, {x: "", y: ""}, {x: "", y: ""}]);
 
-  // For tracking prev curve type to avoid unwanted overwrite
   const prevCurveType = useRef();
 
-  // Auto-set default units/labels for PairedCurveType (user can override)
   useEffect(() => {
     if (structureType !== "PairedData") return;
     if (!pairedCurveType) return;
     const defaults = CURVE_TYPE_DEFAULTS[pairedCurveType];
     if (!defaults) return;
 
-    // Only set if empty or user hasn't changed since last type
     if (!pairedYLabel || prevCurveType.current !== pairedCurveType) setPairedYLabel(defaults.yLabel);
     if (!pairedYUnits || prevCurveType.current !== pairedCurveType) setPairedYUnits(defaults.yUnits);
     if (!pairedXLabel || prevCurveType.current !== pairedCurveType) setPairedXLabel(defaults.xLabel);
     if (!pairedXUnits || prevCurveType.current !== pairedCurveType) setPairedXUnits(defaults.xUnits);
     prevCurveType.current = pairedCurveType;
-  }, [pairedCurveType, structureType]); // update if curve type or PairedData chosen
+  }, [pairedCurveType, structureType]);
 
-  // --- Pathname part auto updates ---
   useEffect(() => {
     setTsPathnameParts(parts => ({
       ...parts,
@@ -108,29 +103,31 @@ export default function ManualDataEntryEditor(props) {
     }));
   }, [tsParameter, tsStartDate, tsInterval]);
 
-  // If PairedData, keep D (date part) always empty
   useEffect(() => {
     if (structureType === "PairedData") {
       setPairedPathnameParts(parts => ({...parts, D: ""}));
     }
   }, [structureType]);
 
-  // --- Render steps ---
   function renderStep() {
     if (step === 1) {
       return (
         <div className="manual-entry-content" style={{maxWidth: 480}}>
-          <legend>Create New Data Set</legend>
+          <legend>{TextStore.interface("ManualDataEntryEditor_Legend")}</legend>
           <hr/>
           <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Name</label>
+            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              {TextStore.interface("ManualDataEntryEditor_Name")}
+            </label>
             <input className="form-control form-control-sm" style={{flex: 1}}
                    value={name} onChange={e => setName(e.target.value)}
                    maxLength={64} required
             />
           </div>
           <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Description</label>
+            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              {TextStore.interface("ManualDataEntryEditor_Description")}
+            </label>
             <textarea className="form-control form-control-sm" style={{flex: 1}}
                       value={desc} onChange={e => setDesc(e.target.value)}
                       maxLength={256} rows={2}
@@ -189,35 +186,45 @@ export default function ManualDataEntryEditor(props) {
             />
             {/* Curve type, units, labels as before */}
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Curve Type</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_CurveType")}
+              </label>
               <PairedCurveTypeComboBox value={pairedCurveType} onChange={val => {
                 setPairedCurveType(val);
                 setPairedPathnameParts(parts => ({...parts, C: val}));
               }}/>
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Y Label</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_YLabel")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedXLabel}
                      onChange={e => setPairedYLabel(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Y Units</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_YUnits")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedYUnits}
                      onChange={e => setPairedYUnits(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>X Label</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_XLabel")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedXLabel}
                      onChange={e => setPairedXLabel(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>X Units</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_XUnits")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedXUnits}
                      onChange={e => setPairedXUnits(e.target.value)}
@@ -230,32 +237,42 @@ export default function ManualDataEntryEditor(props) {
           <div>
             {/* No pathname step for JSON */}
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Curve Type</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_CurveType")}
+              </label>
               <PairedCurveTypeComboBox value={pairedCurveType} onChange={setPairedCurveType}/>
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Y Label</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_YLabel")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedYLabel}
                      onChange={e => setPairedYLabel(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>Y Units</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_YUnits")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedYUnits}
                      onChange={e => setPairedYUnits(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>X Label</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_XLabel")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedXLabel}
                      onChange={e => setPairedXLabel(e.target.value)}
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>X Units</label>
+              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+                {TextStore.interface("ManualDataEntryEditor_XUnits")}
+              </label>
               <input className="form-control font-xs"
                      value={pairedXUnits}
                      onChange={e => setPairedXUnits(e.target.value)}
@@ -303,19 +320,36 @@ export default function ManualDataEntryEditor(props) {
       const pairedPathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
       return (
         <div>
-          <h6>Summary/Confirmation</h6>
-          <div className="my-2 font-xs"><strong>Name:</strong> {name}</div>
-          <div className="my-2 font-xs"><strong>Description:</strong> {desc}</div>
-          <div className="my-2 font-xs"><strong>Structure Type:</strong> {structureType}</div>
-          <div className="my-2 font-xs"><strong>Data Format:</strong> {dataFormat}</div>
+          <h6>{TextStore.interface("ManualDataEntryEditor_Summary")}</h6>
+          <div className="my-2 font-xs">
+            <strong>{TextStore.interface("ManualDataEntryEditor_SummaryName")}</strong>
+            {name}
+          </div>
+          <div className="my-2 font-xs">
+            <strong>
+            {TextStore.interface("ManualDataEntryEditor_SummaryDescription")}</strong>
+            {desc}
+          </div>
+          <div className="my-2 font-xs">
+            <strong>{TextStore.interface("ManualDataEntryEditor_SummaryStructureType")}</strong>
+            {structureType}
+          </div>
+          <div className="my-2 font-xs">
+            <strong>{TextStore.interface("ManualDataEntryEditor_SummaryDataFormat")}</strong>
+            {dataFormat}
+          </div>
           {structureType === "TimeSeries" && (
             <>
               <div style={{maxHeight: 160, overflow: "auto"}}>
                 <table className="table table-bordered table-sm" style={{maxWidth: 340}}>
                   <thead>
                   <tr>
-                    <th style={{width: 160}}>Date/Time</th>
-                    <th style={{width: 80}}>Value</th>
+                    <th style={{width: 160}}>
+                      {TextStore.interface("ManualDataEntryEditor_SummaryDateTime")}
+                    </th>
+                    <th style={{width: 80}}>
+                      {TextStore.interface("ManualDataEntryEditor_SummaryValue")}
+                    </th>
                   </tr>
                   </thead>
                   <tbody>
@@ -335,12 +369,30 @@ export default function ManualDataEntryEditor(props) {
           )}
           {structureType === "PairedData" && (
             <>
-              <div className="my-2 font-xs"><strong>Filepath:</strong> {getDefaultFilepath(pairedCurveType)}</div>
-              <div className="my-2 font-xs"><strong>Pathname:</strong> {pairedPathname}</div>
-              <div className="my-2 font-xs"><strong>Curve Type:</strong> {pairedCurveType}</div>
-              <div className="my-2 font-xs"><strong>Y Units:</strong> {pairedYUnits}</div>
-              <div className="my-2 font-xs"><strong>X Label:</strong> {pairedXLabel}</div>
-              <div className="my-2 font-xs"><strong>X Units:</strong> {pairedXUnits}</div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryFilepath")}</strong>
+                {getDefaultFilepath(pairedCurveType)}
+              </div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryPathname")}</strong>
+                {pairedPathname}
+              </div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryCurveType")}</strong>
+                {pairedCurveType}
+              </div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryYUnits")}</strong>
+                {pairedYUnits}
+              </div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryXLabel")}</strong>
+                {pairedXLabel}
+              </div>
+              <div className="my-2 font-xs">
+                <strong>{TextStore.interface("ManualDataEntryEditor_SummaryXUnits")}</strong>
+                {pairedXUnits}
+              </div>
               <div style={{maxHeight: 160, overflow: "auto"}}>
                 <table className="table table-bordered table-sm font-sm" style={{maxWidth: 380}}>
                   <thead>
@@ -418,12 +470,10 @@ export default function ManualDataEntryEditor(props) {
       if (props.onRemove) props.onRemove();
     }
 
-    // PairedData DSS: only minimal metadata, but pass values for backend write
     if (structureType === "PairedData" && dataFormat === "DSS" && props.onDataSave) {
       const {A, B, C, E, F} = pairedPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
 
-      // Minimal payload (metadata only, no xy/rows in persisted JSON)
       const payload = {
         structureType,
         dataFormat,
@@ -439,11 +489,12 @@ export default function ManualDataEntryEditor(props) {
         filepath: getDefaultFilepath(pairedCurveType),
         pathname,
       };
-      // X/Y arrays for backend writing
-      const xValues = pairedRows.filter(r => r.x !== "" && r.y !== "").map(r => Number(r.x));
-      const yValues = pairedRows.filter(r => r.x !== "" && r.y !== "").map(r => Number(r.y));
 
-      // Pass as API payload (server only writes minimal JSON)
+      const xValues = pairedRows.filter(r => r.x !== "" && r.y !== "")
+        .map(r => Number(r.x));
+      const yValues = pairedRows.filter(r => r.x !== "" && r.y !== "")
+        .map(r => Number(r.y));
+
       props.onDataSave(pairedCurveType, {...payload, xValues, yValues}, props.id);
       if (props.onRemove) props.onRemove();
     }

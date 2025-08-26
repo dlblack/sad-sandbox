@@ -1,37 +1,41 @@
-import React, {useContext, useEffect, useRef} from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import SaveAsDialog from "../dialogs/SaveAsDialog";
-import {FaFolder, FaFolderOpen} from "react-icons/fa";
+import { FaFolder, FaFolderOpen } from "react-icons/fa";
 import "../styles/css/TreeNode.css";
-import dssIcon from '../../assets/images/dss.gif';
-import {StyleContext} from "../styles/StyleContext";
+import dssIcon from "../../assets/images/dss.gif";
+import { StyleContext } from "../styles/StyleContext";
+import { TextStore } from "../utils/TextStore";
 
 const hasRealChildren = (children) => {
   if (!children) return false;
   const arr = React.Children.toArray(children);
-  return arr.some(child => {
+  const noAnalysesText = TextStore.interface("Tree_NoAnalyses");
+  return arr.some((child) => {
     if (child && child.type === TreeNode) {
-      return !!child.props.label && child.props.label !== "(No analyses)";
+      return !!child.props.label && child.props.label !== noAnalysesText;
     }
     return !!child;
   });
 };
 
-function getNodeBadgeOrIcon(label, isLeaf, type, section) {
+function getNodeBadgeOrIcon(parentLabel, isLeaf, type, section) {
   if (isLeaf && section === "data") {
     return (
       <img
         src={dssIcon}
-        alt="Data"
+        alt={TextStore.interface("Tree_Alt_DataIcon")}
         className="tree-data-icon"
       />
     );
   }
   if (isLeaf && section === "analysis") {
-    if (label === "Bulletin 17 Analysis") {
-      return <span className="tree-badge b17">B17</span>;
+    const b17Label = TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard");
+    const pffLabel = TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard");
+    if (parentLabel === b17Label) {
+      return <span className="tree-badge b17">{TextStore.interface("Tree_Badge_B17")}</span>;
     }
-    if (label === "Peak Flow Frequency") {
-      return <span className="tree-badge pff">PFF</span>;
+    if (parentLabel === pffLabel) {
+      return <span className="tree-badge pff">{TextStore.interface("Tree_Badge_PFF")}</span>;
     }
   }
   return null;
@@ -62,7 +66,7 @@ const TreeNode = ({
                     setSaveAsDialogOpen,
                     dataset,
                   }) => {
-  const {componentBackgroundStyle} = useContext(StyleContext);
+  const { componentBackgroundStyle } = useContext(StyleContext);
   const hasContent = hasRealChildren(children);
   const isLeaf = !hasContent;
   const isBottomLevel = isLeaf && canDelete;
@@ -80,7 +84,7 @@ const TreeNode = ({
   const handleContextMenu = (e) => {
     if (!isBottomLevel) return;
     e.preventDefault();
-    setMenu?.({x: e.clientX, y: e.clientY, path});
+    setMenu?.({ x: e.clientX, y: e.clientY, path });
   };
 
   const handleSaveAs = () => {
@@ -118,23 +122,35 @@ const TreeNode = ({
   const handlePlot = () => {
     setMenu?.(null);
     if (section === "data" && dataset) {
-      console.log("Dispatching plot event for:", dataset.name);
+      // Dispatch event for plot consumers
       window.dispatchEvent(
         new CustomEvent("plotNodeData", {
-          detail: {dataset},
+          detail: { dataset },
         })
       );
     }
   };
 
   return (
-    <div className={`tree-node ${componentBackgroundStyle} ${isTopLevel ? " top-level" : ""}`} ref={ref}>
+    <div
+      className={`tree-node ${componentBackgroundStyle} ${
+        isTopLevel ? " top-level" : ""
+      }`}
+      ref={ref}
+    >
       <span
-        className={`tree-label${expanded ? " expanded" : ""}${hasContent ? " pointer" : ""}`}
+        className={`tree-label${expanded ? " expanded" : ""}${
+          hasContent ? " pointer" : ""
+        }`}
         onClick={hasContent ? () => onToggle(path) : undefined}
         onContextMenu={handleContextMenu}
       >
-        {hasContent && (expanded ? <FaFolderOpen color="#f6b73c"/> : <FaFolder color="#f6b73c"/>)}
+        {hasContent &&
+          (expanded ? (
+            <FaFolderOpen color="#f6b73c" />
+          ) : (
+            <FaFolder color="#f6b73c" />
+          ))}
         {badge}
         {renaming === path ? (
           <form onSubmit={handleRenameSubmit}>
@@ -142,7 +158,7 @@ const TreeNode = ({
               type="text"
               autoFocus
               value={renameValue}
-              onChange={e => setRenameValue?.(e.target.value)}
+              onChange={(e) => setRenameValue?.(e.target.value)}
               onBlur={handleRenameBlur}
             />
           </form>
@@ -150,6 +166,7 @@ const TreeNode = ({
           <span>{label}</span>
         )}
       </span>
+
       {menu && menu.path === path && isBottomLevel && (
         <div
           className={`tree-context-menu pointer ${componentBackgroundStyle} `}
@@ -159,24 +176,25 @@ const TreeNode = ({
           }}
         >
           <div className="tree-menu-item" onClick={handleSaveAs}>
-            Save As
+            {TextStore.interface("Tree_Menu_SaveAs")}
           </div>
           <div className="tree-menu-item" onClick={handleRename}>
-            Rename
+            {TextStore.interface("Tree_Menu_Rename")}
           </div>
           <div
             className={`tree-menu-item${canDelete ? "" : " not-allowed"}`}
             onClick={canDelete ? handleDelete : undefined}
           >
-            Delete
+            {TextStore.interface("Tree_Menu_Delete")}
           </div>
           {section === "data" && (
             <div className="tree-menu-item" onClick={handlePlot}>
-              Plot
+              {TextStore.interface("Tree_Menu_Plot")}
             </div>
           )}
         </div>
       )}
+
       {saveAsDialogOpen === path && isBottomLevel && (
         <SaveAsDialog
           type={type}
@@ -186,6 +204,7 @@ const TreeNode = ({
           onCancel={handleSaveAsCancel}
         />
       )}
+
       {expanded && hasContent && <div className="tree-children">{children}</div>}
     </div>
   );

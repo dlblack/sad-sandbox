@@ -1,4 +1,4 @@
-import {getText} from "./TextStore";
+import {TextStore} from "./TextStore.js";
 
 function formatTimestamp(date = new Date()) {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -21,7 +21,7 @@ function formatTimestamp(date = new Date()) {
 }
 
 export function makeMessage(id, args = [], type = "info", extra = {}) {
-  const msg = getText(id, args);
+  const msg = TextStore.message(id, args);
   const timestamp = formatTimestamp();
   return {
     text: `${timestamp}: ${msg}`,

@@ -1,8 +1,11 @@
 import React from "react";
+import {TextStore} from "../../utils/TextStore.js";
 
-function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel = "Finish", disableNext}) {
+function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel, disableNext}) {
   const isFirstStep = step === 1;
   const isLastStep = step === numSteps;
+
+  const finishText = finishLabel || TextStore.interface("WIZARD_FINISH");
 
   return (
     <div className="wizard-footer-inner d-flex justify-content-between">
@@ -12,7 +15,7 @@ function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel = "Fin
         onClick={() => setStep(s => Math.max(1, s - 1))}
         disabled={isFirstStep}
       >
-        Back
+        {TextStore.interface("WIZARD_BACK")}
       </button>
       <button
         type="button"
@@ -20,7 +23,7 @@ function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel = "Fin
         onClick={() => setStep(s => Math.min(numSteps, s + 1))}
         disabled={isLastStep || disableNext}
       >
-        Next
+        {TextStore.interface("WIZARD_NEXT")}
       </button>
       {isLastStep && (
         <button
@@ -28,7 +31,7 @@ function WizardNavigation({step, setStep, numSteps, onFinish, finishLabel = "Fin
           className="btn btn-primary btn-compact"
           onClick={onFinish}
         >
-          {finishLabel}
+          {finishText}
         </button>
       )}
     </div>

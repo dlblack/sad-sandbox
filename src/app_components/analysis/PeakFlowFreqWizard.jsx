@@ -1,310 +1,141 @@
-import React, {useContext, useEffect, useState} from "react";
-import {StyleContext} from "../../styles/StyleContext";
-import WizardNavigation from "../common/WizardNavigation.jsx";
-import {dockableTitles} from "@/utils/dockableTitles.js";
+import React from "react";
+import GenericWizard from "./GenericWizard.jsx";
+import { TextStore } from "../../utils/TextStore.js";
 
-function PeakFlowFreqWizard(props) {
-  const {componentBackgroundStyle} = useContext(StyleContext);
-  const dischargeData = props.data?.Discharge || props.data?.discharge || [];
+const SKEW_OPTIONS = {
+  option1: TextStore.interface("PeakFlowFreqWizard_UseStationSkew"),
+  option2: TextStore.interface("PeakFlowFreqWizard_UseWeightedSkew"),
+  option3: TextStore.interface("PeakFlowFreqWizard_UseRegionalSkew")
+};
 
-  const SKEW_OPTIONS = {
-    option1: "Use Station Skew",
-    option2: "Use Weighted Skew",
-    option3: "Use Regional Skew"
-  };
+const EXPECTED_PROBABILITY_OPTIONS = {
+  option1: TextStore.interface("PeakFlowFreqWizard_DoNotCompExpProb"),
+  option2: TextStore.interface("PeakFlowFreqWizard_CompExpProb")
+};
 
-  const EXPECTED_PROBABILITY_OPTIONS = {
-    option1: "Do Not Compute Expected Probability",
-    option2: "Compute Expected Probability Curve using Numerical Integration (EMA)"
-  };
-
-  const [step, setStep] = useState(1);
-
-  // Step 1
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedDataset, setSelectedDataset] = useState("");
-
-  useEffect(() => {
-    if (dischargeData.length > 0 && !selectedDataset) {
-      setSelectedDataset(dischargeData[0].name);
-    }
-  }, [dischargeData, selectedDataset]);
-
-  useEffect(() => {
-    if (dischargeData.length > 0 && selectedDataset) {
-      const found = dischargeData.find(item => item.name === selectedDataset);
-      setDescription(found?.description || "");
-    }
-  }, [selectedDataset, dischargeData]);
-
-  const displayType = dockableTitles[props.type] || props.type;
-  const existingNames = (
-    (props.analyses && props.analyses[displayType]) || []
-  ).map(a => (a.name || "").trim().toLowerCase());
-  const nameTrimmed = name.trim().toLowerCase();
-  const isDuplicateName =
-    nameTrimmed.length > 0 &&
-    existingNames.includes(nameTrimmed);
-
-  // Step 2
-  const [step2Value, setStep2Value] = useState("");
-  const [regionalSkew, setRegionalSkew] = useState("");
-  const [regionalSkewMSE, setRegionalSkewMSE] = useState("");
-
-  // Step 3
-  const [step3Value, setStep3Value] = useState("");
-
-  //Step 4
-  const [step4Rows, setStep4Rows] = useState(["", "", "", "", ""]);
-
-  //Step 5
-  const handleWizardFinish = (e) => {
-    e.preventDefault();
-    if (props.onFinish) {
-      props.onFinish(
-        props.type,
-        {
-          name,
-          description,
-          selectedDataset,
-          step2Value: SKEW_OPTIONS[step2Value] || "",
-          regionalSkew,
-          regionalSkewMSE,
-          step3Value: EXPECTED_PROBABILITY_OPTIONS[step3Value] || "",
-          frequencies: step4Rows.filter(v => v !== "")
-        },
-        props.id                   // id: the unique id for this wizard
-      );
-    }
-    if (props.onRemove) {
-      props.onRemove();
-    }
-  };
-
-  const progressSteps = [
-    {label: "Skew"},
-    {label: "Expected Probability"},
-    {label: "Output Frequency Ordinates"},
-    {label: "Complete"}
-  ];
-
-  function renderStep() {
-    switch (step) {
-      case 1:
-        return (
-          <div className="manual-entry-content" style={{maxWidth: 480}}>
-            <legend>General Information</legend>
-            <hr/>
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
-                Name
-              </label>
-              <div className="form-control form-control-sm" style={{flex: 1}}>
+export default function PeakFlowFreqWizard(props) {
+  const steps = [
+    // Step 2: Skew selection
+    {
+      label: TextStore.interface("PeakFlowFreqWizard_StepSkew"),
+      render: ({ bag, setBag }) => (
+        <>
+          <div className="mb-2">
+            {["option1","option2","option3"].map((opt, i) => (
+              <div className="form-check" key={opt}>
                 <input
-                  className="form-control form-control-sm font-xs"
-                  type="text"
-                  id="field1"
-                  value={name}
-                  maxLength={20}
-                  onChange={e => setName(e.target.value)}
+                  className="form-check-input font-xs"
+                  type="radio"
+                  name="step2Radio"
+                  id={`step2_${opt}`}
+                  value={opt}
+                  checked={(bag.step2Value || "") === opt}
+                  onChange={e => setBag(prev => ({ ...prev, step2Value: e.target.value }))}
                 />
+                <label className="form-check-label font-xs" htmlFor={`step2_${opt}`}>
+                  {SKEW_OPTIONS[opt]}
+                </label>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="mb-2 d-flex align-items-center">
-              <label htmlFor="description" className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
-                Description
-              </label>
-              <div className="form-control form-control-sm" style={{flex: 1}}>
-                <textarea
-                  className="form-control font-xs"
-                  id="description"
-                  rows={3}
-                  placeholder="(Optional))"
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
-                Dataset
-              </label>
-              <div className="form-control form-control-sm" style={{flex: 1}}>
-                <select
-                  className="form-select font-xs"
-                  id="combo1"
-                  value={selectedDataset}
-                  onChange={e => setSelectedDataset(e.target.value)}
-                >
-                  {dischargeData.map((item, idx) => (
-                    <option key={idx}>{item.name}</option>
-                  ))}
-                </select>
-              </div>
+          <div className="form-group row align-items-center mb-2">
+            <label
+              htmlFor="regionalSkew"
+              className="col-auto col-form-label"
+              style={{ fontSize: "12px", minWidth: 110 }}
+            >
+              {TextStore.interface("PeakFlowFreqWizard_RegionalSkew")}
+            </label>
+            <div className="col ps-0">
+              <input
+                type="number"
+                className="form-control form-control-sm font-xs"
+                id="regionalSkew"
+                value={bag.regionalSkew ?? ""}
+                onChange={e => setBag(prev => ({ ...prev, regionalSkew: e.target.value }))}
+                disabled={(bag.step2Value || "") !== "option3"}
+              />
             </div>
           </div>
-        );
-      case 2:
-        return (
-          <>
-            <div className="mb-2">
-              <div className="form-check">
-                <input
-                  className="form-check-input font-xs"
-                  type="radio"
-                  name="step2Radio"
-                  id="step2Option1"
-                  value="option1"
-                  checked={step2Value === "option1"}
-                  onChange={e => setStep2Value(e.target.value)}
-                />
-                <label
-                  className="form-check-label font-xs"
-                  htmlFor="step2Option1"
-                >
-                  Use Station Skew
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input font-xs"
-                  type="radio"
-                  name="step2Radio"
-                  id="step2Option2"
-                  value="option2"
-                  checked={step2Value === "option2"}
-                  onChange={e => setStep2Value(e.target.value)}
-                />
-                <label
-                  className="form-check-label font-xs"
-                  htmlFor="step2Option2"
-                >
-                  Use Weighted Skew
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input font-xs"
-                  type="radio"
-                  name="step2Radio"
-                  id="step2Option3"
-                  value="option3"
-                  checked={step2Value === "option3"}
-                  onChange={e => setStep2Value(e.target.value)}
-                />
-                <label
-                  className="form-check-label font-xs"
-                  htmlFor="step2Option3"
-                >
-                  Use Regional Skew
-                </label>
-              </div>
-            </div>
-            {/* Numerical Inputs for Option 3, horizontally aligned */}
-            <div className="form-group row align-items-center mb-2">
-              <label htmlFor="regionalSkew" className="col-auto col-form-label"
-                     style={{fontSize: "12px", minWidth: 110}}>
-                Regional Skew:
-              </label>
-              <div className="col ps-0">
-                <input
-                  type="number"
-                  className="form-control form-control-sm font-xs"
-                  id="regionalSkew"
-                  value={regionalSkew}
-                  onChange={e => setRegionalSkew(e.target.value)}
-                  disabled={step2Value !== "option3"}
-                />
-              </div>
-            </div>
-            <div className="form-group row align-items-center mb-2">
-              <label htmlFor="regionalSkewMSE" className="col-auto col-form-label"
-                     style={{fontSize: "12px", minWidth: 110}}>
-                Regional Skew MSE:
-              </label>
-              <div className="col ps-0">
-                <input
-                  type="number"
-                  className="form-control form-control-sm font-xs"
-                  id="regionalSkewMSE"
-                  value={regionalSkewMSE}
-                  onChange={e => setRegionalSkewMSE(e.target.value)}
-                  disabled={step2Value !== "option3"}
-                />
-              </div>
-            </div>
-          </>
-        );
 
-      case 3:
-        return (
-          <>
-            <div className="form-group">
-              <div className="form-check">
-                <input
-                  className="form-check-input font-xs"
-                  type="radio"
-                  name="step3Radio"
-                  id="step3Option1"
-                  value="option1"
-                  checked={step3Value === "option1"}
-                  onChange={e => setStep3Value(e.target.value)}
-                />
-                <label className="form-check-label font-xs" htmlFor="step2Option1">
-                  Do Not Compute Expected Probability
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  className="form-check-input font-xs"
-                  type="radio"
-                  name="step3Radio"
-                  id="step3Option2"
-                  value="option2"
-                  checked={step3Value === "option2"}
-                  onChange={e => setStep3Value(e.target.value)}
-                />
-                <label className="form-check-label font-xs" htmlFor="step3Option2">
-                  Compute Expected Probability Curve using Numerical Integration (EMA)
-                </label>
-              </div>
+          <div className="form-group row align-items-center mb-2">
+            <label
+              htmlFor="regionalSkewMSE"
+              className="col-auto col-form-label"
+              style={{ fontSize: "12px", minWidth: 110 }}
+            >
+              {TextStore.interface("PeakFlowFreqWizard_RegionalSkewMSE")}
+            </label>
+            <div className="col ps-0">
+              <input
+                type="number"
+                className="form-control form-control-sm font-xs"
+                id="regionalSkewMSE"
+                value={bag.regionalSkewMSE ?? ""}
+                onChange={e => setBag(prev => ({ ...prev, regionalSkewMSE: e.target.value }))}
+                disabled={(bag.step2Value || "") !== "option3"}
+              />
             </div>
-          </>
-        );
-      case 4:
+          </div>
+        </>
+      )
+    },
+
+    // Step 3: Expected Probability
+    {
+      label: TextStore.interface("PeakFlowFreqWizard_StepExpProb"),
+      render: ({ bag, setBag }) => (
+        <div className="form-group">
+          {["option1","option2"].map(opt => (
+            <div className="form-check" key={opt}>
+              <input
+                className="form-check-input font-xs"
+                type="radio"
+                name="step3Radio"
+                id={`step3_${opt}`}
+                value={opt}
+                checked={(bag.step3Value || "") === opt}
+                onChange={e => setBag(prev => ({ ...prev, step3Value: e.target.value }))}
+              />
+              <label className="form-check-label font-xs" htmlFor={`step3_${opt}`}>
+                {EXPECTED_PROBABILITY_OPTIONS[opt]}
+              </label>
+            </div>
+          ))}
+        </div>
+      )
+    },
+
+    // Step 4: Output frequencies
+    {
+      label: TextStore.interface("PeakFlowFreqWizard_StepOutFreqOrd"),
+      render: ({ bag, setBag }) => {
+        const rows = Array.isArray(bag.step4Rows) ? bag.step4Rows : ["", "", "", "", ""];
+        const onChangeRow = (idx, val) => {
+          const updated = [...rows];
+          updated[idx] = val;
+          if (idx === rows.length - 1 && val !== "") updated.push("");
+          setBag(prev => ({ ...prev, step4Rows: updated }));
+        };
         return (
           <>
-            <div className="font-sm mb-2">Edit the output frequency ordinates in the table below.</div>
+            <div className="font-sm mb-2">{TextStore.interface("PeakFlowFreqWizard_EditOutputFreqOrd")}</div>
             <table className="table table-sm compact-table wizard-frequency-table">
               <thead>
               <tr>
-                <th>
-                  Frequency in Percent
-                </th>
+                <th>{TextStore.interface("PeakFlowFreqWizard_FreqInPercent")}</th>
               </tr>
               </thead>
               <tbody>
-              {step4Rows.map((value, idx) => (
+              {rows.map((value, idx) => (
                 <tr key={idx}>
                   <td>
                     <input
                       type="number"
                       className="form-control wizard-frequency-input"
                       value={value}
-                      onChange={e => {
-                        const newRows = [...step4Rows];
-                        newRows[idx] = e.target.value;
-                        setStep4Rows(newRows);
-                        if (
-                          idx === step4Rows.length - 1 &&
-                          e.target.value !== ""
-                        ) {
-                          setStep4Rows([...newRows, ""]);
-                        }
-                      }}
+                      onChange={e => onChangeRow(idx, e.target.value)}
                     />
                   </td>
                 </tr>
@@ -313,112 +144,109 @@ function PeakFlowFreqWizard(props) {
             </table>
           </>
         );
-      case 5:
+      }
+    },
+
+    // Step 5: Summary
+    {
+      label: TextStore.interface("PeakFlowFreqWizard_StepComplete"),
+      render: ({ name, description, selectedDataset, bag }) => {
+        const step2 = bag.step2Value || "";
+        const freqList = (bag.step4Rows || []).filter(v => v !== "");
         return (
           <div>
-            <h6 className="mb-3">Summary</h6>
-            <div className="mb-2"><strong>General Information</strong></div>
+            <h6 className="mb-3">{TextStore.interface("PeakFlowFreqWizard_Summary")}</h6>
+
+            <div className="mb-2"><strong>{TextStore.interface("Wizard_GeneralInfo")}</strong></div>
             <ul className="list-unstyled mb-2 font-xs">
-              <li><strong>Name:</strong> {name || <em>(None entered)</em>}</li>
-              <li><strong>Description:</strong> {description || <em>(None entered)</em>}</li>
-              <li><strong>Dataset:</strong> {selectedDataset || <em>(None selected)</em>}</li>
+              <li><strong>{TextStore.interface("Wizard_Name")}</strong>{name || <em>(None entered)</em>}</li>
+              <li>
+                <strong>{TextStore.interface("Wizard_Description")}</strong>
+                {description || <em>(None entered)</em>}
+              </li>
+              <li>
+                <strong>{TextStore.interface("Wizard_Dataset")}</strong>
+                {selectedDataset || <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
+              </li>
             </ul>
-            <div className="mb-2"><strong>Skew Selection</strong></div>
+
+            <div className="mb-2">
+              <strong>{TextStore.interface("PeakFlowFreqWizard_SummarySkewSelection")}</strong>
+            </div>
             <ul className="list-unstyled mb-2 font-xs">
               <li>
-                <strong>Type:</strong> {
-                step2Value === "option1" ? "Use Station Skew" :
-                  step2Value === "option2" ? "Use Weighted Skew" :
-                    step2Value === "option3" ? "Use Regional Skew" :
-                      <em>(None selected)</em>
-              }
+                <strong>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType")}</strong>{" "}
+                {step2 === "option1" ? SKEW_OPTIONS.option1
+                  : step2 === "option2" ? SKEW_OPTIONS.option2
+                    : step2 === "option3" ? SKEW_OPTIONS.option3
+                      : <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
               </li>
-              {step2Value === "option3" && (
+              {step2 === "option3" && (
                 <>
-                  <li><strong>Regional Skew:</strong> {regionalSkew || <em>(None entered)</em>}</li>
-                  <li><strong>Regional Skew MSE:</strong> {regionalSkewMSE || <em>(None entered)</em>}</li>
+                  <li>
+                    <strong>{TextStore.interface("PeakFlowFreqWizard_RegionalSkew")}</strong>
+                    {bag.regionalSkew || <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
+                  </li>
+                  <li>
+                    <strong>{TextStore.interface("PeakFlowFreqWizard_RegionalSkewMSE")}</strong>
+                    {bag.regionalSkewMSE || <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
+                  </li>
                 </>
               )}
             </ul>
-            <div className="mb-2"><strong>Expected Probability</strong></div>
+
+            <div className="mb-2">
+              <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryExpectedProbability")}</strong>
+            </div>
             <ul className="list-unstyled mb-2 font-xs">
               <li>
-                <strong>Computation:</strong> {
-                step3Value === "option1" ? "Do Not Compute Expected Probability" :
-                  step3Value === "option2" ? "Compute Expected Probability Curve using Numerical Integration (EMA)" :
-                    <em>(None selected)</em>
-              }
+                <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryComputation")}</strong>{" "}
+                {bag.step3Value === "option1" ? EXPECTED_PROBABILITY_OPTIONS.option1
+                  : bag.step3Value === "option2" ? EXPECTED_PROBABILITY_OPTIONS.option2
+                    : <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
               </li>
             </ul>
-            <div className="mb-2"><strong>Frequencies</strong></div>
+
+            <div className="mb-2">
+              <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies")}</strong>
+            </div>
             <ul className="list-unstyled mb-2 font-xs">
-              {step4Rows
-                .filter(v => v !== "")
-                .map((v, idx) => (
-                  <li key={idx}>• {v}</li>
-                ))}
-              {step4Rows.filter(v => v !== "").length === 0 && (
-                <li><em>(No values entered)</em></li>
-              )}
+              {freqList.length > 0
+                ? freqList.map((v, idx) => <li key={idx}>• {v}</li>)
+                : <li><em>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies_None")}</em></li>}
             </ul>
           </div>
         );
-
-      default:
-        return null;
+      }
     }
-  }
+  ];
+
+  const validateNext = (ctx, stepIndex) => {
+    if (stepIndex === 2 && (ctx.bag.step2Value || "") === "option3") {
+      return (ctx.bag.regionalSkew ?? "") !== "" && (ctx.bag.regionalSkewMSE ?? "") !== "";
+    }
+    return true;
+  };
+
+  const buildResult = (ctx) => ({
+    name: ctx.name,
+    description: ctx.description,
+    selectedDataset: ctx.selectedDataset,
+    step2Value: SKEW_OPTIONS[ctx.bag.step2Value] || "",
+    regionalSkew: ctx.bag.regionalSkew,
+    regionalSkewMSE: ctx.bag.regionalSkewMSE,
+    step3Value: EXPECTED_PROBABILITY_OPTIONS[ctx.bag.step3Value] || "",
+    frequencies: (ctx.bag.step4Rows || []).filter(v => v !== "")
+  });
 
   return (
-    <div className={`wizard-fixed-size card p-3 ${componentBackgroundStyle}`}>
-      <form
-        className="d-flex flex-column h-100"
-        style={{flex: 1, minHeight: 0, display: "flex", flexDirection: "column"}}
-        onSubmit={e => e.preventDefault()}
-      >
-        {step >= 2 && (
-          <div className="mb-4">
-            {/* Circles row */}
-            <div className="wizard-circles-row">
-              {progressSteps.map((stepObj, idx) => {
-                const isFilled = step === idx + 2;
-                return (
-                  <div key={idx} className="wizard-circle-container">
-                    <div className={`wizard-circle ${isFilled ? "filled" : "unfilled"}`}>
-                      {idx + 1}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Labels row */}
-            <div className="wizard-labels-row">
-              {progressSteps.map((stepObj, idx) => (
-                <div key={idx} className="wizard-label">
-                  {stepObj.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step content */}
-        <div className="flex-grow-1 d-flex flex-column">
-          {renderStep()}
-        </div>
-
-        <div className="wizard-footer">
-          <WizardNavigation
-            step={step}
-            setStep={setStep}
-            numSteps={progressSteps.length + 1}
-            onFinish={handleWizardFinish}
-            disableNext={step === 1 && (isDuplicateName || !nameTrimmed)}
-          />
-        </div>
-      </form>
-    </div>
+    <GenericWizard
+      {...props}
+      includeGeneralInfo
+      steps={steps}
+      buildResult={buildResult}
+      validateNext={validateNext}
+      defaultDatasetKey="Discharge"
+    />
   );
 }
-
-export default PeakFlowFreqWizard;

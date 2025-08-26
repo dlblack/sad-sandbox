@@ -1,5 +1,5 @@
-import {useEffect, useState} from "react";
-import {dockableTitles} from "@/utils/dockableTitles.js";
+import { useEffect, useState } from "react";
+import { componentMetadata } from "../utils/componentMetadata.js"
 
 function groupAnalysesByType(analysesObj = {}) {
   return analysesObj;
@@ -56,7 +56,7 @@ export default function useAppData() {
   };
 
   const handleWizardFinish = async (type, valuesObj) => {
-    const friendlyType = dockableTitles[type] || type;
+    const friendlyType = componentMetadata?.[type]?.entityName ?? type;
     await fetch("/api/analyses", {
       method: "POST",
       headers: {"Content-Type": "application/json"},

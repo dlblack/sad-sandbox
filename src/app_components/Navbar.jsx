@@ -1,6 +1,7 @@
 import React, {useContext, useState} from "react";
 import {StyleContext} from "../styles/StyleContext";
 import logo from "../../assets/images/logo.png";
+import { TextStore } from "../utils/TextStore";
 
 function Navbar({addComponent}) {
   const {navbarStyle} = useContext(StyleContext);
@@ -39,21 +40,21 @@ function Navbar({addComponent}) {
               {/* File Menu */}
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  File
+                  {TextStore.interface("Navbar_File")}
                 </a>
                 <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">Create New...</a></li>
-                  <li><a className="dropdown-item" href="#">Open...</a></li>
-                  <li><a className="dropdown-item" href="#">Close...</a></li>
-                  <li><a className="dropdown-item" href="#">Save...</a></li>
-                  <li><a className="dropdown-item" href="#">Print...</a></li>
+                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_New")}</a></li>
+                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Open")}</a></li>
+                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Close")}</a></li>
+                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Save")}</a></li>
+                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Print")}</a></li>
                 </ul>
               </li>
 
               {/* Maps Menu */}
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  Maps
+                  {TextStore.interface("Navbar_Maps")}
                 </a>
                 <ul className="dropdown-menu">
                   <li>
@@ -65,7 +66,7 @@ function Navbar({addComponent}) {
                         handleOpenComponent("ComponentMap");
                       }}
                     >
-                      Open Map Window
+                      {TextStore.interface("Navbar_Maps_Open")}
                     </a>
                   </li>
                 </ul>
@@ -74,7 +75,7 @@ function Navbar({addComponent}) {
               {/* Data Menu with Submenu */}
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  Data
+                  {TextStore.interface("Navbar_Data")}
                 </a>
                 <ul className="dropdown-menu">
                   {/* New Data Submenu */}
@@ -84,7 +85,7 @@ function Navbar({addComponent}) {
                       href="#"
                       data-bs-toggle="dropdown"
                     >
-                      New Data
+                      {TextStore.interface("Navbar_Data_NewData")}
                     </a>
                     <ul className="dropdown-menu">
                       <li>
@@ -96,23 +97,35 @@ function Navbar({addComponent}) {
                             handleOpenComponent("ManualDataEntryEditor");
                           }}
                         >
-                          Manual Data Entry
+                          {TextStore.interface("Navbar_Data_NewData_Manual")}
                         </a>
                       </li>
-                      <li><a className="dropdown-item" href="#">Import from USGS</a></li>
-                      <li><a className="dropdown-item" href="#">Import from HEC-DSS</a></li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          {TextStore.interface("Navbar_Data_NewData_ImportUSGS")}
+                        </a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item" href="#">
+                          {TextStore.interface("Navbar_Data_NewData_ImportDSS")}
+                        </a>
+                      </li>
                     </ul>
                   </li>
 
-                  <li><a className="dropdown-item" href="#">Edit Data</a></li>
-                  <li><a className="dropdown-item" href="#">Data Utilities</a></li>
+                  <li>
+                    <a className="dropdown-item" href="#">{TextStore.interface("Navbar_Data_EditData")}</a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">{TextStore.interface("Navbar_Data_DataUtilities")}</a>
+                  </li>
                 </ul>
               </li>
 
               {/* Analysis Menu */}
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  Analysis
+                  {TextStore.interface("Navbar_Analysis")}
                 </a>
                 <ul className="dropdown-menu">
                   <li>
@@ -124,30 +137,86 @@ function Navbar({addComponent}) {
                         handleOpenComponent("PeakFlowFreqWizard");
                       }}
                     >
-                      New Peak Flow Frequency
+                      {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
                     </a>
                   </li>
-                  <li><a
-                    className="dropdown-item"
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleOpenComponent("Bulletin17AnalysisWizard");
-                    }}
-                  >New Bulletin 17 Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New General Frequency Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Volume Frequency Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Coincident Frequency Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Curve Combination Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Balanced Hydrograph Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Distribution Fitting Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Mixed Population Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Correlation Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Record Extension Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Peaks Over Threshold Analysis</a></li>
-                  <li><a className="dropdown-item" href="#">New Linear Regression</a></li>
-                  <li><a className="dropdown-item" href="#">New Quantile Mapping</a></li>
-                  <li><a className="dropdown-item" href="#">New Copula Analysis</a></li>
+                  <li>
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOpenComponent("Bulletin17AnalysisWizard");
+                      }}
+                    >
+                      {TextStore.interface("Navbar_Analysis_Bulletin17")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_GeneralFrequencyAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_VolumeFrequencyAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_CoincidentFrequencyAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_CurveCombinationAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_BalancedHydrographAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_DistributionFittingAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_MixedPopulationAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_CorrelationAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_RecordExtensionAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_PeaksOverThresholdAnalysis")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_LinearRegression")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_QuantileMapping")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Analysis_CopulaAnalysis")}
+                    </a>
+                  </li>
                 </ul>
               </li>
 
@@ -174,7 +243,7 @@ function Navbar({addComponent}) {
                         handleOpenComponent("ComponentContent");
                       }}
                     >
-                      Contents
+                      {TextStore.interface("Navbar_Tools_Contents")}
                     </a>
                   </li>
                   <li>
@@ -186,7 +255,7 @@ function Navbar({addComponent}) {
                         handleOpenComponent("ComponentMessage");
                       }}
                     >
-                      Messages
+                      {TextStore.interface("Navbar_Tools_Messages")}
                     </a>
                   </li>
                   <li>
@@ -198,7 +267,7 @@ function Navbar({addComponent}) {
                         handleOpenComponent("ComponentStyleSelector");
                       }}
                     >
-                      Style Selector
+                      {TextStore.interface("Navbar_Tools_StyleSelector")}
                     </a>
                   </li>
                 </ul>
@@ -210,26 +279,58 @@ function Navbar({addComponent}) {
                   <span className="material-icons">help_outline</span>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end">
-                  <li><a className="dropdown-item" href="#">User's Manual</a></li>
-                  <li><a className="dropdown-item" href="#">Tutorials and Guides</a></li>
-                  <li><a className="dropdown-item" href="#">Examples</a></li>
-                  <li><a className="dropdown-item" href="#">Training</a></li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_UsersManual")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_TutorialsAndGuides")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_Examples")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_Training")}
+                    </a>
+                  </li>
                   <li>
                     <hr className="dropdown-divider"/>
                   </li>
-                  <li><a className="dropdown-item" href="#">Install Example Data</a></li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_InstallExampleData")}
+                    </a>
+                  </li>
                   <li>
                     <hr className="dropdown-divider"/>
                   </li>
-                  <li><a className="dropdown-item" href="#">Terms and Conditions</a></li>
-                  <li><a className="dropdown-item" href="#">About HEC-Neptune</a></li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_TermsAndConditions")}
+                    </a>
+                  </li>
+                  <li>
+                    <a className="dropdown-item" href="#">
+                      {TextStore.interface("Navbar_Help_About")}
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>
 
             {/* Search Bar */}
             <form className="d-flex ms-3" role="search" style={{maxHeight: "2.8vh", minWidth: "45%"}}>
-              <input className="form-control" type="search" placeholder="Search" aria-label="Search"/>
+              <input
+                className="form-control"
+                type="search"
+                placeholder={TextStore.interface("Navbar_Search_Placeholder")}
+                aria-label="Search"/>
               <button className="btn btn-outline-light ms-2 d-flex align-items-center justify-content-center"
                       type="submit">
                 <span className="material-icons">search</span>

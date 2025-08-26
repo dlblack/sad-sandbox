@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import DockableItem from "./DockableItem";
-import { dockableTitles } from "@/utils/dockableTitles.js";
+import { componentMetadata } from "../../utils/componentMetadata.js";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 
 const MIN_WIDTH = 120;
@@ -39,7 +39,7 @@ function DraggableDockableItem({
     <div className={`dockable-drag-wrapper${isDragging ? " dragging" : ""}`}>
       <DockableItem
         {...container}
-        type={dockableTitles[type] || type}
+        type={componentMetadata?.[type]?.entityName ?? type}
         title={container.dataset?.name || ""}
         onRemove={onRemove}
         width={container.width}

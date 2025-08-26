@@ -32,8 +32,8 @@ function App() {
     handleWizardFinish: wizardFinishWithMessages,
     handleDeleteNode: deleteNodeWithMessages,
   } = useDockableContainers({
-    handleWizardFinish,   // integrate with saving analyses
-    handleDeleteNode,     // integrate with deleting
+    handleWizardFinish,
+    handleDeleteNode,
   });
 
   // Electron menu (opens components)

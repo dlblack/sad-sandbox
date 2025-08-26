@@ -1,6 +1,5 @@
-// src/app_components/data/manual_data_entry_editor/TableSectionStep.jsx
 import React, {useMemo} from "react";
-import {generateDateTimeRows} from "@/utils/timeUtils.js";
+import {generateDateTimeRows} from "../../../utils/timeUtils.js";
 
 /**
  * TableSectionStep
@@ -17,7 +16,6 @@ function TableSectionStep({
                             endTime,
                             intervalOpt
                           }) {
-  // Compute auto dates (only if all fields are present)
   const autoDateTimes = useMemo(() => {
     if (
       startDate && startTime &&
@@ -29,7 +27,6 @@ function TableSectionStep({
     return [];
   }, [startDate, startTime, endDate, endTime, intervalOpt]);
 
-  // Build the rows: fill from autoDateTimes if available
   const rows = autoDateTimes.length
     ? autoDateTimes.map((dt, i) => ({
       dateTime: dt,
@@ -58,7 +55,7 @@ function TableSectionStep({
                 pattern="\d{2}[A-Za-z]{3}\d{4} \d{2}:\d{2}"
                 autoComplete="off"
                 tabIndex={-1}
-                readOnly={!!autoDateTimes.length} // Auto mode: always readOnly
+                readOnly={!!autoDateTimes.length}
               />
             </td>
             <td>
