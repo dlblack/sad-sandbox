@@ -1,10 +1,10 @@
-import { contextBridge, ipcRenderer } from 'electron';
+const { contextBridge, ipcRenderer } = require("electron");
 
 function onMenu(channel, callback) {
-  ipcRenderer.removeAllListeners(channel);
+  try {
+    ipcRenderer.removeAllListeners(channel);
+  } catch {}
   ipcRenderer.on(channel, (_event, ...args) => callback(...args));
 }
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  onMenu,
-});
+contextBridge.exposeInMainWorld("electronAPI", { onMenu });

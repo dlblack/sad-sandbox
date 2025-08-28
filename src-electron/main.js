@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { TextStore} from "../src/utils/TextStore.js";
+import { TextStore } from "../src/utils/TextStore.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,6 +108,8 @@ function createWindow() {
         { type: 'separator' },
         { label: TextStore.interface('Navbar_Help_TermsAndConditions'), click: () => shell.openExternal('https://www.hec.usace.army.mil/software/terms_and_conditions.aspx') },
         { label: TextStore.interface('Navbar_Help_About'),              click: () => win.webContents.send('menu-help', 'about-hec-neptune') },
+        { type: "separator" },
+        { label: "Demo Plots (Plotly)", click: () => win.webContents.send('menu-tools', 'DemoPlots') },
       ],
     },
   ]);

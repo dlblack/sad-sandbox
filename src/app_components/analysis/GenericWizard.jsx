@@ -59,7 +59,7 @@ export default function GenericWizard(props) {
     const generalInfoStep = {
       label: TextStore.interface?.("Wizard_GeneralInfo") || "General Info",
       render: (ctx) => (
-        <div className="manual-entry-content" style={{ maxWidth: 480 }}>
+        <div className="manual-entry-content">
           <legend>{TextStore.interface?.("Wizard_GeneralInfo") || "General Info"}</legend>
           <hr/>
           <div className="mb-2 d-flex align-items-center">

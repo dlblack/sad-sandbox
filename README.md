@@ -86,7 +86,7 @@ cd server
 node server.js
 ```
 
-- This starts the Express backend at http://localhost:5000
+- This starts the Express backend at http://localhost:5001
 - Java is invoed automatically for DSS file operations.
 - If Java is not in the default path, edit `server.js` and set `javaPath` accordingly.
 

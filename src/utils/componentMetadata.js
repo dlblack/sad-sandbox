@@ -4,8 +4,8 @@ function dataEditor(entityName) {
   return {
     entityName,
     category: "data editor",
-    width: 650,
-    height: 620
+    width: 550,
+    height: 550
   };
 }
 
@@ -73,6 +73,10 @@ export const componentMetadata = {
   LinearRegressionWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_LinearRegressionWizard")),
   QuantileMappingWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_QuantileMappingWizard")),
   CopulaAnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard")),
+
+  // Demo Plots
+  DemoPlots: { entityName: "Demo Plots (Plotly)", category: "demo", width: 1000, height: 800 },
+
 };
 
 export const DEFAULT_COMPONENT_SIZE = {

@@ -463,12 +463,28 @@ html, body, #root, .app-container {
     flex: 1 1 0;
     min-height: 0;
     max-height: 100%;
+    max-width: 480px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     margin: 0;
     padding: 0;
     border: none;
+}
+
+.label-fixed {
+    min-width: 90px;
+    text-align: left;
+}
+
+.summary-line {
+    margin: 0.5rem 0;   /* same as my-2 */
+    font-size: 0.75rem;
+}
+
+.summary-line > strong {
+    margin-right: 0.25rem; /* like Bootstrap’s me-2 */
+    font-weight: 600;
 }
 
 .manual-entry-metadata {
