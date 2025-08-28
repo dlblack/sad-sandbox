@@ -112,11 +112,11 @@ export default function ManualDataEntryEditor(props) {
   function renderStep() {
     if (step === 1) {
       return (
-        <div className="manual-entry-content" style={{maxWidth: 480}}>
+        <div className="manual-entry-content">
           <legend>{TextStore.interface("ManualDataEntryEditor_Legend")}</legend>
           <hr/>
           <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+            <label className="form-label font-xs me-2 label-fixed">
               {TextStore.interface("ManualDataEntryEditor_Name")}
             </label>
             <input className="form-control form-control-sm" style={{flex: 1}}
@@ -125,7 +125,7 @@ export default function ManualDataEntryEditor(props) {
             />
           </div>
           <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+            <label className="form-label font-xs me-2 label-fixed">
               {TextStore.interface("ManualDataEntryEditor_Description")}
             </label>
             <textarea className="form-control form-control-sm" style={{flex: 1}}
@@ -186,7 +186,7 @@ export default function ManualDataEntryEditor(props) {
             />
             {/* Curve type, units, labels as before */}
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_CurveType")}
               </label>
               <PairedCurveTypeComboBox value={pairedCurveType} onChange={val => {
@@ -195,7 +195,7 @@ export default function ManualDataEntryEditor(props) {
               }}/>
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_YLabel")}
               </label>
               <input className="form-control font-xs"
@@ -204,7 +204,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_YUnits")}
               </label>
               <input className="form-control font-xs"
@@ -213,7 +213,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_XLabel")}
               </label>
               <input className="form-control font-xs"
@@ -222,7 +222,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_XUnits")}
               </label>
               <input className="form-control font-xs"
@@ -237,13 +237,13 @@ export default function ManualDataEntryEditor(props) {
           <div>
             {/* No pathname step for JSON */}
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_CurveType")}
               </label>
               <PairedCurveTypeComboBox value={pairedCurveType} onChange={setPairedCurveType}/>
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_YLabel")}
               </label>
               <input className="form-control font-xs"
@@ -252,7 +252,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_YUnits")}
               </label>
               <input className="form-control font-xs"
@@ -261,7 +261,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_XLabel")}
               </label>
               <input className="form-control font-xs"
@@ -270,7 +270,7 @@ export default function ManualDataEntryEditor(props) {
               />
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90, textAlign: "left"}}>
+              <label className="form-label font-xs me-2 label-fixed">
                 {TextStore.interface("ManualDataEntryEditor_XUnits")}
               </label>
               <input className="form-control font-xs"

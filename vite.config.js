@@ -5,22 +5,33 @@ import electron from 'vite-plugin-electron';
 export default defineConfig({
     plugins: [
         react(),
-        electron({
-            main: {
+        electron([
+            {
                 entry: 'src-electron/main.js',
+                onstart({ startup }) {
+                    startup();
+                },
                 vite: {
-                    build: { outDir: 'dist-electron' },
+                    build: { outDir: 'dist-electron', minify: false },
                 },
             },
-            preload: {
-                input: { preload: 'src-electron/preload.js' },
+            {
+                entry: 'src-electron/preload.js',
+                onstart({ reload }) {
+                    reload();
+                },
                 vite: {
-                    build: { outDir: 'dist-electron' },
+                    build: { outDir: 'dist-electron', minify: false },
                 },
             },
-        }),
+        ]),
     ],
     server: {
-        proxy: { '/api': 'http://localhost:5001' },
+        proxy: {
+            '/api': 'http://localhost:5001',
+        },
+    },
+    build: {
+        outDir: "dist",
     },
 });

@@ -320,6 +320,21 @@ function Navbar({addComponent}) {
                       {TextStore.interface("Navbar_Help_About")}
                     </a>
                   </li>
+                  <li>
+                    <hr className="dropdown-divider"/>
+                  </li>
+                  <li>
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOpenComponent("DemoPlots");
+                      }}
+                    >
+                      Demo Plots (Plotly)
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>

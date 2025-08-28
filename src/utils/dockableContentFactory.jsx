@@ -5,6 +5,7 @@ import ComponentContent from "../app_components/ComponentContent";
 import ComponentStyleSelector from "../app_components/ComponentStyleSelector";
 import PairedDataPlot from "../app_components/PairedDataPlot";
 import TimeSeriesPlot from "../app_components/TimeSeriesPlot";
+import DemoPlots from "../app_components/DemoPlots";
 
 import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/ManualDataEntryEditor";
 
@@ -51,6 +52,8 @@ export const dockableContentFactory = (type, props = {}) => {
           dataset={props.dataset}
         />
       );
+    case "DemoPlots":
+      return <DemoPlots {...props} />;
 
     case "ManualDataEntryEditor":
       return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave}/>;
