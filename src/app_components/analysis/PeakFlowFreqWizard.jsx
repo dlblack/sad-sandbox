@@ -42,8 +42,7 @@ export default function PeakFlowFreqWizard(props) {
           <div className="form-group row align-items-center mb-2">
             <label
               htmlFor="regionalSkew"
-              className="col-auto col-form-label"
-              style={{ fontSize: "12px", minWidth: 110 }}
+              className="col-auto col-form-label wizard-label-fixed"
             >
               {TextStore.interface("PeakFlowFreqWizard_RegionalSkew")}
             </label>
@@ -62,8 +61,7 @@ export default function PeakFlowFreqWizard(props) {
           <div className="form-group row align-items-center mb-2">
             <label
               htmlFor="regionalSkewMSE"
-              className="col-auto col-form-label"
-              style={{ fontSize: "12px", minWidth: 110 }}
+              className="col-auto col-form-label wizard-label-fixed"
             >
               {TextStore.interface("PeakFlowFreqWizard_RegionalSkewMSE")}
             </label>

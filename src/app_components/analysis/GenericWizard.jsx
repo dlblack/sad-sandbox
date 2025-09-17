@@ -5,9 +5,7 @@ import { componentMetadata } from "../../utils/componentMetadata";
 import { TextStore } from "../../utils/TextStore.js";
 
 export default function GenericWizard(props) {
-  const {
-    componentBackgroundStyle
-  } = useContext(StyleContext);
+  const { componentBackgroundStyle } = useContext(StyleContext);
 
   const {
     type,
@@ -20,7 +18,7 @@ export default function GenericWizard(props) {
     includeGeneralInfo = true,
     steps = [],
     buildResult,
-    validateNext
+    validateNext,
   } = props;
 
   const datasetList = data?.[defaultDatasetKey] || [];
@@ -28,7 +26,6 @@ export default function GenericWizard(props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDataset, setSelectedDataset] = useState("");
-
   const [bag, setBag] = useState({});
 
   useEffect(() => {
@@ -39,99 +36,124 @@ export default function GenericWizard(props) {
 
   useEffect(() => {
     if (datasetList.length > 0 && selectedDataset) {
-      const found = datasetList.find(item => item.name === selectedDataset);
-      setDescription(prev =>
-        prev && prev.length > 0 ? prev : (found?.description || "")
-      );
+      const found = datasetList.find((item) => item.name === selectedDataset);
+      setDescription((prev) => (prev && prev.length > 0 ? prev : (found?.description || "")));
     }
   }, [selectedDataset, datasetList]);
 
   const displayType = componentMetadata?.[type]?.entityName ?? type;
-  const existingNames = useMemo(() => (
-    (analyses && analyses[displayType]) || []
-  ).map(a => (a.name || "").trim().toLowerCase()), [analyses, displayType]);
+  const existingNames = useMemo(
+    () => ((analyses && analyses[displayType]) || []).map((a) => (a.name || "").trim().toLowerCase()),
+    [analyses, displayType]
+  );
 
   const nameTrimmed = name.trim().toLowerCase();
   const isDuplicateName = nameTrimmed.length > 0 && existingNames.includes(nameTrimmed);
 
   const allSteps = useMemo(() => {
     if (!includeGeneralInfo) return steps;
+
     const generalInfoStep = {
       label: TextStore.interface?.("Wizard_GeneralInfo") || "General Info",
       render: (ctx) => (
         <div className="manual-entry-content">
           <legend>{TextStore.interface?.("Wizard_GeneralInfo") || "General Info"}</legend>
-          <hr/>
-          <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{ minWidth: 90, textAlign: "left" }}>
+          <hr />
+
+          {/* Name */}
+          <div className="form-group row align-items-center mb-2">
+            <label
+              htmlFor="wiz_name"
+              className="col-auto col-form-label wizard-label-fixed"
+            >
               {TextStore.interface?.("Wizard_Name") || "Name"}
             </label>
-            <div className="form-control form-control-sm" style={{ flex: 1 }}>
+            <div className="col">
               <input
+                id="wiz_name"
                 className="form-control form-control-sm font-xs"
                 type="text"
                 value={ctx.name}
                 maxLength={20}
-                onChange={e => ctx.setName(e.target.value)}
+                onChange={(e) => ctx.setName(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="mb-2 d-flex align-items-center">
-            <label className="form-label font-xs me-2" style={{ minWidth: 90, textAlign: "left" }}>
+          {/* Description */}
+          <div className="form-group row align-items-center mb-2">
+            <label
+              htmlFor="wiz_desc"
+              className="col-auto col-form-label wizard-label-fixed"
+            >
               {TextStore.interface?.("Wizard_Description") || "Description"}
             </label>
-            <div className="form-control form-control-sm" style={{ flex: 1 }}>
+            <div className="col">
               <textarea
+                id="wiz_desc"
                 className="form-control font-xs"
                 rows={3}
                 placeholder={TextStore.interface?.("Wizard_DescriptionPlaceholder") || "Describe this analysis..."}
                 value={ctx.description}
-                onChange={e => ctx.setDescription(e.target.value)}
+                onChange={(e) => ctx.setDescription(e.target.value)}
               />
             </div>
           </div>
 
+          {/* Dataset (if available) */}
           {datasetList.length > 0 && (
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{ minWidth: 90, textAlign: "left" }}>
+            <div className="form-group row align-items-center mb-2">
+              <label
+                htmlFor="wiz_dataset"
+                className="col-auto col-form-label wizard-label-fixed"
+              >
                 {TextStore.interface?.("Wizard_Dataset") || "Dataset"}
               </label>
-              <div className="form-control form-control-sm" style={{ flex: 1 }}>
+              <div className="col">
                 <select
+                  id="wiz_dataset"
                   className="form-select font-xs"
                   value={ctx.selectedDataset}
-                  onChange={e => ctx.setSelectedDataset(e.target.value)}
+                  onChange={(e) => ctx.setSelectedDataset(e.target.value)}
                 >
                   {datasetList.map((item, idx) => (
-                    <option key={idx} value={item.name}>{item.name}</option>
+                    <option key={idx} value={item.name}>
+                      {item.name}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
           )}
         </div>
-      )
+      ),
     };
+
     return [generalInfoStep, ...steps];
   }, [includeGeneralInfo, steps, datasetList]);
 
-  const progressLabels = allSteps.map(s => s.label);
+  const progressLabels = allSteps.map((s) => s.label);
 
   const disableNext =
-    step === 1 && includeGeneralInfo && (isDuplicateName || !nameTrimmed) ||
+    (step === 1 && includeGeneralInfo && (isDuplicateName || !nameTrimmed)) ||
     (typeof validateNext === "function" && !validateNext(getCtx(), step));
 
   function getCtx() {
     return {
-      step, setStep,
-      name, setName,
-      description, setDescription,
-      selectedDataset, setSelectedDataset,
+      step,
+      setStep,
+      name,
+      setName,
+      description,
+      setDescription,
+      selectedDataset,
+      setSelectedDataset,
       datasetList,
       isDuplicateName,
-      bag, setBag,
-      type, id,
+      bag,
+      setBag,
+      type,
+      id,
     };
   }
 
@@ -145,11 +167,7 @@ export default function GenericWizard(props) {
 
   return (
     <div className={`wizard-fixed-size card p-3 ${componentBackgroundStyle}`}>
-      <form
-        className="d-flex flex-column h-100"
-        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
-        onSubmit={e => e.preventDefault()}
-      >
+      <form className="d-flex flex-column h-100" onSubmit={(e) => e.preventDefault()}>
         {progressLabels.length > 1 && (
           <div className="mb-4">
             {/* Circles row */}
@@ -158,9 +176,7 @@ export default function GenericWizard(props) {
                 const isFilled = step === idx + 1;
                 return (
                   <div key={idx} className="wizard-circle-container">
-                    <div className={`wizard-circle ${isFilled ? "filled" : "unfilled"}`}>
-                      {idx + 1}
-                    </div>
+                    <div className={`wizard-circle ${isFilled ? "filled" : "unfilled"}`}>{idx + 1}</div>
                   </div>
                 );
               })}
@@ -177,7 +193,7 @@ export default function GenericWizard(props) {
         )}
 
         {/* Step content */}
-        <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
+        <div className="flex-grow-1 d-flex flex-column">
           {allSteps[step - 1]?.render(getCtx())}
         </div>
 

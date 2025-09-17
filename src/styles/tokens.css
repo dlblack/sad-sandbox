@@ -1,0 +1,79 @@
+:root{
+    /* Global knobs */
+    --ui-scale: 1;     /* 0.60 – 2.00 */
+    --ui-density: 1;   /* 0.80 – 1.30 */
+
+    /* Rem baseline (clamped for a11y) */
+    --font-base-px: 16;
+    --font-min: 12px;
+    /* allow large text for TVs; raise/lower to taste */
+    --font-max: 40px;
+    --font-rem: clamp(var(--font-min),
+    calc(var(--font-base-px) * 1px * var(--ui-scale)),
+    var(--font-max));
+
+    /* Type scale (rem-based) */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    /* Spacing scale (density-aware) */
+    --space-1: calc(0.25rem * var(--ui-density));
+    --space-2: calc(0.5rem  * var(--ui-density));
+    --space-3: calc(0.75rem * var(--ui-density));
+    --space-4: calc(1rem    * var(--ui-density));
+    --space-5: calc(1.25rem * var(--ui-density));
+    --space-6: calc(1.5rem  * var(--ui-density));
+
+    /* Controls */
+    --control-h-sm: calc(2rem    * var(--ui-density));  /* ~32px @100% */
+    --control-h-md: calc(2.25rem * var(--ui-density));  /* ~36px @100% */
+    --control-h-lg: calc(2.5rem  * var(--ui-density));  /* ~40px @100% */
+    --control-pad-x: calc(0.75rem * var(--ui-density));
+    --control-radius: calc(0.5rem  * var(--ui-density));
+
+    /* Icons */
+    --icon-sm: calc(1rem   * var(--ui-scale));
+    --icon-md: calc(1.25rem* var(--ui-scale));
+    --icon-lg: calc(1.5rem * var(--ui-scale));
+}
+
+/* Make sure the theme can’t override these */
+html { font-size: var(--font-rem) !important; }
+body { font-size: var(--font-size-md) !important; }
+
+/* Ensure Material Icons scale with the UI */
+.material-icons { font-size: var(--icon-md) !important; }
+
+/* Defaults for common controls */
+button, input, select, textarea{
+    font: inherit;
+    height: var(--control-h-md);
+    padding: 0 var(--control-pad-x);
+    border-radius: var(--control-radius);
+    line-height: 1.1;
+}
+
+.small { height: var(--control-h-sm); }
+.large { height: var(--control-h-lg); }
+
+/* Handy layout utilities */
+.h-stack{ display:flex; align-items:center; gap:var(--space-3); }
+.v-stack{ display:flex; flex-direction:column; gap:var(--space-3); }
+.section{ padding:var(--space-5); }
+
+/* Menus / navbar text follow the root scale */
+.navbar, .nav-link, .dropdown-menu, .dropdown-item {
+    font-size: var(--font-size-md) !important;
+}
+
+/* Project tree / lists – adjust selectors to your actual tree container if needed */
+.sidebar, .project-tree, .tree, .explorer, .list-group, .list-group-item {
+    font-size: var(--font-size-md) !important;
+    line-height: 1.25;
+}

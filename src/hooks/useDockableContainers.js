@@ -8,6 +8,7 @@ function getDefaultDockZone(type) {
       return "W";
     case "ComponentMessage":
       return "S";
+    case "ComponentInterfaceSize":
     case "ComponentStyleSelector":
       return "E";
     default:

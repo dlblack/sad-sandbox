@@ -4,10 +4,10 @@ import { componentMetadata } from "../../utils/componentMetadata.js";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 
 const MIN_WIDTH = 120;
-const MAX_WIDTH_W = 300;
-const MAX_WIDTH_E = 420;
+const MAX_WIDTH_W = 800;
+const MAX_WIDTH_E = 1000;
 const MIN_S_HEIGHT = 120;
-const MAX_S_HEIGHT = 340;
+const MAX_S_HEIGHT = 800;
 
 const DOCK_ZONES = ["W", "CENTER", "E", "S"];
 
@@ -78,7 +78,7 @@ export default function DockableFrame({
   const [zoneWidths, setZoneWidths] = useState({
     W: 240,
     CENTER: undefined,
-    E: 240,
+    E: 400,
   });
 
   const initialSouthHeight = React.useMemo(() => {

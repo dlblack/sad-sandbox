@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell } from 'electron';
+import { app, BrowserWindow, Menu, shell, screen } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TextStore } from "../src/utils/TextStore.js";
@@ -7,6 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
+
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('force-device-scale-factor', '1');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -17,6 +20,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       preload: path.join(__dirname, 'preload.js'),
+      zoomFactor: 0.75,
     },
   });
 
@@ -25,6 +29,10 @@ function createWindow() {
   } else {
     win.loadFile(path.join(process.cwd(), 'dist', 'index.html'));
   }
+
+  app.on('browser-window-created', (_, w) => {
+    try { w.webContents.setVisualZoomLevelLimits(1, 1); } catch {}
+  });
 
   const menu = Menu.buildFromTemplate([
     {
@@ -85,7 +93,19 @@ function createWindow() {
       submenu: [
         { label: TextStore.interface('Navbar_Tools_Contents'),      click: () => win.webContents.send('menu-tools', 'ComponentContent') },
         { label: TextStore.interface('Navbar_Tools_Messages'),      click: () => win.webContents.send('menu-tools', 'ComponentMessage') },
-        { label: TextStore.interface('Navbar_Tools_StyleSelector'), click: () => win.webContents.send('menu-tools', 'ComponentStyleSelector') },
+        {
+          label: TextStore.interface('Navbar_Tools_View'),
+          submenu: [
+            {
+              label: TextStore.interface('Navbar_Tools_View_InterfaceSize'),
+              click: () => win.webContents.send('menu-tools', 'ComponentInterfaceSize'),
+            },
+            {
+              label: TextStore.interface('Navbar_Tools_View_StyleSelector'),
+              click: () => win.webContents.send('menu-tools', 'ComponentStyleSelector')
+            },
+          ],
+        },
         {
           label: TextStore.interface('Navbar_Tools_ToggleDevTools') || 'Toggle Developer Tools',
           accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',

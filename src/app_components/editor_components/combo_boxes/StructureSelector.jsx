@@ -3,32 +3,42 @@ import { TextStore } from "../../../utils/TextStore";
 
 export default function StructureSelector({ value, onChange }) {
   return (
-    <div className="mb-3 d-flex align-items-center">
-      <label className="form-label font-xs me-3" style={{ minWidth: 90 }}>
+    <div className="manual-entry-row">
+      <label className="manual-entry-label">
         {TextStore.interface("StructureSelector_Label")}
       </label>
 
-      <label className="form-label font-xs me-3" style={{ fontWeight: 400 }}>
-        <input
-          type="radio"
-          name="dataStructure"
-          value="TimeSeries"
-          checked={value === "TimeSeries"}
-          onChange={(e) => onChange(e.target.value)}
-        />{" "}
-        {TextStore.interface("StructureSelector_TimeSeries")}
-      </label>
+      <div className="manual-entry-field manual-entry-radio-group">
+        <div className="form-check">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="structure_timeseries"
+            name="dataStructure"
+            value="TimeSeries"
+            checked={value === "TimeSeries"}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          <label className="form-check-label font-xs" htmlFor="structure_timeseries">
+            {TextStore.interface("StructureSelector_TimeSeries")}
+          </label>
+        </div>
 
-      <label className="form-label font-xs" style={{ fontWeight: 400 }}>
-        <input
-          type="radio"
-          name="dataStructure"
-          value="PairedData"
-          checked={value === "PairedData"}
-          onChange={(e) => onChange(e.target.value)}
-        />{" "}
-        {TextStore.interface("StructureSelector_PairedData")}
-      </label>
+        <div className="form-check">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="structure_paireddata"
+            name="dataStructure"
+            value="PairedData"
+            checked={value === "PairedData"}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          <label className="form-check-label font-xs" htmlFor="structure_paireddata">
+            {TextStore.interface("StructureSelector_PairedData")}
+          </label>
+        </div>
+      </div>
     </div>
   );
 }
