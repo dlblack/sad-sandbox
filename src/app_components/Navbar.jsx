@@ -72,7 +72,7 @@ function Navbar({addComponent}) {
                 </ul>
               </li>
 
-              {/* Data Menu with Submenu */}
+              {/* Data Menu */}
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
                   {TextStore.interface("Navbar_Data")}
@@ -258,17 +258,43 @@ function Navbar({addComponent}) {
                       {TextStore.interface("Navbar_Tools_Messages")}
                     </a>
                   </li>
-                  <li>
+                  <li><hr className="dropdown-divider" /></li>
+                  {/* View Submenu */}
+                  <li className="dropdown dropend">
                     <a
-                      className="dropdown-item"
+                      className="dropdown-item dropdown-toggle"
                       href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("ComponentStyleSelector");
-                      }}
+                      data-bs-toggle="dropdown"
+                      onClick={(e) => e.preventDefault()}
                     >
-                      {TextStore.interface("Navbar_Tools_StyleSelector")}
+                      {TextStore.interface("Navbar_Tools_View")}
                     </a>
+                    <ul className="dropdown-menu">
+                      <li>
+                        <a
+                          className="dropdown-item"
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleOpenComponent("ComponentInterfaceSize");
+                          }}
+                        >
+                          {TextStore.interface("Navbar_Tools_View_InterfaceSize")}
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="dropdown-item"
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleOpenComponent("ComponentStyleSelector");
+                          }}
+                        >
+                          {TextStore.interface("Navbar_Tools_View_StyleSelector")}
+                        </a>
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>

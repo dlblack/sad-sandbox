@@ -25,6 +25,12 @@ export const componentMetadata = {
     width: Math.round(window.innerWidth * 0.15),
     height: Math.round(window.innerHeight * 0.2)
   },
+  ComponentInterfaceSize: {
+    entityName: "Interface Size",
+    category: "panel",
+    width: Math.round(window.innerWidth * 0.2),
+    height: Math.round(window.innerHeight * 0.3)
+  },
   ComponentMap: {
     entityName: "Map",
     category: "panel",

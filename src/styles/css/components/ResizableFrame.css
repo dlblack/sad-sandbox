@@ -1,16 +1,20 @@
+/* Grid container: fill parent, no viewport units */
 .resizable-frame-container {
     display: grid;
-    grid-template-columns: 2fr 5px 3fr;
-    grid-template-rows: 1fr 5px 1fr;
-    width: 100vw;
-    height: 100vh;
+    grid-template-columns: 2fr 4px 3fr;
+    grid-template-rows: 1fr 4px 1fr;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    gap: 0;
 }
 
+/* Columns & content */
 .resizable-column {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    gap: 5px;
+    gap: 0.3125rem;
 }
 
 .resizable-content {
@@ -20,8 +24,8 @@
     width: 100%;
     height: 100%;
     background-color: #272b30;
-    padding: 10px;
-    font-size: 14px;
+    padding: 0.625rem;
+    font-size: 1rem;
 }
 
 .resizable-content-align-left {
@@ -35,18 +39,35 @@
     background-color: lightsteelblue;
 }
 
+/* Visible separators: thin; hit-area made larger via ::before */
 .resizable-separator {
     width: 100%;
-    height: 5px;
+    height: 2px;
     background-color: gray;
+    position: relative;
+}
+.resizable-separator::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: -6px; bottom: -6px;
+    cursor: row-resize;
 }
 
 .resizable-separator-vertical {
-    width: 5px;
+    width: 2px;
     background-color: gray;
+    position: relative;
+}
+.resizable-separator-vertical::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -6px; right: -6px;
+    cursor: col-resize;
 }
 
-/* Custom Resize Handles */
+/* Custom resize handles (corners/edges) */
 .resizable-handle-n,
 .resizable-handle-s,
 .resizable-handle-w,
@@ -55,9 +76,10 @@
 .resizable-handle-ne,
 .resizable-handle-sw,
 .resizable-handle-se {
+    --handle-size: 0.625rem;
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: var(--handle-size);
+    height: var(--handle-size);
     background-color: #007bff;
     border-radius: 50%;
     opacity: 0.5;
@@ -65,14 +87,14 @@
 }
 
 .resizable-handle-n {
-    top: -5px;
+    top: calc(var(--handle-size) / -2);
     left: 50%;
     transform: translateX(-50%);
     cursor: ns-resize;
 }
 
 .resizable-handle-s {
-    bottom: -5px;
+    bottom: calc(var(--handle-size) / -2);
     left: 50%;
     transform: translateX(-50%);
     cursor: ns-resize;
@@ -80,78 +102,70 @@
 
 .resizable-handle-w {
     top: 50%;
-    left: -5px;
+    left: calc(var(--handle-size) / -2);
     transform: translateY(-50%);
     cursor: ew-resize;
 }
 
 .resizable-handle-e {
     top: 50%;
-    right: -5px;
+    right: calc(var(--handle-size) / -2);
     transform: translateY(-50%);
     cursor: ew-resize;
 }
 
 .resizable-handle-nw {
-    top: -5px;
-    left: -5px;
+    top: calc(var(--handle-size) / -2);
+    left: calc(var(--handle-size) / -2);
     cursor: nwse-resize;
 }
 
 .resizable-handle-ne {
-    top: -5px;
-    right: -5px;
+    top: calc(var(--handle-size) / -2);
+    right: calc(var(--handle-size) / -2);
     cursor: nesw-resize;
 }
 
 .resizable-handle-sw {
-    bottom: -5px;
-    left: -5px;
+    bottom: calc(var(--handle-size) / -2);
+    left: calc(var(--handle-size) / -2);
     cursor: nesw-resize;
 }
 
 .resizable-handle-se {
-    bottom: -5px;
-    right: -5px;
+    bottom: calc(var(--handle-size) / -2);
+    right: calc(var(--handle-size) / -2);
     cursor: nwse-resize;
 }
 
-.resizable-box {
-    position: relative;
-}
+/* Box + invisible edges for easier grabs along full sides */
+.resizable-box { position: relative; }
 
 .resizable-edge {
     position: absolute;
-    width: 10px; /* Adjust the width as needed */
-    height: 100%;
-    top: 0;
-    background-color: transparent;
-    cursor: col-resize;
     z-index: 2;
+    background-color: transparent;
 }
 
-.resizable-edge.left {
-    left: 0;
-}
-
+.resizable-edge.left,
 .resizable-edge.right {
-    right: 0;
-}
-
-.resizable-edge.top {
-    left: 0;
     top: 0;
-    height: 10px;
-    cursor: row-resize;
+    bottom: 0;
+    width: 0.75rem;
+    cursor: col-resize;
 }
+.resizable-edge.left  { left: 0; }
+.resizable-edge.right { right: 0; }
 
+.resizable-edge.top,
 .resizable-edge.bottom {
     left: 0;
-    bottom: 0;
-    height: 10px;
+    right: 0;
+    height: 0.75rem;
     cursor: row-resize;
 }
+.resizable-edge.top    { top: 0; }
+.resizable-edge.bottom { bottom: 0; }
 
-.resizing {
-    background-color: rgba(0, 0, 0, 0.2);
-}
+/* Visual feedback while resizing */
+.resizing { background-color: rgba(0, 0, 0, 0.2); }

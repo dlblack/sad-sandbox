@@ -1,4 +1,5 @@
 import React from "react";
+import ComponentInterfaceSize from "../app_components/ComponentInterfaceSize";
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentContent from "../app_components/ComponentContent";
@@ -37,6 +38,8 @@ export const dockableContentFactory = (type, props = {}) => {
         onDeleteNode={props.onDeleteNode}
         handleOpenComponent={props.handleOpenComponent}
       />;
+    case "ComponentInterfaceSize":
+      return <ComponentInterfaceSize/>;
     case "ComponentMap":
       return <ComponentMap/>;
     case "ComponentMessage":

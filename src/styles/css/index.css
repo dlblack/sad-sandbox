@@ -1,10 +1,10 @@
+/* Loader */
 .lds-facebook {
     display: inline-block;
     position: relative;
     width: 80px;
     height: 80px;
 }
-
 .lds-facebook div {
     display: inline-block;
     position: absolute;
@@ -13,86 +13,68 @@
     background: #fff;
     animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
 }
-
-.lds-facebook div:nth-child(1) {
-    left: 8px;
-    animation-delay: -0.24s;
-}
-
-.lds-facebook div:nth-child(2) {
-    left: 32px;
-    animation-delay: -0.12s;
-}
-
-.lds-facebook div:nth-child(3) {
-    left: 56px;
-    animation-delay: 0s;
-}
-
+.lds-facebook div:nth-child(1) { left: 8px;  animation-delay: -0.24s; }
+.lds-facebook div:nth-child(2) { left: 32px; animation-delay: -0.12s; }
+.lds-facebook div:nth-child(3) { left: 56px; animation-delay: 0s; }
 @keyframes lds-facebook {
-    0% {
-        top: 8px;
-        height: 64px;
-    }
-    50%, 100% {
-        top: 24px;
-        height: 32px;
-    }
+    0% { top: 8px;  height: 64px; }
+    50%, 100% { top: 24px; height: 32px; }
 }
 
-.font-xs {
-    font-size: 12px !important;
-}
+/* Utilities */
+.font-xs { font-size: 0.75rem !important; }
 
+/* Root layout */
 html, body, #root, .app-container {
     height: 100%;
     min-height: 0;
     margin: 0;
     padding: 0;
 }
-
+html, body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
-/* Navbar at top */
+/* Navbar */
 .thin-navbar {
     max-height: 4vh;
     padding: 0 !important;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     z-index: 2000;
 }
-
 .dropdown-menu {
     background-color: #808080;
     border-color: #eee;
     border-width: 0.1em;
 }
-
-/* Style nested dropdowns (dropend to right) */
+/* Nested dropdowns (dropend) */
 .dropdown-menu .dropdown-menu {
     display: none;
     position: absolute;
     top: 0;
-    left: 100%; /* open to the right */
+    left: 100%;
     margin-top: -0.25rem;
 }
-
-/* Show submenu when parent is hovered or open */
+/* Show submenu when parent hovered/open */
 .dropdown-menu > .dropdown.dropend:hover > .dropdown-menu,
 .dropdown-menu > .dropdown.dropend.show > .dropdown-menu {
     display: block;
 }
-
 .dropdown-item {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     padding: 0.25rem 0.75rem;
 }
 
-/* Dockable frame fills remaining space. */
+/* Dockable frame fills remaining space */
 .dockable-frame {
     display: flex;
     flex-direction: column;
@@ -100,14 +82,15 @@ html, body, #root, .app-container {
     height: 100%;
     overflow: hidden;
 }
-
 .dockable-frame-row {
     display: flex;
     flex: 1 1 0;
     min-height: 0;
+    min-width: 0;
     overflow: hidden;
 }
 
+/* Splitters: thin visual, wide invisible grab area */
 .dock-splitter {
     background: #1d1d1d;
     width: 1px;
@@ -115,8 +98,15 @@ html, body, #root, .app-container {
     z-index: 2;
     user-select: none;
     transition: background 0.2s;
+    position: relative;
 }
-
+.dock-splitter::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -6px; right: -6px;
+    cursor: col-resize;
+}
 .dock-splitter-horizontal {
     background: #1d1d1d;
     height: 2px;
@@ -125,30 +115,23 @@ html, body, #root, .app-container {
     z-index: 3;
     user-select: none;
     transition: background 0.2s;
+    position: relative;
 }
-
+.dock-splitter-horizontal::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: -6px; bottom: -6px;
+    cursor: row-resize;
+}
 .dock-splitter:hover,
-.dock-splitter-horizontal:hover {
-    background: #bbb;
-}
+.dock-splitter-horizontal:hover { background: #bbb; }
 
-
-/* Map zones to grid areas */
-.dock-zone-w {
-    grid-area: w;
-}
-
-.dock-zone-center {
-    grid-area: center;
-}
-
-.dock-zone-e {
-    grid-area: e;
-}
-
-.dock-zone-s {
-    grid-area: s;
-}
+/* Zones */
+.dock-zone-w { grid-area: w; }
+.dock-zone-center { grid-area: center; }
+.dock-zone-e { grid-area: e; }
+.dock-zone-s { grid-area: s; }
 
 .dock-zone {
     min-width: 48px;
@@ -164,17 +147,12 @@ html, body, #root, .app-container {
     gap: 8px;
     align-items: flex-start;
 }
-
-.dock-zone.center {
-    background: #fff;
-}
-
+.dock-zone.center { background: #fff; }
 .dock-zone.hovered {
     background: #e3f2fd;
     border-color: #2196f3;
     z-index: 2;
 }
-
 .dock-zone-s {
     flex-direction: row;
     height: 240px;
@@ -182,27 +160,22 @@ html, body, #root, .app-container {
     max-height: 340px;
     width: 100%;
 }
-
 .dock-zone-w, .dock-zone-e {
     min-width: 120px;
-    max-width: 420px;
-    width: 240px;
+    max-width: none !important;
+    width: auto;
+    flex: 0 0 auto;
     flex-direction: column;
 }
-
 .dock-zone-center {
     flex: 1 1 0;
     min-width: 200px;
     flex-direction: row;
 }
 
-.dockable-drag-wrapper.dragging {
-    opacity: 0.7;
-    z-index: 10;
-}
-
+/* Drag wrappers / cards */
+.dockable-drag-wrapper.dragging { opacity: 0.7; z-index: 10; }
 .dockable-drag-wrapper {
-    /* so DockableItem doesn't expand to fill entire zone by default */
     display: inline-block;
     min-width: 200px;
     max-width: 100%;
@@ -222,13 +195,8 @@ html, body, #root, .app-container {
     justify-content: flex-start;
 }
 
-
-/* All dockable items: cards that can be sized by parent via style */
-.dockable-header-btns {
-    display: flex;
-    gap: 0;
-    align-items: center;
-}
+/* Card shells */
+.dockable-header-btns { display: flex; gap: 0; align-items: center; }
 
 .dockable-item, .card-container, .card {
     display: flex;
@@ -241,123 +209,97 @@ html, body, #root, .app-container {
     overflow: hidden;
     box-sizing: border-box;
     flex: 0 0 auto;
+    font-size: 1rem;              /* content scales with UI */
 }
-
 .dockable-item.focused {
     outline: 2px solid #dfe9f6;
     box-shadow: 0 0 0 2px #a6c8ff;
     z-index: 11 !important;
 }
-
-.dockable-item.expanded {
-    z-index: 100 !important;
-}
+.dockable-item.expanded { z-index: 100 !important; }
 
 .card-container.dockable-item {
     position: relative;
     min-width: 180px;
     min-height: 120px;
-    max-width: 900px;
+    max-width: none;
     max-height: 800px;
     z-index: 1;
     outline: none;
     transition: box-shadow 0.15s;
     box-shadow: 0 2px 12px #0002;
 }
-
 .card-container.dockable-item.focused {
     z-index: 10;
     box-shadow: 0 0 0 2px #7e8081, 0 2px 16px #0004;
 }
-
 .card-container.dockable-item.expanded {
     position: absolute;
     z-index: 100;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     width: 100% !important;
     height: 100% !important;
-    min-width: 0;
-    min-height: 0;
-    max-width: none;
-    max-height: none;
+    min-width: 0; min-height: 0;
+    max-width: none; max-height: none;
 }
+.card-container.dockable-item.expand-to-contents { height: auto; }
+.card.d-flex.flex-column { height: 100%; }
 
-.card-container.dockable-item.expand-to-contents {
-    height: auto;
-}
-
-.card.d-flex.flex-column {
-    height: 100%;
-}
-
-/* Header Styles */
+/* Header */
 .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     min-height: 16px;
-    font-size: 0.85em;
+    font-size: 0.875rem;
     padding: 4px 12px 4px 10px;
     border-bottom: 1px solid #292929;
     background: #212529;
     color: #eee;
 }
-
 .drag-handle {
     cursor: grab;
     display: flex;
     align-items: center;
     user-select: none;
+    max-height: 2.5vh;
 }
-
-.drag-handle:active {
-    cursor: grabbing;
-}
+.drag-handle:active { cursor: grabbing; }
 
 .card-title.mb-0 {
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0.01em;
 }
 
-/* Dockable Header Buttons */
+/* Header buttons */
 .dockable-item-header-btn {
     background: none;
     border: none;
     color: #eee;
     padding: 2px 7px;
     margin-left: 4px;
-    font-size: 1.16em;
+    font-size: 1.1em;
     border-radius: 4px;
     transition: background 0.14s;
 }
+.dockable-item-header-btn:hover,
+.dockable-item-header-btn:focus { background: #333; color: #fff; }
+.dockable-item-close-btn { font-size: 1.24em; }
+.dockable-item-expand-btn { font-size: 1.10em; padding-right: 3px; }
 
-.dockable-item-header-btn:hover, .dockable-item-header-btn:focus {
-    background: #333;
-    color: #fff;
-}
-
-.dockable-item-close-btn {
-    font-size: 1.24em;
-}
-
-.dockable-item-expand-btn {
-    font-size: 1.10em;
-    padding-right: 3px;
-}
-
+/* Body */
 .card-body.flex-grow-1.overflow-auto.p-2 {
     overflow: auto;
     padding: 10px;
     background: #1a1a1a;
     color: #e2e2e2;
-    font-size: 1em;
+    font-size: 1rem;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
 
-/* ----------- Only for the ComponentContent card: expand horizontally as needed ----------- */
+/* ComponentContent can expand */
 .dockable-item.component-content-card,
 .card-container.component-content-card,
 .card.component-content-card,
@@ -366,42 +308,24 @@ html, body, #root, .app-container {
     overflow: visible !important;
     box-sizing: border-box;
 }
-
-/* ----------- ComponentContent/Tree CSS ----------- */
 .component-content-root {
-    width: auto;
-    height: auto;
-    min-width: 220px;
-    min-height: 60px;
-    max-width: none;
-    max-height: none;
+    width: auto; height: auto;
+    min-width: 220px; min-height: 60px;
+    max-width: none; max-height: none;
     overflow: visible !important;
     background: inherit;
     box-sizing: border-box;
     padding-left: 5px;
 }
 
-/* General Card layout */
+/* General card layout tweaks */
 .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     max-height: 2.5vh;
     padding: 4px 10px;
     border-bottom: 1px solid #8e8e8e;
     user-select: none;
 }
-
-.drag-handle {
-    max-height: 2.5vh;
-    display: flex;
-    flex: 1;
-    align-items: center;
-}
-
 .dockable-item-header-btn {
-    background: none;
-    border: none;
     color: #444;
     font-size: 1rem;
     font-weight: bold;
@@ -410,37 +334,18 @@ html, body, #root, .app-container {
     margin-left: 1px;
     border-radius: 1px;
     cursor: pointer;
-    height: 1.4em;
-    width: 1.4em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 1.4em; width: 1.4em;
+    display: flex; align-items: center; justify-content: center;
 }
-
 .dockable-item-expand-btn:hover,
-.dockable-item-expand-btn:focus {
-    background: #cce4f7;
-    color: #195889;
-}
-
+.dockable-item-expand-btn:focus { background: #cce4f7; color: #195889; }
 .dockable-item-close-btn:hover,
-.dockable-item-close-btn:focus {
-    background: #ffd6d6;
-    color: #d12d2d;
-}
+.dockable-item-close-btn:focus { background: #ffd6d6; color: #d12d2d; }
+.dockable-item-header-btn:focus:not(:focus-visible) { outline: none; }
 
-.dockable-item-header-btn:focus:not(:focus-visible) {
-    outline: none;
-}
+.card-title { font-size: 1rem; font-weight: 100; color: #f1f1f1; }
 
-
-.card-title {
-    font-size: 1.5vh;
-    font-weight: 100;
-    color: #f1f1f1;
-}
-
-/* Card body fills rest of card */
+/* Body fills rest */
 .card-body, .wizard-fixed-size, .manual-entry-main {
     flex: 1 1 0;
     min-height: 0;
@@ -452,258 +357,258 @@ html, body, #root, .app-container {
     box-sizing: border-box;
 }
 
-/* ----------- ManualDataEntryEditor CSS ----------- */
-.manual-entry-main {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
+/* ================= ManualDataEntryEditor (full) ================= */
+.manual-entry-main { display: flex; flex-direction: column; min-height: 0; }
 .manual-entry-content {
     flex: 1 1 0;
     min-height: 0;
     max-height: 100%;
-    max-width: 480px;
+    max-width: 100%;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
-    border: none;
+    margin: 0; padding: 0; border: none;
 }
-
-.label-fixed {
-    min-width: 90px;
-    text-align: left;
-}
-
-.summary-line {
-    margin: 0.5rem 0;   /* same as my-2 */
-    font-size: 0.75rem;
-}
-
-.summary-line > strong {
-    margin-right: 0.25rem; /* like Bootstrap’s me-2 */
-    font-weight: 600;
-}
-
-.manual-entry-metadata {
-    padding-bottom: 10px;
-}
+.label-fixed { min-width: 90px; text-align: left; }
+.summary-line { margin: 0.5rem 0; font-size: 0.875rem; }
+.summary-line > strong { margin-right: 0.25rem; font-weight: 600; }
+.manual-entry-metadata { padding-bottom: 10px; }
 
 .manual-entry-fields-container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    width: 100%;
-    min-height: 0;
-    flex: 0 0 auto;
-    gap: 8px;
+    display: flex; flex-direction: row; align-items: flex-start;
+    width: 100%; min-height: 0; flex: 0 0 auto; gap: 8px;
 }
-
 .manual-entry-fields-left {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
+    width: 100%; min-width: 0; max-width: 100%;
     padding: 0 8px 0 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    display: flex; flex-direction: column; justify-content: flex-start;
 }
-
-.manual-entry-fields-left, .manual-entry-table-panel {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-.manual-entry-details {
-    width: 100%;
-    flex-shrink: 0;
-    overflow: visible;
-}
-
-.manual-entry-details:empty {
-    background: #2a2a2a;
-}
+.manual-entry-fields-left, .manual-entry-table-panel { flex: 1 1 0; min-width: 0; }
+.manual-entry-details { width: 100%; flex-shrink: 0; overflow: visible; }
+.manual-entry-details:empty { background: #2a2a2a; }
 
 .manual-entry-table-panel {
-    width: 90%;
-    min-width: 0;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
+    width: 90%; min-width: 0; max-width: 100%;
+    overflow-x: auto; overflow-y: auto;
     margin-top: 1em;
-    min-height: 25vh;
-    max-height: 25vh;
+    min-height: 25vh; max-height: 25vh;
     box-sizing: border-box;
     padding-bottom: 0.5em;
 }
-
 .manual-entry-fields-left .form-control,
 .manual-entry-fields-left .form-select {
-    width: 100% !important;
+    width: 100% !important; min-width: 0; max-width: 100%;
+}
+select.form-select.font-xs { padding-left: 1rem; }
+
+/* ------------ Row/label/field helpers for perfect alignment ------------ */
+.manual-entry-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.manual-entry-label {
+    min-width: 90px;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    margin-bottom: 0;
+    text-align: left;
+    white-space: nowrap;
+}
+.manual-entry-field {
+    flex: 1 1 0;
     min-width: 0;
-    max-width: 100%;
+}
+.manual-entry-field .form-control,
+.manual-entry-field .form-select,
+.manual-entry-field textarea {
+    width: 100%;
+    box-sizing: border-box;
 }
 
-select.form-select.font-xs {
-    padding-left: 1rem; /* Match Bootstrap input padding */
+/* ------------ Radio groups (Structure / Format) ------------ */
+.manual-entry-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.manual-entry-radio-group .form-check {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+.manual-entry-radio-group .form-check-input {
+    margin: 0 6px 0 0;              /* align baseline with label text */
+    vertical-align: middle;
+}
+.manual-entry-radio-group .form-check-label {
+    margin-bottom: 0;
+    line-height: 1.2;
 }
 
-/* Table Styles */
+/* --------------------------- Table styles --------------------------- */
 .compact-input {
-    font-size: 11px !important;
+    font-size: 0.6875rem !important;
     height: 22px !important;
     min-height: 22px !important;
     padding: 2px 5px !important;
     line-height: 1.1 !important;
 }
-
 .compact-label {
-    font-size: 11px !important;
+    font-size: 0.6875rem !important;
     margin-bottom: 0 !important;
     padding: 0 !important;
 }
-
 .compact-field input,
 .compact-field select {
-    font-size: 11px !important;
-    height: 22px !important;
-    min-height: 22px !important;
+    font-size: 0.6875rem !important;
+    height: 22px !important; min-height: 22px !important;
     padding: 1px 6px !important;
     line-height: 1.1 !important;
     border-radius: 3px !important;
     box-sizing: border-box;
 }
-
 .compact-field label {
-    font-size: 11px !important;
+    font-size: 0.6875rem !important;
     margin-bottom: 0 !important;
     padding: 0 !important;
     line-height: 1.3 !important;
 }
 
 .manual-entry-table {
-    width: 300px;
-    min-width: 0;
-    table-layout: fixed;
+    width: 300px; min-width: 0; table-layout: fixed;
     font-size: 0.8em;
-    background: #222;
-    border-collapse: collapse;
-    color: #eee;
+    background: #222; border-collapse: collapse; color: #eee;
 }
-
-.manual-entry-th,
-.manual-entry-input {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.manual-entry-th, .manual-entry-input {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-
 .manual-entry-th {
-    width: 140px;
-    padding: 0.2rem 0.3rem;
-    text-align: center;
-    font-weight: bold;
-    background: #111;
-    color: #fff;
-    font-size: 1em;
+    width: 140px; padding: 0.2rem 0.3rem;
+    text-align: center; font-weight: bold;
+    background: #111; color: #fff; font-size: 1em;
 }
-
-.manual-entry-table th,
-.manual-entry-table td {
-    border: 1px solid #444;
-}
-
+.manual-entry-table th, .manual-entry-table td { border: 1px solid #444; }
 .manual-entry-input {
-    font-size: 0.9em;
-    height: 22px;
-    padding: 2px 4px;
-    width: 130px;
-    background: transparent;
-    color: #eee;
-    box-shadow: none;
-    border: none;
+    font-size: 0.9em; height: 22px; padding: 2px 4px;
+    width: 130px; background: transparent; color: #eee;
+    box-shadow: none; border: none;
 }
-
 .manual-entry-input[type=number]::-webkit-outer-spin-button,
 .manual-entry-input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    -webkit-appearance: none; margin: 0;
 }
 
-/* Footer Button */
+/* ================= Wizard footer (unchanged) ================= */
 .wizard-footer {
-    flex-shrink: 0;
-    width: 100%;
-    padding: 10px 18px;
-    z-index: 10;
+    flex-shrink: 0; width: 100%;
+    padding: 10px 18px; z-index: 10;
     border-top: 1px solid #333;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    background: inherit;
-    margin: 0;
+    display: flex; justify-content: flex-end; align-items: center;
+    background: inherit; margin: 0;
 }
-
-.wizard-footer-inner {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-}
-
+.wizard-footer-inner { width: 100%; display: flex; justify-content: space-between; }
 .wizard-footer .btn.btn-compact {
-    min-width: 54px;
-    min-height: 28px;
-    max-width: 100px;
-    max-height: 32px;
-    padding: 2px 10px;
-    font-size: 0.95em;
-    line-height: 1;
+    min-width: 54px; min-height: 28px;
+    max-width: 100px; max-height: 32px;
+    padding: 2px 10px; font-size: 0.95em; line-height: 1;
 }
+.wizard-fixed-size legend { font-size: 0.9em; font-weight: normal; margin-bottom: 0.25rem; color: #ccc; }
 
-.wizard-fixed-size legend {
-    font-size: 0.9em;
-    font-weight: normal;
-    margin-bottom: 0.25rem;
-    color: #ccc;
-}
-
-/* Wizard-specific smaller inputs */
+/* ================= Small inputs ================= */
 .wizard-fixed-size input[type="text"],
 .wizard-fixed-size input[type="number"],
 .wizard-fixed-size select,
 .wizard-fixed-size textarea {
-    font-size: 0.75rem;
-    padding: 2px 4px;
-    height: 22px;
+    font-size: 0.75rem; padding: 2px 4px; height: 22px; line-height: 1.2;
+}
+.wizard-fixed-size select { padding-right: 1rem; height: 24px; }
+.wizard-fixed-size textarea { min-height: 48px; line-height: 1.2; }
+
+/* -------- Form rows: pixel-aligned label/input at any zoom -------- */
+.wizard-fixed-size .form-group.row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.wizard-fixed-size .form-group.row > .col-auto {
+    flex: 0 0 var(--wizard-label-min, 6.875rem);
+    width: var(--wizard-label-min, 6.875rem);
+    max-width: var(--wizard-label-min, 6.875rem);
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.wizard-fixed-size .form-group.row > .col {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.wizard-label-fixed,
+.wizard-fixed-size .col-form-label {
+    min-width: var(--wizard-label-min, 6.875rem);
+    font-size: var(--wizard-label-font, 0.875rem);
+    line-height: 1.2;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    white-space: nowrap;
+}
+
+.wizard-fixed-size .form-control,
+.wizard-fixed-size .form-select,
+.wizard-fixed-size .form-control-sm,
+.wizard-fixed-size .form-select-sm {
+    box-sizing: border-box;
+    width: 100%;
     line-height: 1.2;
 }
 
-.wizard-fixed-size select {
-    padding-right: 1rem;
-    height: 24px;
+.wizard-fixed-size textarea.form-control {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
 }
 
-.wizard-fixed-size textarea {
-    min-height: 48px;
-    line-height: 1.2;
+/* ======== Stepper ======== */
+:root {
+    --wizard-step-slot: 110px;
+    --wizard-step-gap: 24px;
+    --wizard-label-min: 6.875rem;
+    --wizard-label-font: 0.875rem;
 }
 
+/* Numbers row */
 .wizard-circles-row {
     display: flex;
-    flex-direction: row;
     justify-content: center;
-    gap: 36px;
+    align-items: flex-start;
+    gap: var(--wizard-step-gap);
+}
+
+/* Labels row */
+.wizard-labels-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--wizard-step-gap);
+    margin-top: 6px;
 }
 
 .wizard-circle-container {
-    width: 55px;
+    width: var(--wizard-step-slot);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* Circle visuals */
 .wizard-circle {
     width: 38px;
     height: 38px;
@@ -714,93 +619,65 @@ select.form-select.font-xs {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    border: 2px solid #adb5bd;
+    background: transparent;
+    color: #e9ecef;
 }
-
 .wizard-circle.filled {
     background: #0d6efd;
     color: #fff;
-    border: 2px solid #0d6efd;
+    border-color: #0d6efd;
 }
-
 .wizard-circle.unfilled {
     background: #e4e7eb;
     color: #333;
-    border: 2px solid #adb5bd;
-}
-
-.wizard-labels-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 6px;
+    border-color: #adb5bd;
 }
 
 .wizard-label {
-    width: 60px;
+    width: var(--wizard-step-slot);
     text-align: center;
-    font-size: 0.7em;
+    font-size: 0.8rem;
     color: rgb(173, 175, 174);
     line-height: 1.18;
     white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
 }
 
-.wizard-frequency-table {
-    font-size: 0.8em;
-    width: 25%;
-}
-
+/* ======== Frequency table ======== */
+.wizard-frequency-table { font-size: 0.8em; width: 25%; }
 .wizard-frequency-table th {
-    width: 25%;
-    text-align: center;
-    font-weight: bold;
-    background: #000;
-    color: #fff;
-    font-size: 1em;
+    width: 25%; text-align: center; font-weight: bold;
+    background: #000; color: #fff; font-size: 1em;
 }
-
-.wizard-frequency-table tr {
-    height: 10%;
-}
-
-.wizard-frequency-table td {
-    padding: 0.1rem 0.3rem;
-}
-
+.wizard-frequency-table tr { height: 10%; }
+.wizard-frequency-table td { padding: 0.1rem 0.3rem; }
 .wizard-frequency-table input,
 .wizard-frequency-input {
-    background: transparent !important;
-    color: #fff !important;
-    border: none;
-    box-shadow: none;
+    background: transparent !important; color: #fff !important;
+    border: none; box-shadow: none;
 }
-
 .wizard-frequency-table input:focus,
 .wizard-frequency-input:focus,
 .wizard-frequency-table input:active,
 .wizard-frequency-input:active {
-    background: transparent !important;
-    color: #fff !important;
-    outline: 1px solid #5bc0de;
-    box-shadow: none !important;
+    background: transparent !important; color: #fff !important;
+    outline: 1px solid #5bc0de; box-shadow: none !important;
 }
+table.wizard-frequency-table > tbody > tr:nth-child(odd) > td { background: #CCD2D8 !important; }
+table.wizard-frequency-table > tbody > tr:nth-child(even) > td { background: #E7EAED !important; }
+table.wizard-frequency-table > tbody > tr > td { color: #fff !important; }
 
-/* Force dark stripes on wizard-frequency-table */
-table.wizard-frequency-table > tbody > tr:nth-child(odd) > td {
-    background: #CCD2D8 !important;
-}
-
-table.wizard-frequency-table > tbody > tr:nth-child(even) > td {
-    background: #E7EAED !important;
-}
-
-table.wizard-frequency-table > tbody > tr > td {
-    color: #fff !important;
-}
+/* ======== Helpers ======== */
+.wizard-form-row { display: flex; align-items: center; gap: 0.5rem; }
+.wizard-label-fixed--sm { min-width: 5.5rem; }
+.wizard-label-fixed--lg { min-width: 8rem; }
 
 /* ComponentStyleSelector */
 .style-selector-compact {
-    font-size: 1.4vh !important;
+    font-size: 0.875rem !important;
     padding-top: 2px !important;
     padding-bottom: 2px !important;
     min-height: 26px !important;
@@ -808,74 +685,39 @@ table.wizard-frequency-table > tbody > tr > td {
     line-height: 1.1 !important;
     border-radius: 0.15rem !important;
 }
-
-.style-selector-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 0.5rem;
-}
-
+.style-selector-row { display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem; }
 .style-selector-label {
     min-width: 110px;
     margin-bottom: 0;
-    font-size: 1.4vh;
+    font-size: 0.875rem;
 }
-
 .saveas-dialog-card textarea.form-control {
     min-height: 84px !important;
     height: 84px !important;
-    font-size: 1.4vh !important;
-    background: #fff;
-    color: #222;
+    font-size: 0.875rem !important;
+    background: #fff; color: #222;
     resize: vertical;
 }
 
-
-/* Miscellaneous */
+/* Misc */
 input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.gray-box {
-    background: #444;
-}
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.gray-box { background: #444; }
 
 .project-tree {
     font-family: Arial, sans-serif;
     color: white;
     width: 100%;
+    font-size: 1rem;                 /* ensure tree follows UI scale */
 }
 
-.component-messages {
-    overflow-y: auto;
-    height: 100%;
-}
-
+.component-messages { overflow-y: auto; height: 100%; }
 .message {
     font-weight: 100;
-    font-size: 1.25vh;
+    font-size: 0.875rem;
 }
-
-.message.info {
-    color: #6c757d;
-}
-
-.message.success {
-    color: #198754;
-}
-
-.message.danger {
-    color: #dc3545;
-}
-
-.message.warning {
-    color: #ffc107;
-}
-
-.message.text-body-secondary {
-    color: #6c757d;
-}
-
+.message.info    { color: #6c757d; }
+.message.success { color: #198754; }
+.message.danger  { color: #dc3545; }
+.message.warning { color: #ffc107; }
+.message.text-body-secondary { color: #6c757d; }

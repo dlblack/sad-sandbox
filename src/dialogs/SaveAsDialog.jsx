@@ -1,10 +1,11 @@
-import React, {useContext, useEffect, useRef, useState} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import {StyleContext} from "../styles/StyleContext";
+import { StyleContext } from "../styles/StyleContext";
+import { TextStore } from "../utils/TextStore";
 import "../styles/css/SaveAsDialog.css";
 
-function SaveAsDialog({type, oldName, onConfirm, onCancel}) {
-  const {componentHeaderStyle, componentBackgroundStyle} = useContext(StyleContext);
+function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
+  const { componentHeaderStyle, componentBackgroundStyle } = useContext(StyleContext);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const inputRef = useRef();
@@ -35,57 +36,77 @@ function SaveAsDialog({type, oldName, onConfirm, onCancel}) {
         aria-modal="true"
         tabIndex={-1}
       >
-        <div className={`card-header d-flex justify-content-between align-items-center ${componentHeaderStyle}`}>
-          <div className="card-title mb-0">Save {type} As</div>
+        <div className={`card-header d-flex justify-content-between align-items-center ${componentHeaderStyle} saveas-dialog-header`}>
+          <div className="card-title mb-0">{TextStore.interface("SaveAsDialog_Title", [type])}</div>
           <button
             type="button"
-            className="dockable-item-header-btn dockable-item-close-btn"
+            className="dockable-item-header-btn dockable-item-close-btn saveas-dialog-close"
             onClick={onCancel}
+            aria-label="Close"
           >
             ×
           </button>
         </div>
+
         <form
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
             onConfirm(name.trim(), desc.trim());
           }}
         >
           <div className="manual-entry-content p-2">
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90}}>Old Name</label>
-              <input type="text" className="form-control form-control-sm font-xs" value={oldName} disabled />
+              <label className="form-label font-xs me-2 saveas-label">
+                {TextStore.interface("SaveAsDialog_OldName")}
+              </label>
+              <input
+                type="text"
+                className="form-control form-control-sm font-xs"
+                value={oldName}
+                disabled
+              />
             </div>
+
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90}}>Name</label>
+              <label className="form-label font-xs me-2 saveas-label">
+                {TextStore.interface("SaveAsDialog_Name")}
+              </label>
               <input
                 type="text"
                 className="form-control form-control-sm font-xs"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 ref={inputRef}
                 required
                 maxLength={64}
                 placeholder="Enter new name"
               />
             </div>
+
             <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2" style={{minWidth: 90}}>Description</label>
+              <label className="form-label font-xs me-2 saveas-label">
+                {TextStore.interface("SaveAsDialog_Description")}
+              </label>
               <textarea
                 className="form-control form-control-sm font-xs"
                 rows={3}
                 maxLength={200}
                 value={desc}
-                onChange={e => setDesc(e.target.value)}
+                onChange={(e) => setDesc(e.target.value)}
                 placeholder="Enter description"
               />
             </div>
           </div>
+
           <div className={`saveas-dialog-footer ${componentBackgroundStyle}`}>
             <div className="saveas-dialog-footer-inner">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>Cancel</button>
-              <button type="submit" className="btn btn-primary btn-sm" disabled={!name.trim()}>OK</button>
-          </div>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>
+                {TextStore.interface("SaveAsDialog_ButtonCancel")}
+              </button>
+              <button type="submit" className="btn btn-primary btn-sm" disabled={!name.trim()}>
+                {TextStore.interface("SaveAsDialog_ButtonOk")}
+              </button>
+            </div>
           </div>
         </form>
       </div>

@@ -36,7 +36,9 @@ const INTERFACE_TEXT = {
   Navbar_Tools: "Tools",
   Navbar_Tools_Contents: "Contents",
   Navbar_Tools_Messages: "Messages",
-  Navbar_Tools_StyleSelector: "Style Selector",
+  Navbar_Tools_View: "View",
+  Navbar_Tools_View_InterfaceSize: "Interface Size",
+  Navbar_Tools_View_StyleSelector: "Style Selector",
   Navbar_Tools_ToggleDevTools: "Toggle DevTools",
   Navbar_Help: "Help",
   Navbar_Help_UsersManual: "User's Manual",
@@ -47,6 +49,20 @@ const INTERFACE_TEXT = {
   Navbar_Help_TermsAndConditions: "Terms And Conditions",
   Navbar_Help_About: "About HEC-Neptune",
   Navbar_Search_Placeholder: "Search",
+
+  // --------------------------------------
+  // ComponentInterfaceSize
+  // --------------------------------------
+  ComponentInterfaceSize_HeaderPrefix: "UI",
+  ComponentInterfaceSize_Decrease: "Decrease by 10%",
+  ComponentInterfaceSize_Increase: "Increase by 10%",
+  ComponentInterfaceSize_InterfaceScaleSlider: "Interface scale slider",
+  ComponentInterfaceSize_ResetButton: "Reset",
+  ComponentInterfaceSize_ResetTitle: "Increase by 10%",
+  ComponentInterfaceSize_Density: "Density",
+  ComponentInterfaceSize_Density_Compact: "Compact",
+  ComponentInterfaceSize_Density_Standard: "Standard",
+  ComponentInterfaceSize_Density_Comfy: "Comfy",
 
   // --------------------------------------
   // ComponentStyleSelector
@@ -183,6 +199,16 @@ const INTERFACE_TEXT = {
   Parameter_SWE: "Snow Water Equivalent (SWE)",
   Parameter_Temperature: "Temperature",
   Parameter_Windspeed: "Windspeed",
+
+  // --------------------------------------
+  // SaveAsDialog
+  // --------------------------------------
+  SaveAsDialog_Title: "Save {0} As",
+  SaveAsDialog_OldName: "Old Name",
+  SaveAsDialog_Name: "Name",
+  SaveAsDialog_Description: "Description",
+  SaveAsDialog_ButtonCancel: "Cancel",
+  SaveAsDialog_ButtonOk: "OK",
 
   // --------------------------------------
   // StructureSelector
