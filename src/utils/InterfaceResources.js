@@ -275,32 +275,55 @@ const INTERFACE_TEXT = {
   DELETE: "Delete",
 
   // --------------------------------------
-  // PeakFlowFreqWizard
+  // Analysis Wizard - General
   // --------------------------------------
   Wizard_GeneralInfo: "General Information",
   Wizard_Name: "Name: ",
   Wizard_Description: "Description: ",
+  AnalysisWizard_Summary_Title: "Summary",
+
+  // --------------------------------------
+  // Analysis Wizard - Skew
+  // --------------------------------------
+  AnalysisWizard_Skew_StepSkew: "Skew",
+  AnalysisWizard_Skew_UseStationSkew: "Use Station Skew",
+  AnalysisWizard_Skew_UseWeightedSkew: "Use Weighted Skew",
+  AnalysisWizard_Skew_UseRegionalSkew: "Use Regional Skew",
+  AnalysisWizard_Skew_RegionalSkew: "Regional Skew",
+  AnalysisWizard_Skew_RegionalSkewMSE: "Regional Skew MSE",
+  AnalysisWizard_Skew_Summary_SkewSelection: "Skew Selection:",
+  AnalysisWizard_Skew_Summary_SkewType: "Type:",
+  AnalysisWizard_Skew_Summary_UseStationSkew: "Use Station Skew:",
+  AnalysisWizard_Skew_Summary_UseWeightedSkew: "Use Weighted Skew:",
+  AnalysisWizard_Skew_Summary_UseRegionalSkew: "Use Regional Skew:",
+  AnalysisWizard_Skew_Summary_RegionalSkew: "Regional Skew:",
+  AnalysisWizard_Skew_Summary_RegionalSkewMSE: "Regional Skew MSE:",
+  AnalysisWizard_Skew_Summary_SkewType_None: "(None selected)",
+
+  // --------------------------------------
+  // PeakFlowFreqWizard
+  // --------------------------------------
+  Bulletin17_Wizard_Method_Label: "Method",
+  Bulletin17_Wizard_Method_B17B: "17B Methods",
+  Bulletin17_Wizard_Method_B17C: "17C EMA",
+  Bulletin17_Wizard_Prob_Label: "Probability",
+  Bulletin17_Wizard_Prob_Field: "Probability",
+  Bulletin17_Wizard_Step_Summary: "Complete",
+
+  // --------------------------------------
+  // PeakFlowFreqWizard
+  // --------------------------------------
   Wizard_DescriptionPlaceholder: "Optional",
   Wizard_Dataset: "Dataset: ",
-  PeakFlowFreqWizard_UseStationSkew: "Use Station Skew",
-  PeakFlowFreqWizard_UseWeightedSkew: "Use Weighted Skew",
-  PeakFlowFreqWizard_UseRegionalSkew: "Use Regional Skew",
-  PeakFlowFreqWizard_RegionalSkew: "Regional Skew",
-  PeakFlowFreqWizard_RegionalSkewMSE: "Regional Skew MSE",
   PeakFlowFreqWizard_DoNotCompExpProb: "Do not Compute Expected Probability",
   PeakFlowFreqWizard_CompExpProb: "Compute Expected Probability Curve using Numerical Integration (EMA)",
   PeakFlowFreqWizard_EditOutputFreqOrd: "Edit the output frequency ordinates in the table below.",
   PeakFlowFreqWizard_FreqInPercent: "Frequency in Percent",
-  PeakFlowFreqWizard_Summary: "Summary",
-  PeakFlowFreqWizard_SummarySkewSelection: "Skew Selection:",
-  PeakFlowFreqWizard_SummarySkewType: "Type:",
-  PeakFlowFreqWizard_SummarySkewType_None: "(None selected)",
   PeakFlowFreqWizard_SummaryExpectedProbability: "Expected Probability",
   PeakFlowFreqWizard_SummaryComputation: "Computation:",
   PeakFlowFreqWizard_SummaryComputation_None: "(None selected)",
   PeakFlowFreqWizard_SummaryFrequencies: "Frequencies",
   PeakFlowFreqWizard_SummaryFrequencies_None: "(No values entered)",
-  PeakFlowFreqWizard_StepSkew: "Skew",
   PeakFlowFreqWizard_StepExpProb: "Expected Probability",
   PeakFlowFreqWizard_StepOutFreqOrd: "Output Frequency Ordinates",
   PeakFlowFreqWizard_StepComplete: "Complete",
