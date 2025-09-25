@@ -73,7 +73,7 @@ function createWindow() {
       submenu: [
         { label: TextStore.interface('Navbar_Analysis_PeakFlowFrequency'),  click: () => win.webContents.send('menu-analysis', 'PeakFlowFreqWizard') },
         { label: TextStore.interface('Navbar_Analysis_Bulletin17'),         click: () => win.webContents.send('menu-analysis', 'Bulletin17AnalysisWizard') },
-        { label: TextStore.interface('Navbar_Analysis_GeneralFrequencyAnalysis'), click: () => win.webContents.send('menu-analysis', 'GeneralFreqAnalysisWizard') },
+        /*{ label: TextStore.interface('Navbar_Analysis_GeneralFrequencyAnalysis'), click: () => win.webContents.send('menu-analysis', 'GeneralFreqAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_VolumeFrequencyAnalysis'),  click: () => win.webContents.send('menu-analysis', 'VolumeFreqAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_CoincidentFrequencyAnalysis'), click: () => win.webContents.send('menu-analysis', 'CoincidentFreqAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_CurveCombinationAnalysis'), click: () => win.webContents.send('menu-analysis', 'CurveCombinationAnalysisWizard') },
@@ -85,7 +85,7 @@ function createWindow() {
         { label: TextStore.interface('Navbar_Analysis_PeaksOverThresholdAnalysis'), click: () => win.webContents.send('menu-analysis', 'PeaksOverThresholdAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_LinearRegression'), click: () => win.webContents.send('menu-analysis', 'LinearRegressionWizard') },
         { label: TextStore.interface('Navbar_Analysis_QuantileMapping'),  click: () => win.webContents.send('menu-analysis', 'QuantileMappingWizard') },
-        { label: TextStore.interface('Navbar_Analysis_CopulaAnalysis'),   click: () => win.webContents.send('menu-analysis', 'CopulaAnalysisWizard') },
+        { label: TextStore.interface('Navbar_Analysis_CopulaAnalysis'),   click: () => win.webContents.send('menu-analysis', 'CopulaAnalysisWizard') },*/
       ],
     },
     {
