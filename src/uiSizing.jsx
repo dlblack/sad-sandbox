@@ -1,9 +1,22 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const KEY = "uiSizing.v1";
-const BASELINE = 1.25;        // 100% now renders at 125%
+const KEY = "uiSizing.v2";
+
+// Detect Electron
+const isElectron =
+  typeof window !== "undefined" &&
+  (
+    (window.process && window.process.versions && window.process.versions.electron) ||
+    (navigator && /Electron/i.test(navigator.userAgent || ""))
+  );
+
+// Baselines: Browser and Electron baselines do not align
+const WEB_BASELINE = 0.8;
+const ELECTRON_BASELINE = 1.5;
+
+// Scale and density limits
 const MIN_SCALE = 0.6;
-const MAX_SCALE = 2.0;
+const MAX_SCALE = 1.5;
 const MIN_DENSITY = 0.8;
 const MAX_DENSITY = 1.3;
 
@@ -14,36 +27,39 @@ export function UISizingProvider({ children }) {
     try {
       const saved = JSON.parse(localStorage.getItem(KEY));
       return isFinite(saved?.scale) ? clamp(saved.scale, MIN_SCALE, MAX_SCALE) : 1;
-    } catch { return 1; }
+    } catch {
+      return 1;
+    }
   });
 
   const [density, setDensity] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(KEY));
       return isFinite(saved?.density) ? clamp(saved.density, MIN_DENSITY, MAX_DENSITY) : 1;
-    } catch { return 1; }
+    } catch {
+      return 1;
+    }
   });
 
   useEffect(() => {
-    const effectiveScale = scale * BASELINE;
+    const runtimeBaseline = isElectron ? ELECTRON_BASELINE : WEB_BASELINE;
+    const effectiveScale = scale * runtimeBaseline;
 
     const root = document.documentElement;
     root.style.setProperty("--ui-scale", String(effectiveScale));
     root.style.setProperty("--ui-density", String(density));
 
-    // persist raw (un-multiplied) values
+    // persist raw values (unmultiplied)
     localStorage.setItem(KEY, JSON.stringify({ scale, density }));
-
-    // IMPORTANT: do NOT use mount.style.zoom; it causes the giant page scrollbars.
   }, [scale, density]);
 
   const value = useMemo(() => ({
-    // values
-    scale,                   // 1.00 shows as 100% in UI (renders 1.25x)
+    // current values
+    scale,                  // 1.00 shows as "100%" in the UI
     density,
-    effectiveScale: scale * BASELINE,
+    effectiveScale: scale * (isElectron ? ELECTRON_BASELINE : WEB_BASELINE),
 
-    // controls (used by ComponentInterfaceSize)
+    // controls
     setScale: (v) => setScale(clamp(v, MIN_SCALE, MAX_SCALE)),
     setDensity: (v) => setDensity(clamp(v, MIN_DENSITY, MAX_DENSITY)),
     setScalePercent: (p) => setScale(clamp(p / 100, MIN_SCALE, MAX_SCALE)),
@@ -63,4 +79,6 @@ export function useUISizing() {
   return ctx;
 }
 
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}

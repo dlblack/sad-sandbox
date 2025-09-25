@@ -46,7 +46,7 @@ html, body {
 
 /* Navbar */
 .thin-navbar {
-    max-height: 4vh;
+    max-height: calc(5vh * var(--ui-scale));
     padding: 0 !important;
     font-size: 0.875rem;
     z-index: 2000;
@@ -155,13 +155,13 @@ html, body {
 }
 .dock-zone-s {
     flex-direction: row;
-    height: 240px;
-    min-height: 120px;
-    max-height: 340px;
+    height: 20%;
+    min-height: 10%;
+    max-height: none !important;
     width: 100%;
 }
 .dock-zone-w, .dock-zone-e {
-    min-width: 120px;
+    min-width: 10%;
     max-width: none !important;
     width: auto;
     flex: 0 0 auto;
@@ -169,7 +169,7 @@ html, body {
 }
 .dock-zone-center {
     flex: 1 1 0;
-    min-width: 200px;
+    min-width: 10%;
     flex-direction: row;
 }
 
@@ -295,8 +295,8 @@ html, body {
     background: #1a1a1a;
     color: #e2e2e2;
     font-size: 1rem;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 /* ComponentContent can expand */
@@ -500,21 +500,42 @@ select.form-select.font-xs { padding-left: 1rem; }
     -webkit-appearance: none; margin: 0;
 }
 
-/* ================= Wizard footer (unchanged) ================= */
+/* ================= Wizard footer ================= */
 .wizard-footer {
-    flex-shrink: 0; width: 100%;
-    padding: 10px 18px; z-index: 10;
+    flex-shrink: 0;
+    width: 100%;
+    padding: 10px 18px;
+    z-index: 10;
     border-top: 1px solid #333;
-    display: flex; justify-content: flex-end; align-items: center;
-    background: inherit; margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background: inherit;
+    margin: 0;
 }
-.wizard-footer-inner { width: 100%; display: flex; justify-content: space-between; }
+.wizard-footer-inner {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+/* Wizard footer buttons */
 .wizard-footer .btn.btn-compact {
-    min-width: 54px; min-height: 28px;
-    max-width: 100px; max-height: 32px;
-    padding: 2px 10px; font-size: 0.95em; line-height: 1;
+    --btn-scale: var(--ui-scale, 1);
+    --btn-font:  calc(1rem * var(--btn-scale));
+    --btn-pad-y: calc(0.25em  * var(--btn-scale));
+    --btn-pad-x: calc(0.25em  * var(--btn-scale));
+    --btn-min-i: calc(7ch     * var(--btn-scale));
+    --btn-min-b: calc(2.0em   * var(--btn-scale));
+
+    font-size: var(--btn-font);
+    line-height: 1;
 }
-.wizard-fixed-size legend { font-size: 0.9em; font-weight: normal; margin-bottom: 0.25rem; color: #ccc; }
+.wizard-fixed-size legend {
+    font-size: 0.9em;
+    font-weight: normal;
+    margin-bottom: 0.25rem;
+    color: #ccc;
+}
 
 /* ================= Small inputs ================= */
 .wizard-fixed-size input[type="text"],
@@ -574,14 +595,6 @@ select.form-select.font-xs { padding-left: 1rem; }
 .wizard-fixed-size textarea.form-control {
     padding-top: 0.35rem;
     padding-bottom: 0.35rem;
-}
-
-/* ======== Stepper ======== */
-:root {
-    --wizard-step-slot: 110px;
-    --wizard-step-gap: 24px;
-    --wizard-label-min: 6.875rem;
-    --wizard-label-font: 0.875rem;
 }
 
 /* Numbers row */

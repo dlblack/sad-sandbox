@@ -152,7 +152,7 @@ function Navbar({addComponent}) {
                       {TextStore.interface("Navbar_Analysis_Bulletin17")}
                     </a>
                   </li>
-                  <li>
+                  {/*<li>
                     <a className="dropdown-item" href="#">
                       {TextStore.interface("Navbar_Analysis_GeneralFrequencyAnalysis")}
                     </a>
@@ -216,7 +216,7 @@ function Navbar({addComponent}) {
                     <a className="dropdown-item" href="#">
                       {TextStore.interface("Navbar_Analysis_CopulaAnalysis")}
                     </a>
-                  </li>
+                  </li>*/}
                 </ul>
               </li>
 
@@ -321,7 +321,12 @@ function Navbar({addComponent}) {
                     </a>
                   </li>
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <a
+                      className="dropdown-item"
+                      href="https://www.hec.usace.army.mil/training/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       {TextStore.interface("Navbar_Help_Training")}
                     </a>
                   </li>
@@ -337,7 +342,12 @@ function Navbar({addComponent}) {
                     <hr className="dropdown-divider"/>
                   </li>
                   <li>
-                    <a className="dropdown-item" href="#">
+                    <a
+                      className="dropdown-item"
+                      href="https://www.hec.usace.army.mil/software/terms_and_conditions.aspx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       {TextStore.interface("Navbar_Help_TermsAndConditions")}
                     </a>
                   </li>

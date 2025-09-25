@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react";
 import {Resizable} from "react-resizable";
 import {StyleContext} from "../../styles/StyleContext";
 import "react-resizable/css/styles.css";
+import "../../styles/css/components/ResizableFrame.css";
 
 const MIN_WIDTH = 180;
 const MIN_HEIGHT = 120;

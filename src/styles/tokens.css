@@ -5,7 +5,7 @@
 
     /* Rem baseline (clamped for a11y) */
     --font-base-px: 16;
-    --font-min: 12px;
+    --font-min: 8px;
     /* allow large text for TVs; raise/lower to taste */
     --font-max: 40px;
     --font-rem: clamp(var(--font-min),
@@ -41,6 +41,15 @@
     --icon-sm: calc(1rem   * var(--ui-scale));
     --icon-md: calc(1.25rem* var(--ui-scale));
     --icon-lg: calc(1.5rem * var(--ui-scale));
+
+    /* Wizard */
+    --wizard-step-slot: 110px;
+    --wizard-step-gap: 24px;
+    --wizard-label-min: 6.875rem;
+    --wizard-label-font: 0.875rem;
+
+    /* Optional helper so you can scale px when needed */
+    --px: calc(1px * var(--ui-scale));
 }
 
 /* Make sure the theme can’t override these */

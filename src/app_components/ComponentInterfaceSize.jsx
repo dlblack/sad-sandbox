@@ -44,7 +44,7 @@ export default function ComponentInterfaceSize() {
             <input
               type="range"
               min={60}
-              max={200}
+              max={150}
               step={5}
               value={currentPercent}
               className="form-range flex-grow-1"
