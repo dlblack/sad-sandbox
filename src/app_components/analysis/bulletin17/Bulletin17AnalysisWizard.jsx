@@ -1,11 +1,13 @@
 import React from "react";
-import GenericWizard from "./GenericWizard.jsx";
-import Skew, { SkewSummary, skewChoiceToOptions } from "./components/Skew.jsx";
-import { TextStore } from "../../utils/TextStore.js";
+import WizardRunner from "../components/WizardRunner.jsx";
+import { makeWizardGeneralInfoStep, GeneralInfoSummary } from "../components/steps/WizardGeneralInfo.jsx";
+import { makeSkewStep, SkewSummary, skewChoiceToOptions } from "../components/steps/WizardSkew.jsx";
+import { TextStore } from "../../../utils/TextStore.js";
 
 export default function Bulletin17AnalysisWizard(props) {
   const steps = [
-    // Method (17B disabled)
+    makeWizardGeneralInfoStep(),
+
     {
       label: TextStore.interface("Bulletin17_Wizard_Method_Label"),
       render: ({ bag, setBag }) => (
@@ -45,25 +47,8 @@ export default function Bulletin17AnalysisWizard(props) {
       ),
     },
 
-    // Skew
-    {
-      label: TextStore.interface("AnalysisWizard_Skew_StepSkew"),
-      render: ({ bag, setBag }) => (
-        <Skew
-          value={bag.skewChoice ?? ""}
-          onChange={(val) => setBag((prev) => ({ ...prev, skewChoice: val }))}
-          regionalSkew={bag.regionalSkew ?? ""}
-          setRegionalSkew={(val) => setBag((prev) => ({ ...prev, regionalSkew: val }))}
-          regionalSkewMSE={bag.regionalSkewMSE ?? ""}
-          setRegionalSkewMSE={(val) => setBag((prev) => ({ ...prev, regionalSkewMSE: val }))}
-          allowStation={false}
-          allowWeighted={false}
-          compact
-        />
-      ),
-    },
+    makeSkewStep({ allowStation: false, allowWeighted: false, compact: true }),
 
-    // Probability
     {
       label: TextStore.interface("Bulletin17_Wizard_Prob_Label"),
       render: ({ bag, setBag }) => (
@@ -85,36 +70,41 @@ export default function Bulletin17AnalysisWizard(props) {
       ),
     },
 
-    // Summary
     {
       label: TextStore.interface("Bulletin17_Wizard_Step_Summary"),
-      render: ({ name, description, selectedDataset, bag }) => {
-        return (
-          <div className="p-2">
-            <h6 className="mb-3">{TextStore.interface("AnalysisWizard_Summary_Title")}</h6>
+      render: ({ name, description, selectedDataset, bag }) => (
+        <div className="p-2">
+          <h6 className="mb-3">{TextStore.interface("Wizard_Summary_Title")}</h6>
 
-            <div className="mb-2"><strong>{TextStore.interface("Wizard_GeneralInfo")}</strong></div>
-            <ul className="list-unstyled mb-2 font-xs">
-              <li><strong>{TextStore.interface("Wizard_Name")}</strong>{name}</li>
-              <li><strong>{TextStore.interface("Wizard_Description")}</strong>{description}</li>
-              <li><strong>{TextStore.interface("Wizard_Dataset")}</strong>{selectedDataset}</li>
-              <li><strong>{TextStore.interface("Bulletin17_Wizard_Method_Label")}</strong> {(bag.method || "B17C")}</li>
-              <li><strong>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</strong> {(bag.probability ?? 0.01)}</li>
-            </ul>
+          <GeneralInfoSummary
+            name={name}
+            description={description}
+            selectedDataset={selectedDataset}
+          />
 
-            <SkewSummary
-              choice={bag.skewChoice}
-              regionalSkew={bag.regionalSkew}
-              regionalSkewMSE={bag.regionalSkewMSE}
-            />
-          </div>
-        );
-      },
+          <ul className="list-unstyled mb-2 font-xs">
+            <li>
+              <strong>{TextStore.interface("Bulletin17_Wizard_Method_Label")}</strong>{" "}
+              {bag.method || "B17C"}
+            </li>
+            <li>
+              <strong>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</strong>{" "}
+              {bag.probability ?? 0.01}
+            </li>
+          </ul>
+
+          <SkewSummary
+            choice={bag.skewChoice}
+            regionalSkew={bag.regionalSkew}
+            regionalSkewMSE={bag.regionalSkewMSE}
+          />
+        </div>
+      ),
     },
   ];
 
-  // Leaving Skew step → stepIndex === 3
   const validateNext = (ctx, stepIndex) => {
+    // Leaving Skew step: it is step 3 here
     if (stepIndex === 3 && (ctx.bag.skewChoice || "") === "option3") {
       return (ctx.bag.regionalSkew ?? "") !== "" && (ctx.bag.regionalSkewMSE ?? "") !== "";
     }
@@ -140,9 +130,8 @@ export default function Bulletin17AnalysisWizard(props) {
   };
 
   return (
-    <GenericWizard
+    <WizardRunner
       {...props}
-      includeGeneralInfo
       steps={steps}
       validateNext={validateNext}
       buildResult={buildResult}

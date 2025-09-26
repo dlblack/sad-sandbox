@@ -263,8 +263,9 @@ const INTERFACE_TEXT = {
   // --------------------------------------
   // Wizard Navigation Buttons
   // --------------------------------------
-  WIZARD_BACK: "Back",
-  WIZARD_NEXT: "Next",
+  WIZARD_CANCEL: "X Cancel",
+  WIZARD_BACK: "< Back",
+  WIZARD_NEXT: "Next >",
   WIZARD_FINISH: "Finish",
 
   // --------------------------------------
@@ -275,12 +276,18 @@ const INTERFACE_TEXT = {
   DELETE: "Delete",
 
   // --------------------------------------
-  // Analysis Wizard - General
+  // Analysis Wizard - General Information
   // --------------------------------------
   Wizard_GeneralInfo: "General Information",
-  Wizard_Name: "Name: ",
-  Wizard_Description: "Description: ",
-  AnalysisWizard_Summary_Title: "Summary",
+  Wizard_Name: "Name",
+  Wizard_Description: "Description",
+  Wizard_Dataset: "Dataset",
+  Wizard_Summary_Title: "Summary",
+  Wizard_Summary_None: "(None)",
+  Wizard_Summary_Name: "Name: ",
+  Wizard_Summary_Description: "Description: ",
+  Wizard_Summary_Dataset: "Dataset: ",
+
 
   // --------------------------------------
   // Analysis Wizard - Skew
@@ -314,7 +321,6 @@ const INTERFACE_TEXT = {
   // PeakFlowFreqWizard
   // --------------------------------------
   Wizard_DescriptionPlaceholder: "Optional",
-  Wizard_Dataset: "Dataset: ",
   PeakFlowFreqWizard_DoNotCompExpProb: "Do not Compute Expected Probability",
   PeakFlowFreqWizard_CompExpProb: "Compute Expected Probability Curve using Numerical Integration (EMA)",
   PeakFlowFreqWizard_EditOutputFreqOrd: "Edit the output frequency ordinates in the table below.",
@@ -339,6 +345,11 @@ const INTERFACE_TEXT = {
   Tree_Menu_Plot: "Plot",
   Tree_Badge_B17: "B17",
   Tree_Badge_PFF: "PFF",
+
+  // --------------------------------------
+  // ----Maps
+  // --------------------------------------
+  ComponentMetadata_ComponentMap: "Map",
 
   // --------------------------------------
   // PairedDataPlot

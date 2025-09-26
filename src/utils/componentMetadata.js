@@ -4,8 +4,7 @@ function dataEditor(entityName) {
   return {
     entityName,
     category: "data editor",
-    width: 550,
-    height: 550
+    centerTab: true,
   };
 }
 
@@ -13,8 +12,7 @@ function wizard(entityName) {
   return {
     entityName,
     category: "wizard",
-    width: 600,
-    height: 600
+    centerTab: true,
   };
 }
 
@@ -22,40 +20,47 @@ export const componentMetadata = {
   ComponentContent: {
     entityName: "Contents",
     category: "panel",
+    centerTab: false,
     width: Math.round(window.innerWidth * 0.15),
     height: Math.round(window.innerHeight * 0.2)
   },
   ComponentInterfaceSize: {
     entityName: "Interface Size",
     category: "panel",
+    centerTab: false,
     width: Math.round(window.innerWidth * 0.2),
     height: Math.round(window.innerHeight * 0.3)
   },
   ComponentMap: {
     entityName: "Map",
     category: "panel",
+    centerTab: true,
     width: Math.round(window.innerWidth * 0.3),
     height: Math.round(window.innerHeight * 0.3)
   },
   ComponentMessage: {
     entityName: "Messages",
     category: "panel",
+    centerTab: false,
     width: Math.round(window.innerWidth * 0.4),
     height: Math.round(window.innerHeight * 0.2)
   },
   ComponentStyleSelector: {
     entityName: "Style Selector",
     category: "panel",
+    centerTab: false,
     width: Math.round(window.innerWidth * 0.2),
     height: Math.round(window.innerHeight * 0.25)
   },
   PairedDataPlot: {
     entityName: "Paired Data Plot",
+    centerTab: true,
     width: Math.round(window.innerWidth * 0.5),
     height: Math.round(window.innerHeight * 0.4)
   },
   TimeSeriesPlot: {
     entityName: "Time Series Plot",
+    centerTab: true,
     width: Math.round(window.innerWidth * 0.5),
     height: Math.round(window.innerHeight * 0.4)
   },
@@ -81,7 +86,13 @@ export const componentMetadata = {
   CopulaAnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard")),
 
   // Demo Plots
-  DemoPlots: { entityName: "Demo Plots (Plotly)", category: "demo", width: 1000, height: 800 },
+  DemoPlots: {
+    entityName: "Demo Plots (Plotly)",
+    category: "demo",
+    centerTab: true,
+    width: 1000,
+    height: 800
+  },
 
 };
 

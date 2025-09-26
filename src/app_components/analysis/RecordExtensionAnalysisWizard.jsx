@@ -1,5 +1,5 @@
 import React from "react";
-import GenericWizard from "./GenericWizard.jsx";
+import WizardRunner from "./components/WizardRunner.jsx";
 
 export default function RecordExtensionAnalysisWizard(props) {
   const buildResult = (ctx) => ({
@@ -9,7 +9,7 @@ export default function RecordExtensionAnalysisWizard(props) {
   });
 
   return (
-    <GenericWizard
+    <WizardRunner
       {...props}
       includeGeneralInfo
       steps={[]}
