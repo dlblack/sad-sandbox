@@ -1,7 +1,8 @@
 import React from "react";
-import GenericWizard from "./GenericWizard.jsx";
-import Skew, { SkewSummary } from "./components/Skew.jsx";
-import { TextStore } from "../../utils/TextStore.js";
+import WizardRunner from "../components/WizardRunner.jsx";
+import { makeWizardGeneralInfoStep, GeneralInfoSummary } from "../components/steps/WizardGeneralInfo.jsx";
+import { makeSkewStep, SkewSummary } from "../components/steps/WizardSkew.jsx";
+import { TextStore } from "../../../utils/TextStore.js";
 
 const EXP_PROB = {
   doNotComp: TextStore.interface("PeakFlowFreqWizard_DoNotCompExpProb"),
@@ -10,30 +11,15 @@ const EXP_PROB = {
 
 export default function PeakFlowFreqWizard(props) {
   const steps = [
-    // Step 2: Skew selection
-    {
-      label: TextStore.interface("AnalysisWizard_Skew_StepSkew"),
-      render: ({ bag, setBag }) => (
-        <Skew
-          value={bag.skewChoice ?? ""}
-          onChange={(val) => setBag((prev) => ({ ...prev, skewChoice: val }))}
-          regionalSkew={bag.regionalSkew ?? ""}
-          setRegionalSkew={(val) => setBag((prev) => ({ ...prev, regionalSkew: val }))}
-          regionalSkewMSE={bag.regionalSkewMSE ?? ""}
-          setRegionalSkewMSE={(val) => setBag((prev) => ({ ...prev, regionalSkewMSE: val }))}
-          allowStation
-          allowWeighted
-          compact
-        />
-      )
-    },
+    makeWizardGeneralInfoStep(),
 
-    // Step 3: Expected Probability
+    makeSkewStep({ allowStation: true, allowWeighted: true, compact: true }),
+
     {
       label: TextStore.interface("PeakFlowFreqWizard_StepExpProb"),
       render: ({ bag, setBag }) => (
         <div className="form-group">
-          {["option1","option2"].map(opt => (
+          {["option1", "option2"].map((opt) => (
             <div className="form-check" key={opt}>
               <input
                 className="form-check-input font-xs"
@@ -42,7 +28,9 @@ export default function PeakFlowFreqWizard(props) {
                 id={`step3_${opt}`}
                 value={opt}
                 checked={(bag.exProbChoice || "") === opt}
-                onChange={e => setBag(prev => ({ ...prev, exProbChoice: e.target.value }))}
+                onChange={(e) =>
+                  setBag((prev) => ({ ...prev, exProbChoice: e.target.value }))
+                }
               />
               <label className="form-check-label font-xs" htmlFor={`step3_${opt}`}>
                 {opt === "option1" ? EXP_PROB.doNotComp : EXP_PROB.comp}
@@ -50,10 +38,9 @@ export default function PeakFlowFreqWizard(props) {
             </div>
           ))}
         </div>
-      )
+      ),
     },
 
-    // Step 4: Output frequencies
     {
       label: TextStore.interface("PeakFlowFreqWizard_StepOutFreqOrd"),
       render: ({ bag, setBag }) => {
@@ -62,11 +49,13 @@ export default function PeakFlowFreqWizard(props) {
           const updated = [...rows];
           updated[idx] = val;
           if (idx === rows.length - 1 && val !== "") updated.push("");
-          setBag(prev => ({ ...prev, step4Rows: updated }));
+          setBag((prev) => ({ ...prev, step4Rows: updated }));
         };
         return (
           <>
-            <div className="font-sm mb-2">{TextStore.interface("PeakFlowFreqWizard_EditOutputFreqOrd")}</div>
+            <div className="font-sm mb-2">
+              {TextStore.interface("PeakFlowFreqWizard_EditOutputFreqOrd")}
+            </div>
             <table className="table table-sm compact-table wizard-frequency-table">
               <thead>
               <tr>
@@ -81,7 +70,7 @@ export default function PeakFlowFreqWizard(props) {
                       type="number"
                       className="form-control wizard-frequency-input"
                       value={value}
-                      onChange={e => onChangeRow(idx, e.target.value)}
+                      onChange={(e) => onChangeRow(idx, e.target.value)}
                     />
                   </td>
                 </tr>
@@ -90,30 +79,22 @@ export default function PeakFlowFreqWizard(props) {
             </table>
           </>
         );
-      }
+      },
     },
 
-    // Step 5: Summary
     {
       label: TextStore.interface("PeakFlowFreqWizard_StepComplete"),
       render: ({ name, description, selectedDataset, bag }) => {
-        const freqList = (bag.step4Rows || []).filter(v => v !== "");
+        const freqList = (bag.step4Rows || []).filter((v) => v !== "");
         return (
           <div>
-            <h6 className="mb-3">{TextStore.interface("AnalysisWizard_Summary_Title")}</h6>
+            <h6 className="mb-3">{TextStore.interface("Wizard_Summary_Title")}</h6>
 
-            <div className="mb-2"><strong>{TextStore.interface("Wizard_GeneralInfo")}</strong></div>
-            <ul className="list-unstyled mb-2 font-xs">
-              <li><strong>{TextStore.interface("Wizard_Name")}</strong>{name || <em>(None entered)</em>}</li>
-              <li>
-                <strong>{TextStore.interface("Wizard_Description")}</strong>
-                {description || <em>(None entered)</em>}
-              </li>
-              <li>
-                <strong>{TextStore.interface("Wizard_Dataset")}</strong>
-                {selectedDataset || <em>{TextStore.interface("PeakFlowFreqWizard_SummarySkewType_None")}</em>}
-              </li>
-            </ul>
+            <GeneralInfoSummary
+              name={name}
+              description={description}
+              selectedDataset={selectedDataset}
+            />
 
             <SkewSummary
               choice={bag.skewChoice}
@@ -122,13 +103,17 @@ export default function PeakFlowFreqWizard(props) {
             />
 
             <div className="mb-2">
-              <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryExpectedProbability")}</strong>
+              <strong>
+                {TextStore.interface("PeakFlowFreqWizard_SummaryExpectedProbability")}
+              </strong>
             </div>
             <ul className="list-unstyled mb-2 font-xs">
               <li>
                 <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryComputation")}</strong>{" "}
-                {bag.exProbChoice === "option1" ? EXP_PROB.doNotComp
-                  : bag.exProbChoice === "option2" ? EXP_PROB.comp
+                {bag.exProbChoice === "option1"
+                  ? EXP_PROB.doNotComp
+                  : bag.exProbChoice === "option2"
+                    ? EXP_PROB.comp
                     : null}
               </li>
             </ul>
@@ -137,31 +122,31 @@ export default function PeakFlowFreqWizard(props) {
               <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies")}</strong>
             </div>
             <ul className="list-unstyled mb-2 font-xs">
-              {freqList.length > 0
-                ? freqList.map((v, idx) => <li key={idx}>• {v}</li>)
-                : <li><em>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies_None")}</em></li>}
+              {freqList.length > 0 ? (
+                freqList.map((v, idx) => <li key={idx}>• {v}</li>)
+              ) : (
+                <li>
+                  <em>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies_None")}</em>
+                </li>
+              )}
             </ul>
           </div>
         );
-      }
-    }
+      },
+    },
   ];
-
-  const validateNext = (ctx, stepIndex) => {
-    if (stepIndex === 2 && (ctx.bag.skewChoice || "") === "option3") {
-      return (ctx.bag.regionalSkew ?? "") !== "" && (ctx.bag.regionalSkewMSE ?? "") !== "";
-    }
-    return true;
-  };
 
   const buildResult = (ctx) => ({
     name: ctx.name,
     description: ctx.description,
     selectedDataset: ctx.selectedDataset,
     skewChoiceValue:
-      (ctx.bag.skewChoice === "option1" && TextStore.interface("AnalysisWizard_Skew_UseStationSkew")) ||
-      (ctx.bag.skewChoice === "option2" && TextStore.interface("AnalysisWizard_Skew_UseWeightedSkew")) ||
-      (ctx.bag.skewChoice === "option3" && TextStore.interface("AnalysisWizard_Skew_UseRegionalSkew")) ||
+      (ctx.bag.skewChoice === "option1" &&
+        TextStore.interface("AnalysisWizard_Skew_UseStationSkew")) ||
+      (ctx.bag.skewChoice === "option2" &&
+        TextStore.interface("AnalysisWizard_Skew_UseWeightedSkew")) ||
+      (ctx.bag.skewChoice === "option3" &&
+        TextStore.interface("AnalysisWizard_Skew_UseRegionalSkew")) ||
       "",
     regionalSkew: ctx.bag.regionalSkew,
     regionalSkewMSE: ctx.bag.regionalSkewMSE,
@@ -173,12 +158,10 @@ export default function PeakFlowFreqWizard(props) {
   });
 
   return (
-    <GenericWizard
+    <WizardRunner
       {...props}
-      includeGeneralInfo
       steps={steps}
       buildResult={buildResult}
-      validateNext={validateNext}
       defaultDatasetKey="Discharge"
     />
   );

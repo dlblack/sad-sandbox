@@ -71,6 +71,7 @@ export default function DockableFrame({
                                         maps,
                                         data,
                                         analyses,
+                                        centerContent,
                                       }) {
   const [focusedId, setFocusedId] = useState(null);
   const [draggingPanelId, setDraggingPanelId] = useState(null);
@@ -304,6 +305,14 @@ export default function DockableFrame({
       zoneStyle.height = southHeight;
     } else if (zone === "W" || zone === "E") {
       zoneStyle.width = zoneWidths[zone];
+    }
+
+    if (zone === "CENTER" && centerContent) {
+      return (
+        <div key={zone} className="dock-zone dock-zone-center" style={zoneStyle}>
+          {centerContent}
+        </div>
+      );
     }
 
     const handleDragOver = (e) => {

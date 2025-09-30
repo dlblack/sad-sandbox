@@ -107,7 +107,7 @@ function createWindow() {
           ],
         },
         {
-          label: TextStore.interface('Navbar_Tools_ToggleDevTools') || 'Toggle Developer Tools',
+          label: TextStore.interface('Navbar_Tools_ToggleDevTools'),
           accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click: () => {
             const focused = BrowserWindow.getFocusedWindow();
@@ -129,7 +129,7 @@ function createWindow() {
         { label: TextStore.interface('Navbar_Help_TermsAndConditions'), click: () => shell.openExternal('https://www.hec.usace.army.mil/software/terms_and_conditions.aspx') },
         { label: TextStore.interface('Navbar_Help_About'),              click: () => win.webContents.send('menu-help', 'about-hec-neptune') },
         { type: "separator" },
-        { label: "Demo Plots (Plotly)", click: () => win.webContents.send('menu-tools', 'DemoPlots') },
+        { label: TextStore.interface('Navbar_Tools_DemoPlots'), click: () => win.webContents.send('menu-tools', 'DemoPlots') },
       ],
     },
   ]);

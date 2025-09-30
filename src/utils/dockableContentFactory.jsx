@@ -10,8 +10,8 @@ import DemoPlots from "../app_components/DemoPlots";
 
 import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/ManualDataEntryEditor";
 
-import PeakFlowFreqWizard from "../app_components/analysis/PeakFlowFreqWizard";
-import Bulletin17AnalysisWizard from "../app_components/analysis/Bulletin17AnalysisWizard";
+import PeakFlowFreqWizard from "../app_components/analysis/peak_flow/PeakFlowFreqWizard.jsx";
+import Bulletin17AnalysisWizard from "../app_components/analysis/bulletin17/Bulletin17AnalysisWizard.jsx";
 import GeneralFreqAnalysisWizard from "../app_components/analysis/GeneralFreqAnalysisWizard";
 import VolumeFreqAnalysisWizard from "../app_components/analysis/VolumeFreqAnalysisWizard";
 import CoincidentFreqAnalysisWizard from "../app_components/analysis/CoincidentFreqAnalysisWizard";

@@ -1,7 +1,7 @@
 import React from "react";
-import { TextStore } from "../../../utils/TextStore.js";
+import { TextStore } from "../../../../utils/TextStore.js";
 
-export default function Skew({
+export default function WizardSkew({
                                value,
                                onChange,
                                regionalSkew,
@@ -23,11 +23,7 @@ export default function Skew({
       };
 
       return (
-        <fieldset>
-            <legend className="col-form-label fw-semibold">
-              {TextStore.interface("AnalysisWizard_Skew_StepSkew")}
-            </legend>
-
+        <fieldset className="wizard-grid">
             <div className="mb-2">
               <div className="form-check">
                 <input
@@ -163,3 +159,45 @@ export function SkewSummary({ choice, regionalSkew, regionalSkewMSE }) {
       </>
     );
   }
+
+// ---- Reusable Skew step -----------------
+export function makeSkewStep({
+                               allowStation = false,
+                               allowWeighted = false,
+                               compact = false,
+                               key = "skew",
+                             } = {}) {
+  const label = TextStore.interface("AnalysisWizard_Skew_StepSkew");
+
+  const validate = (ctx) => {
+    const choice = ctx.bag.skewChoice || "";
+    if (choice === "option3") {
+      return (ctx.bag.regionalSkew ?? "") !== "" && (ctx.bag.regionalSkewMSE ?? "") !== "";
+    }
+    return true;
+  };
+
+  const render = ({ bag, setBag }) => (
+    <WizardSkew
+      value={bag.skewChoice ?? ""}
+      onChange={(val) => setBag((prev) => ({ ...prev, skewChoice: val }))}
+      regionalSkew={bag.regionalSkew ?? ""}
+      setRegionalSkew={(val) => setBag((prev) => ({ ...prev, regionalSkew: val }))}
+      regionalSkewMSE={bag.regionalSkewMSE ?? ""}
+      setRegionalSkewMSE={(val) => setBag((prev) => ({ ...prev, regionalSkewMSE: val }))}
+      allowStation={allowStation}
+      allowWeighted={allowWeighted}
+      compact={compact}
+    />
+  );
+
+  const summary = ({ bag }) => (
+    <SkewSummary
+      choice={bag.skewChoice}
+      regionalSkew={bag.regionalSkew}
+      regionalSkewMSE={bag.regionalSkewMSE}
+    />
+  );
+
+  return { key, label, render, validate, summary };
+}

@@ -1,4 +1,4 @@
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useState} from "react";
 import {componentMetadata, DEFAULT_COMPONENT_SIZE} from "../utils/componentMetadata";
 import {makeMessage} from "../utils/messageUtils";
 
@@ -16,13 +16,12 @@ function getDefaultDockZone(type) {
   }
 }
 
-export default function useDockableContainers({handleWizardFinish, handleDeleteNode}) {
+export default function useDockableContainers({ handleWizardFinish, handleDeleteNode }) {
   const [messages, setMessages] = useState([]);
   const [messageType, setMessageType] = useState("info");
 
-  // Initialize with correct titles and metadata
   const [containers, setContainers] = useState(() => {
-    return ["ComponentContent", "ComponentMessage"].map(type => {
+    return ["ComponentContent", "ComponentMessage"].map((type) => {
       const meta = componentMetadata[type] || {};
       return {
         id: type,
@@ -31,97 +30,92 @@ export default function useDockableContainers({handleWizardFinish, handleDeleteN
         dockZone: getDefaultDockZone(type),
         width: meta.width || DEFAULT_COMPONENT_SIZE.width,
         height: meta.height || DEFAULT_COMPONENT_SIZE.height,
-        ...meta
+        ...meta,
       };
     });
   });
 
-  const openComponentTypesRef = useRef(new Set());
-
   const addComponent = useCallback((type, optionalProps = {}) => {
     const meta = componentMetadata[type] || DEFAULT_COMPONENT_SIZE;
-
-    if (containers.some(c => c.type === type) || openComponentTypesRef.current.has(type)) {
-      setMessages(prev => [
-        ...prev,
-        makeMessage(10010, [meta.entityName || type], "warning"),
-      ]);
-      return;
-    }
-
-    openComponentTypesRef.current.add(type);
-
-    const newComponentId = `${type}-${crypto.randomUUID()}`;
     const resolvedWidth = meta.width > 0 ? meta.width : (DEFAULT_COMPONENT_SIZE.width || 320);
     const resolvedHeight = meta.height > 0 ? meta.height : (DEFAULT_COMPONENT_SIZE.height || 240);
 
-    setContainers(prev => [
-      ...prev,
-      {
-        id: newComponentId,
-        type,
-        title: meta.entityName || type,
-        dockZone: getDefaultDockZone(type),
-        width: resolvedWidth,
-        height: resolvedHeight,
-        ...meta,
-        ...optionalProps,
-      },
-    ]);
+    const newComponentId =
+      type === "ComponentContent" || type === "ComponentMessage"
+        ? type
+        : `${type}-${crypto.randomUUID()}`;
 
-    setMessages(prev => [
-      ...prev,
-      makeMessage(10001, [meta.entityName || type, meta.category], "text-body"),
-    ]);
+    setContainers((prev) => {
+      const cleaned = prev.filter((c) => c.type !== type);
+      return [
+        ...cleaned,
+        {
+          id: newComponentId,
+          type,
+          title: meta.entityName || type,
+          dockZone: optionalProps.dockZone || getDefaultDockZone(type),
+          width: resolvedWidth,
+          height: resolvedHeight,
+          ...meta,
+          ...optionalProps,
+        },
+      ];
+    });
 
-    setTimeout(() => openComponentTypesRef.current.delete(type), 100);
-  }, [containers]);
-
-  const wizardFinishWithMessages = useCallback(async (type, valuesObj, id) => {
-    const meta = componentMetadata[type] || {};
-    const name = valuesObj?.name || "";
-    setMessages(prev => [
-      ...prev,
-      makeMessage(10002, [meta.entityName || type, name], "success"),
+    const category = (meta.category || "").trim();
+    setMessages((prevMsgs) => [
+      ...prevMsgs,
+      makeMessage(10001, [meta.entityName || type, category], "text-body"),
     ]);
-    if (handleWizardFinish) {
-      await handleWizardFinish(type, valuesObj, id);
-    }
-  }, [handleWizardFinish]);
+  }, []);
 
-  const deleteNodeWithMessages = useCallback((section, pathArr, name) => {
-    setMessages(prev => [
-      ...prev,
-      makeMessage(10020, [name || "Unknown"], "danger"),
-    ]);
-    if (handleDeleteNode) {
-      handleDeleteNode(section, pathArr);
-    }
-  }, [handleDeleteNode]);
+  const wizardFinishWithMessages = useCallback(
+    async (type, valuesObj, id) => {
+      const meta = componentMetadata[type] || {};
+      const name = valuesObj?.name || "";
+      setMessages((prev) => [
+        ...prev,
+        makeMessage(10002, [meta.entityName || type, name], "success"),
+      ]);
+      if (handleWizardFinish) {
+        await handleWizardFinish(type, valuesObj, id);
+      }
+    },
+    [handleWizardFinish]
+  );
+
+  const deleteNodeWithMessages = useCallback(
+    (section, pathArr, name) => {
+      setMessages((prev) => [...prev, makeMessage(10020, [name || "Unknown"], "danger")]);
+      if (handleDeleteNode) {
+        handleDeleteNode(section, pathArr);
+      }
+    },
+    [handleDeleteNode]
+  );
 
   const removeComponent = (id) => {
+    let removedInfo = null;
+
     setContainers((prev) => {
       const removed = prev.find((c) => c.id === id);
       if (!removed) return prev;
 
       const meta = componentMetadata[removed.type] || {};
-      const entityName = meta.entityName || removed.type;
-
-      setMessages((prevMsgs) => {
-        const closedMsg = makeMessage(
-          10030,
-          [entityName, meta.category || ""],
-          "text-body-secondary"
-        );
-        const lastMsg = prevMsgs[prevMsgs.length - 1];
-        if (lastMsg?.text === closedMsg.text) {
-          return prevMsgs;
-        }
-        return [...prevMsgs, closedMsg];
-      });
+      removedInfo = {
+        name: meta.entityName || removed.type,
+        category: (meta.category || "").trim(),
+      };
 
       return prev.filter((c) => c.id !== id);
     });
+
+    if (removedInfo) {
+      setMessages((prevMsgs) => [
+        ...prevMsgs,
+        makeMessage(10030, [removedInfo.name, removedInfo.category], "text-body-secondary"),
+      ]);
+    }
   };
 
   const onDragStart = (id, event) => {
@@ -147,6 +141,26 @@ export default function useDockableContainers({handleWizardFinish, handleDeleteN
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  // Type-aware logging
+  const logCenterOpened = (type, title) => {
+    const cat = (componentMetadata[type]?.category || "").trim() || "Component";
+    setMessages((prev) => [...prev, makeMessage(10001, [title, cat], "text-body")]);
+  };
+
+  const logCenterClosed = (type, title) => {
+    const cat = (componentMetadata[type]?.category || "").trim() || "Component";
+    setMessages((prevMsgs) => {
+      const msg = makeMessage(10030, [title, cat], "text-body-secondary");
+      const last = prevMsgs[prevMsgs.length - 1];
+      if (last?.text === msg.text) return prevMsgs;
+      return [...prevMsgs, msg];
+    });
+  };
+
+  const logCenterAlreadyOpen = (type, title) => {
+    setMessages((prev) => [...prev, makeMessage(10010, [title], "warning")]);
+  };
+
   return {
     containers, setContainers,
     messages, setMessages,
@@ -155,5 +169,6 @@ export default function useDockableContainers({handleWizardFinish, handleDeleteN
     onDragStart,
     handleWizardFinish: wizardFinishWithMessages,
     handleDeleteNode: deleteNodeWithMessages,
+    logCenterOpened, logCenterClosed, logCenterAlreadyOpen,
   };
 }
