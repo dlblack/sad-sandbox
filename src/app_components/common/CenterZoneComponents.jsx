@@ -3,6 +3,7 @@ import PeakFlowFreqWizard from "../analysis/peak_flow/PeakFlowFreqWizard.jsx";
 import Bulletin17AnalysisWizard from "../analysis/bulletin17/Bulletin17AnalysisWizard.jsx";
 import ManualDataEntryEditor from "../data/ManualDataEntryEditor/ManualDataEntryEditor.jsx";
 import DemoPlots from "../DemoPlots.jsx";
+import DemoPlotsRecharts from "../DemoPlotsRecharts.jsx";
 import TimeSeriesPlot from "../TimeSeriesPlot.jsx";
 import PairedDataPlot from "../PairedDataPlot.jsx";
 import { TextStore } from "../../utils/TextStore.js";
@@ -28,6 +29,11 @@ const REGISTRY = {
     title: () => "Demo Plots (Plotly)",
     typeClass: "tab--plot",
     Component: DemoPlots,
+  },
+  DemoPlotsRecharts: {
+    title: () => "Demo Plots (Recharts)",
+    typeClass: "tab--plot",
+    Component: DemoPlotsRecharts,
   },
   TimeSeriesPlot: {
     title: () => "Time Series Plot",
