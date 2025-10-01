@@ -129,7 +129,8 @@ function createWindow() {
         { label: TextStore.interface('Navbar_Help_TermsAndConditions'), click: () => shell.openExternal('https://www.hec.usace.army.mil/software/terms_and_conditions.aspx') },
         { label: TextStore.interface('Navbar_Help_About'),              click: () => win.webContents.send('menu-help', 'about-hec-neptune') },
         { type: "separator" },
-        { label: TextStore.interface('Navbar_Tools_DemoPlots'), click: () => win.webContents.send('menu-tools', 'DemoPlots') },
+        { label: "Demo Plots (Plotly)", click: () => win.webContents.send('menu-tools', 'DemoPlots') },
+        { label: "Demo Plots (Recharts)", click: () => win.webContents.send('menu-tools', 'DemoPlotsRecharts') },
       ],
     },
   ]);

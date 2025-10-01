@@ -90,10 +90,12 @@ export const componentMetadata = {
     entityName: "Demo Plots (Plotly)",
     category: "demo",
     centerTab: true,
-    width: 1000,
-    height: 800
   },
-
+  DemoPlotsRecharts: {
+    entityName: "Demo Plots (Recharts)",
+    category: "demo",
+    centerTab: true,
+  },
 };
 
 export const DEFAULT_COMPONENT_SIZE = {

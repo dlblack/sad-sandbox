@@ -371,6 +371,18 @@ function Navbar({addComponent}) {
                       Demo Plots (Plotly)
                     </a>
                   </li>
+                  <li>
+                    <a
+                      className="dropdown-item"
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleOpenComponent("DemoPlotsRecharts");
+                      }}
+                    >
+                      Demo Plots (Recharts)
+                    </a>
+                  </li>
                 </ul>
               </li>
             </ul>
