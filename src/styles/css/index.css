@@ -356,65 +356,234 @@ html, body {
 }
 
 /* =========================================================
-   Wizard tabs (center workspace)
+   Center zone: tabs + body (single row with overflow)
    ========================================================= */
+
+/* Container */
 .wizard-workspace {
-    min-height: 0;
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
+    min-height: 0;
 }
 
+/* Sticky tab bar */
 .wizard-tabs-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+
+    display: flex;                /* in-flow layout */
+    align-items: center;          /* vertical centering at any scale */
+    gap: 8px;
+
+    border-bottom: 1px solid #2a2a2a;
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 0 6px;               /* small horizontal breathing room */
+    background: inherit;          /* keep same background as content */
+}
+
+.tabs-row {
     display: flex;
+    flex: 1 1 auto;               /* consume all remaining width */
+    min-width: 0;
     gap: 2px;
-    padding: 6px 8px 0 8px;
-    background: #1f1f1f; border-bottom: 1px solid #2a2a2a;
+    overflow: hidden;             /* single line only */
+    white-space: nowrap;
 }
 
+/* hidden measurement container */
+.tabs-measure {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    left: -99999px;
+    top: -99999px;
+}
+
+/* Individual tab */
 .wizard-tab {
-    position: relative; z-index: 0;
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 10px; cursor: pointer;
-    background: #262626; color: #ddd;
-    border: 1px solid transparent; border-bottom: none;
-    border-top-left-radius: 6px; border-top-right-radius: 6px;
-    transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 22ch;
+    padding: 4px 10px;
+    background: #262626;
+    color: #ddd;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.wizard-tab:hover { background: #2b2b2b; }
-.wizard-tab:focus-visible { outline: 2px solid #7db7ff; outline-offset: 2px; }
+.wizard-tab:hover {
+    background: #2f2f2f;
+    box-shadow: inset 0 -2px 0 #5bc0de;   /* subtle hover accent */
+}
+.wizard-tab:focus-visible {
+    outline: 2px solid #7db7ff;
+    outline-offset: 2px;
+}
 
+/* Active tab */
 .wizard-tab.is-active {
     z-index: 1;
     background: #202020;
     color: #fff;
     box-shadow: 0 1px 0 0 #202020;
 }
-.wizard-tab.is-active .wizard-tab-title { font-weight: 600; }
-/* Color-code the tab underline by kind */
-.wizard-tab.is-active.tab--wizard::after { background: #3a82f7; }   /* blue */
-.wizard-tab.is-active.tab--editor::after { background: #f7c23a; }   /* yellow */
-
-
-/* Accent bar under the active tab */
 .wizard-tab.is-active::after {
     content: "";
     position: absolute;
-    left: 8px; right: 8px; bottom: -1px;
-    height: 3px; border-radius: 3px 3px 0 0;
-    background: #3a82f7;
+    left: 8px;
+    right: 8px;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: #3a82f7;           /* default accent */
 }
+/* Color accents by type */
+.wizard-tab.is-active.tab--wizard::after { background: #3a82f7; }  /* blue */
+.wizard-tab.is-active.tab--editor::after { background: #f7c23a; }  /* yellow */
+.wizard-tab.is-active.tab--plot::after   { background: #8bc34a; }  /* green */
+.wizard-tab.is-active.tab--panel::after  { background: #9c27b0; }  /* purple */
 
 .wizard-tab-title {
-    max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.2;
 }
 
-.wizard-tab-close { font-weight: bold; line-height: 1; opacity: 0.8; }
-.wizard-tab-close:hover { opacity: 1; }
+/* Close icon */
+.wizard-tab-close {
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.65;
+    transition: opacity .12s ease;
+}
+.wizard-tab:hover .wizard-tab-close,
+.wizard-tab:focus-within .wizard-tab-close { opacity: 1; }
 
-.wizard-tab-body { flex: 1 1 0; min-height: 0; display: flex; background: inherit; }
-.wizard-tab-body > * { flex: 1 1 0; min-width: 0; }
+/* Overflow control */
+.tabs-overflow {
+    flex: 0 0 auto;               /* doesn’t shrink; stays visible */
+    position: relative;           /* menu anchoring */
+}
+
+.tabs-overflow-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 24px;
+    border: 1px solid #333;
+    background: #262626;
+    color: #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1;
+}
+.tabs-overflow-btn:hover {
+    background: #2b2b2b;
+    border-color: #3a3a3a;
+}
+
+/* Dropdown menu */
+.tabs-overflow-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);        /* below the button */
+    min-width: 220px;
+    background: #262626;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 6px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.35);
+    z-index: 10;
+}
+.tabs-overflow-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 2px;
+    transition: background-color .12s ease;
+}
+.tabs-overflow-item:hover { background: #2f2f2f; }
+.tabs-overflow-item-btn,
+.tabs-overflow-item-close {
+    background: transparent;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 4px;
+    line-height: 1;
+    color: #ddd;
+    cursor: pointer;
+}
+.tabs-overflow-item-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tabs-overflow-item-btn {
+    flex: 1 1 auto;
+    display: block;
+    background: transparent;
+    border: 0;
+    padding: 6px 4px;
+    text-align: left;
+    color: #ddd;
+    cursor: pointer;
+}
+.tabs-overflow-item-btn:hover { text-decoration: underline; }
+.tabs-overflow-item-close {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: 0;
+    color: #aaa;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.tabs-overflow-item-close:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+}
+.tabs-overflow-item-btn:focus-visible,
+.tabs-overflow-item-close:focus-visible {
+    outline: 2px solid rgba(59,130,246,.45);
+    outline-offset: 2px;
+}
+
+.wizard-tab:focus-visible,
+.tabs-overflow-item-btn:focus-visible,
+.tabs-overflow-item-close:focus-visible {
+    box-shadow: 0 0 0 2px rgba(59,130,246,.45);
+    outline: none;
+}
+
+/* Body area (scrolls; tab bar stays) */
+.wizard-tab-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    background: inherit;
+}
+.wizard-tab-body > * {
+    flex: 1 1 0;
+    min-width: 0;
+}
 .wizard-tab-body .wizard-fixed-size.card { height: 100%; }
 .wizard-tab-body .wizard-main-inner { height: 100%; }
 
@@ -428,17 +597,20 @@ html, body {
     color: #ccc;
 }
 
-/* ================= Small inputs ================= */
+/* Small inputs */
 .wizard-fixed-size input[type="text"],
 .wizard-fixed-size input[type="number"],
 .wizard-fixed-size select,
 .wizard-fixed-size textarea {
-    font-size: 0.75rem; padding: 2px 4px; height: 22px; line-height: 1.2;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    height: 22px;
+    line-height: 1.2;
 }
 .wizard-fixed-size select { padding-right: 1rem; height: 24px; }
 .wizard-fixed-size textarea { min-height: 48px; line-height: 1.2; }
 
-/* -------- Form rows: pixel-aligned label/input at any zoom -------- */
+/* Form rows grid */
 .wizard-fixed-size .form-group.row {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -451,9 +623,9 @@ html, body {
 .wizard-fixed-size .form-group.row > .col-auto {
     padding-left: 0 !important;
     padding-right: 0 !important;
-    min-width: 0;         /* allow inputs to shrink */
-    width: auto;          /* don't force fixed widths */
-    max-width: none;      /* remove prior cap */
+    min-width: 0;
+    width: auto;
+    max-width: none;
 }
 .wizard-label-fixed,
 .wizard-fixed-size .col-form-label {
@@ -481,7 +653,7 @@ html, body {
     padding-bottom: 0.35rem;
 }
 
-/* One grid for the whole fieldset: label col = max-content, field col = 1fr */
+/* One grid for the whole fieldset */
 .wizard-grid {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -489,24 +661,16 @@ html, body {
     row-gap: 0.5rem;
     align-items: center;
 }
-.wizard-grid .form-group.row {
-    display: contents;               /* let children become grid items */
-}
-
-/* Map cells to columns explicitly */
+.wizard-grid .form-group.row { display: contents; }
 .wizard-grid .form-group.row > .col-auto { grid-column: 1; }
 .wizard-grid .form-group.row > .col      { grid-column: 2; min-width: 0; }
-
-/* Keep labels on one line so the label column is sized by the longest label */
 .wizard-grid .col-form-label,
 .wizard-grid .wizard-label-fixed { white-space: nowrap; }
-
-/* Ensure controls fill the field column */
 .wizard-grid .form-control,
 .wizard-grid .form-select,
 .wizard-grid textarea { width: 100%; }
 
-/* ── Wizard sidebar layout ───────────────────────────── */
+/* Wizard sidebar layout */
 .wizard-shell {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -555,7 +719,6 @@ html, body {
 
 .wizard-rail-item.current { border-left-color: #0d6efd; }
 .wizard-rail-item.done    { border-left-color: #198754; }
-
 .wizard-rail-item.current .wizard-rail-btn { background: #2a2a2a; }
 .wizard-rail-item.todo .wizard-rail-btn:hover,
 .wizard-rail-item.done .wizard-rail-btn:hover { background: #2b2b2b; }
@@ -588,7 +751,8 @@ html, body {
     --btn-pad-x: calc(0.25em * var(--btn-scale));
     --btn-min-i: calc(7ch * var(--btn-scale));
     --btn-min-b: calc(2em * var(--btn-scale));
-    font-size: var(--btn-font); line-height: 1;
+    font-size: var(--btn-font);
+    line-height: 1;
 }
 
 @media (max-width: 900px) {
@@ -697,14 +861,11 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin
     font-family: Arial, sans-serif;
     color: white;
     width: 100%;
-    font-size: 1rem;                 /* ensure tree follows UI scale */
+    font-size: 1rem;
 }
 
 .component-messages { overflow-y: auto; height: 100%; }
-.message {
-    font-weight: 100;
-    font-size: 0.875rem;
-}
+.message { font-weight: 100; font-size: 0.875rem; }
 .message.info    { color: #6c757d; }
 .message.success { color: #198754; }
 .message.danger  { color: #dc3545; }
