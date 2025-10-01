@@ -2,7 +2,7 @@ import React from "react";
 import ComponentInterfaceSize from "../app_components/ComponentInterfaceSize";
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
-import ComponentContent from "../app_components/ComponentContent";
+import ComponentProject from "../app_components/ComponentProject";
 import ComponentStyleSelector from "../app_components/ComponentStyleSelector";
 import PairedDataPlot from "../app_components/PairedDataPlot";
 import TimeSeriesPlot from "../app_components/TimeSeriesPlot";
@@ -28,8 +28,8 @@ import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizar
 
 export const dockableContentFactory = (type, props = {}) => {
   switch (type) {
-    case "ComponentContent":
-      return <ComponentContent
+    case "ComponentProject":
+      return <ComponentProject
         maps={props.maps}
         data={props.data}
         analyses={props.analyses}

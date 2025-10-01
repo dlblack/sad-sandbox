@@ -240,10 +240,10 @@ function Navbar({addComponent}) {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        handleOpenComponent("ComponentContent");
+                        handleOpenComponent("ComponentProject");
                       }}
                     >
-                      {TextStore.interface("Navbar_Tools_Contents")}
+                      {TextStore.interface("Navbar_Tools_Project")}
                     </a>
                   </li>
                   <li>
