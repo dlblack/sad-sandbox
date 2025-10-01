@@ -17,8 +17,8 @@ function wizard(entityName) {
 }
 
 export const componentMetadata = {
-  ComponentContent: {
-    entityName: "Contents",
+  ComponentProject: {
+    entityName: "Project",
     category: "panel",
     centerTab: false,
     width: Math.round(window.innerWidth * 0.15),

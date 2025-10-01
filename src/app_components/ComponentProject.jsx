@@ -21,7 +21,7 @@ function makePath(...args) {
   return args.filter(Boolean).join("/");
 }
 
-function ComponentContent({
+function ComponentProject({
                             analyses = {},
                             data = {},
                             maps = [],
@@ -254,4 +254,4 @@ function ComponentContent({
   );
 }
 
-export default ComponentContent;
+export default ComponentProject;

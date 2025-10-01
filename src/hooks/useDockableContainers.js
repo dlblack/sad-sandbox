@@ -4,7 +4,7 @@ import {makeMessage} from "../utils/messageUtils";
 
 function getDefaultDockZone(type) {
   switch (type) {
-    case "ComponentContent":
+    case "ComponentProject":
       return "W";
     case "ComponentMessage":
       return "S";
@@ -21,7 +21,7 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
   const [messageType, setMessageType] = useState("info");
 
   const [containers, setContainers] = useState(() => {
-    return ["ComponentContent", "ComponentMessage"].map((type) => {
+    return ["ComponentProject", "ComponentMessage"].map((type) => {
       const meta = componentMetadata[type] || {};
       return {
         id: type,
@@ -41,7 +41,7 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
     const resolvedHeight = meta.height > 0 ? meta.height : (DEFAULT_COMPONENT_SIZE.height || 240);
 
     const newComponentId =
-      type === "ComponentContent" || type === "ComponentMessage"
+      type === "ComponentProject" || type === "ComponentMessage"
         ? type
         : `${type}-${crypto.randomUUID()}`;
 

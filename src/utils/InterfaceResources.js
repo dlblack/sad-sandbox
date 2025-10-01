@@ -34,7 +34,7 @@ const INTERFACE_TEXT = {
   Navbar_Analysis_QuantileMapping: "New Quantile Mapping",
   Navbar_Analysis_CopulaAnalysis: "New Copula Analysis",
   Navbar_Tools: "Tools",
-  Navbar_Tools_Contents: "Contents",
+  Navbar_Tools_Project: "Project",
   Navbar_Tools_Messages: "Messages",
   Navbar_Tools_View: "View",
   Navbar_Tools_View_InterfaceSize: "Interface Size",
@@ -83,7 +83,7 @@ const INTERFACE_TEXT = {
   // --------------------------------------
   // componentMetadata
   // --------------------------------------
-  ComponentMetadata_ComponentContent: "Contents",
+  ComponentMetadata_ComponentProject: "Project",
   ComponentMetadata_ManualDataEntryEditor: "Manual Data Entry",
   ComponentMetadata_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
   ComponentMetadata_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell, screen } from 'electron';
+import { app, BrowserWindow, Menu, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { TextStore } from "../src/utils/TextStore.js";
@@ -91,7 +91,7 @@ function createWindow() {
     {
       label: TextStore.interface('Navbar_Tools'),
       submenu: [
-        { label: TextStore.interface('Navbar_Tools_Contents'),      click: () => win.webContents.send('menu-tools', 'ComponentContent') },
+        { label: TextStore.interface('Navbar_Tools_Project'),      click: () => win.webContents.send('menu-tools', 'ComponentProject') },
         { label: TextStore.interface('Navbar_Tools_Messages'),      click: () => win.webContents.send('menu-tools', 'ComponentMessage') },
         {
           label: TextStore.interface('Navbar_Tools_View'),
