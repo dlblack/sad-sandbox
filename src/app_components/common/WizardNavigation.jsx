@@ -27,7 +27,9 @@ function WizardNavigation({
     (e) => {
       if (e.key === "Enter") {
         if (!isLastStep && !disableNext) goNext();
-        else if (isLastStep) onFinish?.();
+        else if (isLastStep) {
+          onFinish?.();
+        }
       } else if (e.key === "Escape" && !hideCancel) {
         onCancel?.();
       }
@@ -88,7 +90,9 @@ function WizardNavigation({
             variant="filled"
             color="teal"
             size="xs"
-            onClick={onFinish}
+            onClick={(e) => {
+              onFinish?.(e);
+            }}
             aria-label={finishText}
           >
             {finishText}

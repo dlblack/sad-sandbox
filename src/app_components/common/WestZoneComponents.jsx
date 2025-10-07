@@ -7,7 +7,8 @@ const REGISTRY = {
   ComponentProject: {
     title: () => TextStore.interface("ComponentMetadata_ComponentProject"),
     typeClass: "tab--panel",
-    Component: ComponentProject },
+    Component: ComponentProject
+  }
 };
 
 export function westTitle(kind, props) {
@@ -25,8 +26,11 @@ export default function WestZoneComponents({
                                              maps,
                                              data,
                                              analyses,
-                                             handleOpenComponent
-                                            }) {
+                                             handleOpenComponent,
+                                             onSaveAsNode,
+                                             onRenameNode,
+                                             onDeleteNode
+                                           }) {
   const activeTab = useMemo(
     () => tabs.find((t) => t.id === activeId) || null,
     [tabs, activeId]
@@ -35,15 +39,46 @@ export default function WestZoneComponents({
     <div className="wizard-workspace" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
       <ZoneTabs tabs={tabs} activeId={activeId} setActiveId={setActiveId} closeTab={closeTab} registry={REGISTRY} />
       <div className="wizard-tab-body" style={{ flex: 1, minHeight: 0 }}>
-        {activeTab ? <ActivePane tab={activeTab} maps={maps} data={data} analyses={analyses} handleOpenComponent={handleOpenComponent} /> : null}
+        {activeTab ? (
+          <ActivePane
+            tab={activeTab}
+            maps={maps}
+            data={data}
+            analyses={analyses}
+            handleOpenComponent={handleOpenComponent}
+            onSaveAsNode={onSaveAsNode}
+            onRenameNode={onRenameNode}
+            onDeleteNode={onDeleteNode}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
 
-function ActivePane({ tab, maps, data, analyses, handleOpenComponent }) {
+function ActivePane({
+                      tab,
+                      maps,
+                      data,
+                      analyses,
+                      handleOpenComponent,
+                      onSaveAsNode,
+                      onRenameNode,
+                      onDeleteNode
+                    }) {
   const reg = REGISTRY[tab.kind];
   if (!reg) return null;
   const Cmp = reg.Component;
-  return <Cmp {...tab.props} maps={maps} data={data} analyses={analyses} handleOpenComponent={handleOpenComponent} />;
+  return (
+    <Cmp
+      {...tab.props}
+      maps={maps}
+      data={data}
+      analyses={analyses}
+      handleOpenComponent={handleOpenComponent}
+      onSaveAsNode={onSaveAsNode}
+      onRenameNode={onRenameNode}
+      onDeleteNode={onDeleteNode}
+    />
+  );
 }

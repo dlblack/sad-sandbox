@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import isElectron from "./utils/isElectron";
 import Navbar from "./app_components/Navbar.jsx";
@@ -172,6 +171,8 @@ function App() {
       maps={maps}
       data={data}
       analyses={analyses}
+      onDataSave={handleDataSave}
+      onFinish={wizardFinishWithMessages}
     />
   );
 
@@ -185,6 +186,9 @@ function App() {
       data={data}
       analyses={analyses}
       handleOpenComponent={openComponent}
+      onSaveAsNode={handleSaveAsNode}
+      onRenameNode={handleRenameNode}
+      onDeleteNode={deleteNodeWithMessages}
     />
   );
 

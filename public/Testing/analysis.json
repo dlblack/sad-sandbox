@@ -27,6 +27,19 @@
     {
       "name": "Bulletin 17 tests",
       "description": "Test of an incomplete analysis wizard."
+    },
+    {
+      "name": "Test",
+      "description": "Discharge for the American River, 01Jul2000 07:00 - 06Jul2000 06:45.",
+      "selectedDataset": "American River Discharge",
+      "method": "B17C",
+      "probability": 0.01,
+      "datasetRef": "American River Discharge",
+      "options": {
+        "useRegionalSkew": true,
+        "regionalSkew": 0.5,
+        "regionalSkewMSE": 3.2
+      }
     }
   ]
 }

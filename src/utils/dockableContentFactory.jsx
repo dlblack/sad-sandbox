@@ -9,8 +9,9 @@ import DemoPlots from "../app_components/DemoPlots";
 
 import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/ManualDataEntryEditor";
 
-import PeakFlowFreqWizard from "../app_components/analysis/peak_flow/PeakFlowFreqWizard.jsx";
 import Bulletin17AnalysisWizard from "../app_components/analysis/bulletin17/Bulletin17AnalysisWizard.jsx";
+import FloodTypeClassAnalysisWizard from "../app_components/analysis/flood_type_classification/FloodTypeClassAnalysisWizard.jsx";
+import PeakFlowFreqWizard from "../app_components/analysis/peak_flow/PeakFlowFreqWizard.jsx";
 import GeneralFreqAnalysisWizard from "../app_components/analysis/GeneralFreqAnalysisWizard";
 import VolumeFreqAnalysisWizard from "../app_components/analysis/VolumeFreqAnalysisWizard";
 import CoincidentFreqAnalysisWizard from "../app_components/analysis/CoincidentFreqAnalysisWizard";
@@ -59,10 +60,18 @@ export const dockableContentFactory = (type, props = {}) => {
       return <ManualDataEntryEditor {...props} onDataSave={props.onDataSave}/>;
 
     // Analysis
-    case "PeakFlowFreqWizard":
-      return <PeakFlowFreqWizard {...props} analyses={props.analyses} data={props.data}/>;
     case "Bulletin17AnalysisWizard":
       return <Bulletin17AnalysisWizard {...props} />;
+    case "FloodTypeClassAnalysisWizard":
+      return <FloodTypeClassAnalysisWizard {...props} />;
+    case "PeakFlowFreqWizard":
+      return <PeakFlowFreqWizard
+        {...props}
+        analyses={props.analyses}
+        data={props.data}
+        onFinish={props.onWizardFinish}
+        onRemove={props.onRemove}
+      />;
     case "GeneralFreqAnalysisWizard":
       return <GeneralFreqAnalysisWizard {...props} />;
     case "VolumeFreqAnalysisWizard":

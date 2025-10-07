@@ -20,24 +20,14 @@ export default function PeakFlowFreqWizard(props) {
       label: TextStore.interface("PeakFlowFreqWizard_StepExpProb"),
       render: ({ bag, setBag }) => (
         <Stack gap="xs">
-          <Radio
-            label={EXP_PROB.doNotComp}
+          <Radio.Group
+            value={bag.exProbChoice || ""}
+            onChange={(val) => setBag((prev) => ({ ...prev, exProbChoice: val }))}
             name="step3Radio"
-            value="option1"
-            checked={(bag.exProbChoice || "") === "option1"}
-            onChange={(e) =>
-              setBag((prev) => ({ ...prev, exProbChoice: e.currentTarget.value }))
-            }
-          />
-          <Radio
-            label={EXP_PROB.comp}
-            name="step3Radio"
-            value="option2"
-            checked={(bag.exProbChoice || "") === "option2"}
-            onChange={(e) =>
-              setBag((prev) => ({ ...prev, exProbChoice: e.currentTarget.value }))
-            }
-          />
+          >
+            <Radio label={EXP_PROB.doNotComp} value="option1" />
+            <Radio label={EXP_PROB.comp} value="option2" />
+          </Radio.Group>
         </Stack>
       ),
     },
@@ -45,15 +35,26 @@ export default function PeakFlowFreqWizard(props) {
     {
       label: TextStore.interface("PeakFlowFreqWizard_StepOutFreqOrd"),
       render: ({ bag, setBag }) => {
-        const rows = Array.isArray(bag.step4Rows) ? bag.step4Rows : ["", "", "", "", ""];
-        const onChangeRow = (idx, val) => {
-          const updated = [...rows];
-          const valueStr = val === null || typeof val === "undefined" ? "" : String(val);
-          updated[idx] = valueStr;
-          if (idx === rows.length - 1 && valueStr !== "") {
-            updated.push("");
+        const MIN_ROWS = 5;
+
+        function normalizeRows(arr) {
+          const filled = (Array.isArray(arr) ? arr : []).filter(v => v !== "");
+          const out = filled.slice();
+          out.push("");
+          while (out.length < MIN_ROWS) {
+            out.push("");
           }
-          setBag((prev) => ({ ...prev, step4Rows: updated }));
+          return out;
+        }
+
+        const rows = normalizeRows(bag.step4Rows);
+
+        const onChangeRow = (idx, val) => {
+          const valueStr = val == null ? "" : String(val);
+          const updated = rows.slice();
+          updated[idx] = valueStr;
+          const next = normalizeRows(updated);
+          setBag(prev => ({ ...prev, step4Rows: next }));
         };
 
         return (
@@ -65,7 +66,7 @@ export default function PeakFlowFreqWizard(props) {
             <Stack gap="xs">
               {rows.map((value, idx) => (
                 <NumberInput
-                  key={`freq-${idx}`}
+                  key={`${idx}`}
                   label={
                     idx === 0
                       ? TextStore.interface("PeakFlowFreqWizard_FreqInPercent")
@@ -73,7 +74,7 @@ export default function PeakFlowFreqWizard(props) {
                   }
                   hideControls
                   value={value === "" ? "" : Number(value)}
-                  onChange={(v) => onChangeRow(idx, v)}
+                  onChange={v => onChangeRow(idx, v)}
                   min={0}
                   max={100}
                   step={1}
@@ -130,7 +131,7 @@ export default function PeakFlowFreqWizard(props) {
               {freqList.length > 0 ? (
                 <Stack gap={2}>
                   {freqList.map((v, idx) => (
-                    <Text key={`freq-sum-${idx}`} size="xs">
+                    <Text key={`freqsum${idx}`} size="xs">
                       • {v}
                     </Text>
                   ))}

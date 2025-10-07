@@ -1,15 +1,3 @@
-/* Tree root */
-.tree-node {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    font-size: var(--font-size-md);
-    font-weight: 300;
-    letter-spacing: -0.2px;
-    position: relative;
-    margin-bottom: 0;
-}
-
-.tree-node.top-level { margin-top: 2px; }
-
 /* Labels */
 .tree-label {
     position: relative;
@@ -25,14 +13,6 @@
     user-select: none;
 }
 
-.tree-node.top-level > .tree-label {
-    padding-left: 0 !important;
-    font-weight: normal;
-}
-
-/* Children indent */
-.tree-children { margin-left: 0.75rem; }
-
 /* Icons & badges scale with text */
 .tree-label svg {
     font-size: 1em !important;
@@ -40,64 +20,7 @@
     vertical-align: middle;
 }
 
-.tree-data-icon {
-    width: 1em;
-    height: 1em;
-    margin-right: 0.25rem;
-    opacity: 0.85;
-}
-
-.tree-badge {
-    font-weight: 600;
-    font-size: 0.85em;
-    margin-right: 0.25rem;
-    letter-spacing: 0.03em;
-    border-radius: 3px;
-    padding: 0 0.25em;
-}
-.tree-badge.b17 { color: #4287f5; }
-.tree-badge.pff { color: #25c379; }
-
 /* Hover */
 .tree-label.pointer:hover {
     background: rgba(255, 255, 255, 0.08);
-}
-
-/* Context menu */
-.tree-context-menu {
-    position: fixed;
-    z-index: 9999;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-    padding: 2px 0;
-    font-size: var(--font-size-sm);
-    min-width: 10rem;
-}
-
-.tree-context-menu .tree-menu-item {
-    padding: 4px 10px;
-    cursor: pointer;
-}
-.tree-context-menu .tree-menu-item:hover { background: #444; }
-.tree-context-menu .tree-menu-item.not-allowed { cursor: not-allowed; opacity: 0.6; }
-
-/* Inline rename/input */
-.tree-node input[type="text"] {
-    width: 10em;
-    font-size: inherit;
-    padding: 2px 0.25rem;
-}
-
-/* TreeNode.css — remove any outer frame */
-.tree-node.top-level {
-    border: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-}
-
-/* if you had a left guide line for children */
-.tree-children {
-    border-left: 0 !important;
 }

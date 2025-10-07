@@ -18,8 +18,9 @@ const INTERFACE_TEXT = {
   Navbar_Data_EditData: "Edit Data",
   Navbar_Data_DataUtilities: "Data Utilities",
   Navbar_Analysis: "Analysis",
-  Navbar_Analysis_PeakFlowFrequency: "New Peak Flow Frequency",
   Navbar_Analysis_Bulletin17: "New Bulletin 17 Analysis",
+  Navbar_Analysis_FloodTypeClass: "New Flood Type Classification Analysis",
+  Navbar_Analysis_PeakFlowFrequency: "New Peak Flow Frequency",
   Navbar_Analysis_GeneralFrequencyAnalysis: "New General Frequency Analysis",
   Navbar_Analysis_VolumeFrequencyAnalysis: "New Volume Analysis",
   Navbar_Analysis_CoincidentFrequencyAnalysis: " New Coincident Frequency Analysis",
@@ -84,6 +85,7 @@ const INTERFACE_TEXT = {
   ComponentMetadata_ComponentInterfaceOptions: "Interface Options",
   ComponentMetadata_ManualDataEntryEditor: "Manual Data Entry",
   ComponentMetadata_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
+  ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard: "Flood Type Classification Analysis",
   ComponentMetadata_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",
   ComponentMetadata_Wizard_GeneralFreqAnalysisWizard: "General Frequency Analysis",
   ComponentMetadata_Wizard_VolumeFreqAnalysisWizard: "Volume Frequency Analysis",
@@ -199,6 +201,11 @@ const INTERFACE_TEXT = {
   Parameter_Windspeed: "Windspeed",
 
   // --------------------------------------
+  // TimeSeriesComboBox
+  // --------------------------------------
+  TimeSeriesCombo_None: "None",
+
+  // --------------------------------------
   // SaveAsDialog
   // --------------------------------------
   SaveAsDialog_Title: "Save {0} As",
@@ -280,11 +287,11 @@ const INTERFACE_TEXT = {
   Wizard_Name: "Name",
   Wizard_Description: "Description",
   Wizard_Dataset: "Dataset",
-  Wizard_Summary_Title: "Summary",
+  Wizard_Summary_Title: "Review your inputs before proceeding.",
   Wizard_Summary_None: "(None)",
   Wizard_Summary_Name: "Name: ",
   Wizard_Summary_Description: "Description: ",
-  Wizard_Summary_Dataset: "Dataset: ",
+  Wizard_Summary_Dataset: "Time series: ",
 
 
   // --------------------------------------
@@ -306,7 +313,7 @@ const INTERFACE_TEXT = {
   AnalysisWizard_Skew_Summary_SkewType_None: "(None selected)",
 
   // --------------------------------------
-  // PeakFlowFreqWizard
+  // Bulletin17Wizard
   // --------------------------------------
   Bulletin17_Wizard_Method_Label: "Method",
   Bulletin17_Wizard_Method_B17B: "17B Methods",
@@ -314,6 +321,48 @@ const INTERFACE_TEXT = {
   Bulletin17_Wizard_Prob_Label: "Probability",
   Bulletin17_Wizard_Prob_Field: "Probability",
   Bulletin17_Wizard_Step_Summary: "Complete",
+
+  // --------------------------------------
+  // FloodTypeClassWizard
+  // --------------------------------------
+  FloodTypeClass_Wizard_StepFlowData: "Flow Data Source",
+  FloodTypeClass_Wizard_StepFlowData_Label: "Select a flow data source and enter the time window over which to classify events.",
+  FloodTypeClass_Wizard_StepFlowData_TimeSeries: "Select time series:",
+  FloodTypeClass_Wizard_StepFlowData_StartDate: "Classification Start Date:",
+  FloodTypeClass_Wizard_StepFlowData_StartTime: "Classification Start Time:",
+  FloodTypeClass_Wizard_StepFlowData_EndDate: "Classification End Date:",
+  FloodTypeClass_Wizard_StepFlowData_EndTime: "Classification End Time:",
+  FloodTypeClass_Wizard_StepFloodTypeClass: "Flood Type Classification",
+  FloodTypeClass_Wizard_StepFloodTypeClass_Label: "Select a flood type classification algorithm.",
+  FloodTypeClass_Wizard_StepFloodTypeClass_HumidEastDelawareRiver: "Humid East | Delaware River",
+  FloodTypeClass_Wizard_StepFloodTypeClass_HumidEastTrinityRiver: "Humid East | Trinity River",
+  FloodTypeClass_Wizard_StepFloodTypeClass_MountainousWestPugetSound: "Mountainous West | Puget Sound",
+  FloodTypeClass_Wizard_StepFloodTypeClass_MountainousWestUpperColoradoRiver: "Mountainous West | Upper Colorado River",
+  FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsRedRiver: "Central Plains | Red River of the North",
+  FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsIowaRiver: "Central Plains | Iowa River",
+  FloodTypeClass_Wizard_StepDataSources: "Data Sources",
+  FloodTypeClass_Wizard_StepDataSources_Label: "Select data sources for flood type indicators.",
+  FloodTypeClass_Wizard_StepDataSources_PrecipTS: "Precipitation time series:",
+  FloodTypeClass_Wizard_StepDataSources_SweTS: "SWE time series:",
+  FloodTypeClass_Wizard_StepLookback: "Lookback Period",
+  FloodTypeClass_Wizard_StepLookback_Label: "Specify lookback period for each flood type indicator.",
+  FloodTypeClass_Wizard_StepLookback_Lookback_UserSpecified: "User-specified",
+  FloodTypeClass_Wizard_StepLookback_Lookback_Days: "Days",
+  FloodTypeClass_Wizard_StepLookback_Lookback_Ceiling: "ceiling[5 + ln(DA)]",
+  FloodTypeClass_Wizard_StepLookback_Lookback_DrainageArea: "Drainage area (sq. mi.)",
+  FloodTypeClass_Wizard_StepLookback_Flow_Label: "Flow lookback period (days)",
+  FloodTypeClass_Wizard_StepLookback_SWELabel: "SWE depletion lookback period (days):",
+  FloodTypeClass_Wizard_StepLookback_PrecipLabel: "Precipitation lookback period (days):",
+  FloodTypeClass_Wizard_StepThresholds: "Thresholds",
+  FloodTypeClass_Wizard_StepThresholds_Label: "Enter critical threshold values for each indicator. The default values used in the flood type algorithm are entered for you.",
+  FloodTypeClass_Wizard_StepThresholds_Precip: "Critical threshold for precipitation accumulation (in):",
+  FloodTypeClass_Wizard_StepThresholds_SWE: "Critical threshold for SWE depletion (in):",
+  FloodTypeClass_Wizard_StepThresholds_SnowmeltFrac: "Critical snowmelt fraction:",
+  FloodTypeClass_Wizard_StepThresholds_RainFrac: "Critical rain fraction:",
+  FloodTypeClass_Wizard_StepReview: "Review Inputs",
+  FloodTypeClass_Wizard_StepResults: "Results",
+  FloodTypeClass_Wizard_Review_Timeseries: "Time series:",
+  FloodTypeClass_Results_Placeholder: "Results go here",
 
   // --------------------------------------
   // PeakFlowFreqWizard
@@ -368,7 +417,10 @@ const INTERFACE_TEXT = {
 
 export function getInterfaceText(key, args = []) {
   let template = INTERFACE_TEXT[key] || key;
-  args.forEach((arg, i) => {
+
+  const arr = Array.isArray(args) ? args : (args == null ? [] : [args]);
+
+  arr.forEach((arg, i) => {
     template = typeof template === "string"
       ? template.replace(new RegExp(`\\{${i}\\}`, "g"), arg ?? "")
       : template;

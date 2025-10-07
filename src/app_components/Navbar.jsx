@@ -83,11 +83,14 @@ function Navbar({ addComponent }) {
               <Button size="xs" variant="subtle">{TextStore.interface("Navbar_Analysis")}</Button>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item onClick={() => open("PeakFlowFreqWizard")}>
-                {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
-              </Menu.Item>
               <Menu.Item onClick={() => open("Bulletin17AnalysisWizard")}>
                 {TextStore.interface("Navbar_Analysis_Bulletin17")}
+              </Menu.Item>
+              <Menu.Item onClick={() => open("FloodTypeClassAnalysisWizard")}>
+                {TextStore.interface("Navbar_Analysis_FloodTypeClass")}
+              </Menu.Item>
+              <Menu.Item onClick={() => open("PeakFlowFreqWizard")}>
+                {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>

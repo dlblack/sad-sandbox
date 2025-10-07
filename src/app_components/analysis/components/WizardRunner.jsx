@@ -67,6 +67,7 @@ export default function WizardRunner(props) {
     datasetList,
     bag, setBag,
     type, id,
+    data,
   };
 
   const current = steps[step - 1];
@@ -78,11 +79,24 @@ export default function WizardRunner(props) {
     (typeof validateNext === "function" && !validateNext(ctx, step));
 
   function handleFinish(e) {
-    e.preventDefault();
-    if (typeof buildResult !== "function") return;
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+
+    if (typeof buildResult !== "function") {
+      return;
+    }
+
     const result = buildResult(ctx);
-    onFinish?.(type, result, id);
-    onRemove?.();
+    if (typeof onFinish === "function") {
+      onFinish(type, result, id);
+    } else {
+      console.warn("WizardRunner: onFinish handler not provided");
+    }
+
+    if (typeof onRemove === "function") {
+      onRemove();
+    }
   }
 
   const sidebarSteps = steps.map((s) => ({ label: s.label }));
