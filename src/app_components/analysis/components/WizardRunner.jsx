@@ -1,8 +1,8 @@
-import React, { useMemo, useEffect, useState, useContext } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import WizardLayoutSidebar from "./WizardLayoutSidebar.jsx";
 import WizardNavigation from "../../common/WizardNavigation.jsx";
 import { componentMetadata } from "../../../utils/componentMetadata.js";
-import { StyleContext } from "../../../styles/StyleContext.jsx";
+import { Card } from "@mantine/core";
 
 /**
  * WizardRunner
@@ -29,8 +29,6 @@ export default function WizardRunner(props) {
     onFinish,
     onRemove,
   } = props;
-
-  const { componentBackgroundStyle } = useContext(StyleContext);
 
   const datasetList = data?.[defaultDatasetKey] || [];
   const [step, setStep] = useState(1);
@@ -91,7 +89,6 @@ export default function WizardRunner(props) {
   const active0 = step - 1;
 
   const handleStepClick = (i) => {
-    // basic rule: can go back freely; restrict forward if needed
     if (i <= active0) setStep(i + 1);
   };
 
@@ -107,15 +104,10 @@ export default function WizardRunner(props) {
   );
 
   return (
-    <div className={`wizard-fixed-size card ${componentBackgroundStyle}`}>
-      <WizardLayoutSidebar
-        steps={sidebarSteps}
-        active={active0}
-        onStepClick={handleStepClick}
-        footer={footer}
-      >
+    <Card withBorder radius="md" padding="sm">
+      <WizardLayoutSidebar steps={sidebarSteps} active={active0} onStepClick={handleStepClick} footer={footer} >
         {current?.render(ctx)}
       </WizardLayoutSidebar>
-    </div>
+    </Card>
   );
 }

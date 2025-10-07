@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+// src/app_components/dockable/DockableFrame.jsx
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import DockableItem from "./DockableItem";
 import { componentMetadata } from "../../utils/componentMetadata.js";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
@@ -14,7 +15,7 @@ const DOCK_ZONES = ["W", "CENTER", "E", "S"];
 function getZoneMaxWidth(zone) {
   if (zone === "W") return MAX_WIDTH_W;
   if (zone === "E") return MAX_WIDTH_E;
-  return undefined;
+  return Infinity;
 }
 
 function DraggableDockableItem({
@@ -24,8 +25,9 @@ function DraggableDockableItem({
                                  setFocusedId,
                                  focusedId,
                                  setDraggingPanelId,
+                                 showHeader = true,
                                }) {
-  const { id, type, isDragging } = container;
+  const { id, type } = container;
 
   const handleDragStart = (e) => {
     setDraggingPanelId(id);
@@ -35,21 +37,23 @@ function DraggableDockableItem({
 
   const handleDragEnd = () => setDraggingPanelId(null);
 
+  const sizeProps = showHeader ? { width: container.width, height: container.height } : {};
+
   return (
-    <div className={`dockable-drag-wrapper${isDragging ? " dragging" : ""}`}>
+    <div className="dockable-drag-wrapper" style={{ display: "flex", flex: 1, minWidth: 0, minHeight: 0 }}>
       <DockableItem
         {...container}
+        {...sizeProps}
         type={componentMetadata?.[type]?.entityName ?? type}
         title={container.dataset?.name || ""}
         onRemove={onRemove}
-        width={container.width}
-        height={container.height}
         onResize={(size) => onResize(size, id)}
         onClick={() => setFocusedId(container.id)}
         isFocused={container.id === focusedId}
-        draggable
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        showHeader={showHeader}
+        fill
       >
         {container.content}
       </DockableItem>
@@ -72,20 +76,17 @@ export default function DockableFrame({
                                         data,
                                         analyses,
                                         centerContent,
+                                        westContent,
+                                        eastContent,
+                                        southContent,
                                       }) {
   const [focusedId, setFocusedId] = useState(null);
   const [draggingPanelId, setDraggingPanelId] = useState(null);
 
-  const [zoneWidths, setZoneWidths] = useState({
-    W: 240,
-    CENTER: undefined,
-    E: 400,
-  });
+  const [zoneWidths, setZoneWidths] = useState({ W: 240, CENTER: undefined, E: 400 });
 
-  const initialSouthHeight = React.useMemo(() => {
-    const southItem = containers.find(
-      (c) => c.dockZone === "S" && typeof c.height === "number"
-    );
+  const initialSouthHeight = useMemo(() => {
+    const southItem = containers.find((c) => c.dockZone === "S" && typeof c.height === "number");
     return southItem ? Math.max(southItem.height, MIN_S_HEIGHT) : 240;
   }, [containers]);
 
@@ -144,17 +145,10 @@ export default function DockableFrame({
           ...panelsInZone.map((p) => (typeof p.width === "number" ? p.width : 0)),
           MIN_WIDTH
         );
-        setZoneWidths((w) =>
-          w[zone] !== undefined && w[zone] === maxWidth + 24
-            ? w
-            : {
-              ...w,
-              [zone]: Math.min(
-                Math.max(maxWidth + 24, MIN_WIDTH),
-                getZoneMaxWidth(zone)
-              ),
-            }
-        );
+        setZoneWidths((w) => {
+          const desired = Math.min(Math.max(maxWidth + 24, MIN_WIDTH), getZoneMaxWidth(zone));
+          return w[zone] === desired ? w : { ...w, [zone]: desired };
+        });
       }
     });
   }, [containers]);
@@ -167,7 +161,6 @@ export default function DockableFrame({
         );
       } else {
         setZoneWidths((prev) => {
-          if (!zone || !size || !size.width) return prev;
           const maxWidth = getZoneMaxWidth(zone);
           const newWidth = Math.max(
             MIN_WIDTH,
@@ -187,7 +180,7 @@ export default function DockableFrame({
 
   const onVerticalSplitterDown = (zone) => (e) => {
     dragging.current = {
-      zone, // can now be "W" or "E"
+      zone,
       startX: e.clientX,
       startWidth: zoneWidths[zone] || 0,
       startY: 0,
@@ -266,13 +259,10 @@ export default function DockableFrame({
           });
         }
         if (newZone === "S" && moved.height) {
-          setSouthHeight((curr) => {
-            const desiredHeight = Math.min(
-              Math.max(moved.height + 24, MIN_S_HEIGHT),
-              MAX_S_HEIGHT
-            );
-            return desiredHeight > curr ? desiredHeight : curr;
-          });
+          setSouthHeight(() => Math.min(
+            Math.max(moved.height + 24, MIN_S_HEIGHT),
+            MAX_S_HEIGHT
+          ));
         }
 
         setFocusedId(id);
@@ -325,11 +315,66 @@ export default function DockableFrame({
       setDraggingPanelId(null);
     };
 
+    // CENTER
+    if (zone === "CENTER" && centerContent) {
+      return (
+        <div key={zone} className="dock-zone dock-zone-center" style={{ ...zoneStyle, minWidth: 0, minHeight: 0 }}>
+          {centerContent}
+        </div>
+      );
+    }
+
+    // WEST — if content provided, render it (no internal tabs)
+    if (zone === "W" && westContent) {
+      return (
+        <div
+          key="W"
+          className="dock-zone dock-zone-w"
+          style={{ width: zoneWidths.W, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {westContent}
+        </div>
+      );
+    }
+
+    // EAST — if content provided, render it (no internal tabs)
+    if (zone === "E" && eastContent) {
+      return (
+        <div
+          key="E"
+          className="dock-zone dock-zone-e"
+          style={{ width: zoneWidths.E, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {eastContent}
+        </div>
+      );
+    }
+
+    // SOUTH — if content provided, render it (no internal tabs)
+    if (zone === "S" && southContent) {
+      return (
+        <div
+          key="S"
+          className="dock-zone dock-zone-s"
+          style={{ ...zoneStyle, minWidth: 0, minHeight: 0, display: "flex" }}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {southContent}
+        </div>
+      );
+    }
+
+    // Fallback: legacy direct render of items (rare or during transition)
     return (
       <div
         key={zone}
         className={`dock-zone dock-zone-${zone.toLowerCase()}`}
-        style={zoneStyle}
+        style={{ ...zoneStyle, minWidth: 0, minHeight: 0 }}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -338,14 +383,11 @@ export default function DockableFrame({
             key={c.id}
             container={c}
             onRemove={removeComponent}
-            width={zone === "CENTER" ? undefined : zoneWidths[zone] - 24}
-            height={zone === "S" ? southHeight - 24 : undefined}
             onResize={handleItemResize(zone)}
-            moveToZone={moveToZone}
             setFocusedId={setFocusedId}
             focusedId={focusedId}
-            draggingPanelId={draggingPanelId}
             setDraggingPanelId={setDraggingPanelId}
+            showHeader
           />
         ))}
       </div>

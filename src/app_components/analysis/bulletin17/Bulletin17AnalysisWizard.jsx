@@ -3,6 +3,7 @@ import WizardRunner from "../components/WizardRunner.jsx";
 import { makeWizardGeneralInfoStep, GeneralInfoSummary } from "../components/steps/WizardGeneralInfo.jsx";
 import { makeSkewStep, SkewSummary, skewChoiceToOptions } from "../components/steps/WizardSkew.jsx";
 import { TextStore } from "../../../utils/TextStore.js";
+import { Stack, Text, NumberInput, Radio } from "@mantine/core";
 
 export default function Bulletin17AnalysisWizard(props) {
   const steps = [
@@ -11,39 +12,28 @@ export default function Bulletin17AnalysisWizard(props) {
     {
       label: TextStore.interface("Bulletin17_Wizard_Method_Label"),
       render: ({ bag, setBag }) => (
-        <div className="p-2">
-          <div className="form-check mb-1">
-            <input
-              className="form-check-input"
-              type="radio"
-              name="b17-method"
-              id="b17b"
-              value="B17B"
-              disabled
-              checked={(bag.method || "B17C") === "B17B"}
-              onChange={(e) => setBag((prev) => ({ ...prev, method: e.target.value }))}
-            />
-            <label className="form-check-label" htmlFor="b17b">
-              {TextStore.interface("Bulletin17_Wizard_Method_B17B")}
-              <span className="ms-2 text-muted">(disabled)</span>
-            </label>
-          </div>
-
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              type="radio"
-              name="b17-method"
-              id="b17c"
-              value="B17C"
-              checked={(bag.method || "B17C") === "B17C"}
-              onChange={(e) => setBag((prev) => ({ ...prev, method: e.target.value }))}
-            />
-            <label className="form-check-label" htmlFor="b17c">
-              {TextStore.interface("Bulletin17_Wizard_Method_B17C")}
-            </label>
-          </div>
-        </div>
+        <Stack gap="xs">
+          <Radio
+            name="b17-method"
+            value="B17B"
+            disabled
+            checked={(bag.method || "B17C") === "B17B"}
+            onChange={(e) => setBag((prev) => ({ ...prev, method: e.currentTarget.value }))}
+            label={
+              <>
+                {TextStore.interface("Bulletin17_Wizard_Method_B17B")}{" "}
+                <Text size="xs" c="dimmed" component="span">(disabled)</Text>
+              </>
+            }
+          />
+          <Radio
+            name="b17-method"
+            value="B17C"
+            checked={(bag.method || "B17C") === "B17C"}
+            onChange={(e) => setBag((prev) => ({ ...prev, method: e.currentTarget.value }))}
+            label={TextStore.interface("Bulletin17_Wizard_Method_B17C")}
+          />
+        </Stack>
       ),
     },
 
@@ -52,29 +42,25 @@ export default function Bulletin17AnalysisWizard(props) {
     {
       label: TextStore.interface("Bulletin17_Wizard_Prob_Label"),
       render: ({ bag, setBag }) => (
-        <div className="p-2">
-          <label htmlFor="b17-prob" className="form-label">
-            {TextStore.interface("Bulletin17_Wizard_Prob_Field")}
-          </label>
-          <input
+        <Stack gap="xs">
+          <Text>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</Text>
+          <NumberInput
             id="b17-prob"
-            type="number"
-            step="0.0001"
-            min="0"
-            max="1"
-            className="form-control"
+            step={0.0001}
+            min={0}
+            max={1}
             value={bag.probability ?? 0.01}
-            onChange={(e) => setBag((prev) => ({ ...prev, probability: e.target.value }))}
+            onChange={(v) => setBag((prev) => ({ ...prev, probability: v }))}
           />
-        </div>
+        </Stack>
       ),
     },
 
     {
       label: TextStore.interface("Bulletin17_Wizard_Step_Summary"),
       render: ({ name, description, selectedDataset, bag }) => (
-        <div className="p-2">
-          <h6 className="mb-3">{TextStore.interface("Wizard_Summary_Title")}</h6>
+        <Stack gap="sm">
+          <Text fw={600}>{TextStore.interface("Wizard_Summary_Title")}</Text>
 
           <GeneralInfoSummary
             name={name}
@@ -82,23 +68,23 @@ export default function Bulletin17AnalysisWizard(props) {
             selectedDataset={selectedDataset}
           />
 
-          <ul className="list-unstyled mb-2 font-xs">
-            <li>
+          <Stack gap={2}>
+            <Text size="sm">
               <strong>{TextStore.interface("Bulletin17_Wizard_Method_Label")}</strong>{" "}
               {bag.method || "B17C"}
-            </li>
-            <li>
+            </Text>
+            <Text size="sm">
               <strong>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</strong>{" "}
               {bag.probability ?? 0.01}
-            </li>
-          </ul>
+            </Text>
+          </Stack>
 
           <SkewSummary
             choice={bag.skewChoice}
             regionalSkew={bag.regionalSkew}
             regionalSkewMSE={bag.regionalSkewMSE}
           />
-        </div>
+        </Stack>
       ),
     },
   ];

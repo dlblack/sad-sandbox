@@ -3,6 +3,7 @@ import WizardRunner from "../components/WizardRunner.jsx";
 import { makeWizardGeneralInfoStep, GeneralInfoSummary } from "../components/steps/WizardGeneralInfo.jsx";
 import { makeSkewStep, SkewSummary } from "../components/steps/WizardSkew.jsx";
 import { TextStore } from "../../../utils/TextStore.js";
+import { Stack, Text, NumberInput, Radio } from "@mantine/core";
 
 const EXP_PROB = {
   doNotComp: TextStore.interface("PeakFlowFreqWizard_DoNotCompExpProb"),
@@ -18,26 +19,26 @@ export default function PeakFlowFreqWizard(props) {
     {
       label: TextStore.interface("PeakFlowFreqWizard_StepExpProb"),
       render: ({ bag, setBag }) => (
-        <div className="form-group">
-          {["option1", "option2"].map((opt) => (
-            <div className="form-check" key={opt}>
-              <input
-                className="form-check-input font-xs"
-                type="radio"
-                name="step3Radio"
-                id={`step3_${opt}`}
-                value={opt}
-                checked={(bag.exProbChoice || "") === opt}
-                onChange={(e) =>
-                  setBag((prev) => ({ ...prev, exProbChoice: e.target.value }))
-                }
-              />
-              <label className="form-check-label font-xs" htmlFor={`step3_${opt}`}>
-                {opt === "option1" ? EXP_PROB.doNotComp : EXP_PROB.comp}
-              </label>
-            </div>
-          ))}
-        </div>
+        <Stack gap="xs">
+          <Radio
+            label={EXP_PROB.doNotComp}
+            name="step3Radio"
+            value="option1"
+            checked={(bag.exProbChoice || "") === "option1"}
+            onChange={(e) =>
+              setBag((prev) => ({ ...prev, exProbChoice: e.currentTarget.value }))
+            }
+          />
+          <Radio
+            label={EXP_PROB.comp}
+            name="step3Radio"
+            value="option2"
+            checked={(bag.exProbChoice || "") === "option2"}
+            onChange={(e) =>
+              setBag((prev) => ({ ...prev, exProbChoice: e.currentTarget.value }))
+            }
+          />
+        </Stack>
       ),
     },
 
@@ -47,37 +48,39 @@ export default function PeakFlowFreqWizard(props) {
         const rows = Array.isArray(bag.step4Rows) ? bag.step4Rows : ["", "", "", "", ""];
         const onChangeRow = (idx, val) => {
           const updated = [...rows];
-          updated[idx] = val;
-          if (idx === rows.length - 1 && val !== "") updated.push("");
+          const valueStr = val === null || typeof val === "undefined" ? "" : String(val);
+          updated[idx] = valueStr;
+          if (idx === rows.length - 1 && valueStr !== "") {
+            updated.push("");
+          }
           setBag((prev) => ({ ...prev, step4Rows: updated }));
         };
+
         return (
-          <>
-            <div className="font-sm mb-2">
+          <Stack gap="sm">
+            <Text size="sm">
               {TextStore.interface("PeakFlowFreqWizard_EditOutputFreqOrd")}
-            </div>
-            <table className="table table-sm compact-table wizard-frequency-table">
-              <thead>
-              <tr>
-                <th>{TextStore.interface("PeakFlowFreqWizard_FreqInPercent")}</th>
-              </tr>
-              </thead>
-              <tbody>
+            </Text>
+
+            <Stack gap="xs">
               {rows.map((value, idx) => (
-                <tr key={idx}>
-                  <td>
-                    <input
-                      type="number"
-                      className="form-control wizard-frequency-input"
-                      value={value}
-                      onChange={(e) => onChangeRow(idx, e.target.value)}
-                    />
-                  </td>
-                </tr>
+                <NumberInput
+                  key={`freq-${idx}`}
+                  label={
+                    idx === 0
+                      ? TextStore.interface("PeakFlowFreqWizard_FreqInPercent")
+                      : undefined
+                  }
+                  hideControls
+                  value={value === "" ? "" : Number(value)}
+                  onChange={(v) => onChangeRow(idx, v)}
+                  min={0}
+                  max={100}
+                  step={1}
+                />
               ))}
-              </tbody>
-            </table>
-          </>
+            </Stack>
+          </Stack>
         );
       },
     },
@@ -87,8 +90,10 @@ export default function PeakFlowFreqWizard(props) {
       render: ({ name, description, selectedDataset, bag }) => {
         const freqList = (bag.step4Rows || []).filter((v) => v !== "");
         return (
-          <div>
-            <h6 className="mb-3">{TextStore.interface("Wizard_Summary_Title")}</h6>
+          <Stack gap="sm">
+            <Text size="sm" fw={600}>
+              {TextStore.interface("Wizard_Summary_Title")}
+            </Text>
 
             <GeneralInfoSummary
               name={name}
@@ -102,35 +107,41 @@ export default function PeakFlowFreqWizard(props) {
               regionalSkewMSE={bag.regionalSkewMSE}
             />
 
-            <div className="mb-2">
-              <strong>
+            <div>
+              <Text fw={600}>
                 {TextStore.interface("PeakFlowFreqWizard_SummaryExpectedProbability")}
-              </strong>
-            </div>
-            <ul className="list-unstyled mb-2 font-xs">
-              <li>
-                <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryComputation")}</strong>{" "}
+              </Text>
+              <Text size="sm">
+                <strong>
+                  {TextStore.interface("PeakFlowFreqWizard_SummaryComputation")}
+                </strong>{" "}
                 {bag.exProbChoice === "option1"
                   ? EXP_PROB.doNotComp
                   : bag.exProbChoice === "option2"
                     ? EXP_PROB.comp
                     : null}
-              </li>
-            </ul>
-
-            <div className="mb-2">
-              <strong>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies")}</strong>
+              </Text>
             </div>
-            <ul className="list-unstyled mb-2 font-xs">
+
+            <div>
+              <Text fw={600}>
+                {TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies")}
+              </Text>
               {freqList.length > 0 ? (
-                freqList.map((v, idx) => <li key={idx}>• {v}</li>)
+                <Stack gap={2}>
+                  {freqList.map((v, idx) => (
+                    <Text key={`freq-sum-${idx}`} size="xs">
+                      • {v}
+                    </Text>
+                  ))}
+                </Stack>
               ) : (
-                <li>
-                  <em>{TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies_None")}</em>
-                </li>
+                <Text size="xs" fs="italic">
+                  {TextStore.interface("PeakFlowFreqWizard_SummaryFrequencies_None")}
+                </Text>
               )}
-            </ul>
-          </div>
+            </div>
+          </Stack>
         );
       },
     },

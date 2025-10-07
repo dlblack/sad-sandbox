@@ -21,15 +21,11 @@ export const componentMetadata = {
     entityName: "Project",
     category: "panel",
     centerTab: false,
-    width: Math.round(window.innerWidth * 0.15),
-    height: Math.round(window.innerHeight * 0.2)
   },
-  ComponentInterfaceSize: {
-    entityName: "Interface Size",
+  ComponentInterfaceOptions: {
+    entityName: "Interface Options",
     category: "panel",
     centerTab: false,
-    width: Math.round(window.innerWidth * 0.2),
-    height: Math.round(window.innerHeight * 0.3)
   },
   ComponentMap: {
     entityName: "Map",
@@ -42,15 +38,6 @@ export const componentMetadata = {
     entityName: "Messages",
     category: "panel",
     centerTab: false,
-    width: Math.round(window.innerWidth * 0.4),
-    height: Math.round(window.innerHeight * 0.2)
-  },
-  ComponentStyleSelector: {
-    entityName: "Style Selector",
-    category: "panel",
-    centerTab: false,
-    width: Math.round(window.innerWidth * 0.2),
-    height: Math.round(window.innerHeight * 0.25)
   },
   PairedDataPlot: {
     entityName: "Paired Data Plot",

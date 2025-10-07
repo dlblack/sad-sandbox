@@ -1,9 +1,8 @@
 import React from "react";
-import ComponentInterfaceSize from "../app_components/ComponentInterfaceSize";
+import ComponentInterfaceOptions from "../app_components/ComponentInterfaceOptions.jsx";
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentProject from "../app_components/ComponentProject";
-import ComponentStyleSelector from "../app_components/ComponentStyleSelector";
 import PairedDataPlot from "../app_components/PairedDataPlot";
 import TimeSeriesPlot from "../app_components/TimeSeriesPlot";
 import DemoPlots from "../app_components/DemoPlots";
@@ -38,14 +37,12 @@ export const dockableContentFactory = (type, props = {}) => {
         onDeleteNode={props.onDeleteNode}
         handleOpenComponent={props.handleOpenComponent}
       />;
-    case "ComponentInterfaceSize":
-      return <ComponentInterfaceSize/>;
+    case "ComponentInterfaceOptions":
+      return <ComponentInterfaceOptions/>;
     case "ComponentMap":
       return <ComponentMap/>;
     case "ComponentMessage":
       return <ComponentMessage {...props} />;
-    case "ComponentStyleSelector":
-      return <ComponentStyleSelector/>;
     case "TimeSeriesPlot":
       return <TimeSeriesPlot {...props} dataset={props.dataset}/>;
     case "PairedDataPlot":

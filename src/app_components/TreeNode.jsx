@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import SaveAsDialog from "../dialogs/SaveAsDialog";
 import { FaFolder, FaFolderOpen } from "react-icons/fa";
 import "../styles/css/TreeNode.css";
 import dssIcon from "../../assets/images/dss.gif";
-import { StyleContext } from "../styles/StyleContext";
 import { TextStore } from "../utils/TextStore";
+import { Card, TextInput } from "@mantine/core";
 
 const hasRealChildren = (children) => {
   if (!children) return false;
@@ -66,7 +66,6 @@ const TreeNode = ({
                     setSaveAsDialogOpen,
                     dataset,
                   }) => {
-  const { componentBackgroundStyle } = useContext(StyleContext);
   const hasContent = hasRealChildren(children);
   const isLeaf = !hasContent;
   const isBottomLevel = isLeaf && canDelete;
@@ -122,28 +121,32 @@ const TreeNode = ({
   const handlePlot = () => {
     setMenu?.(null);
     if (section === "data" && dataset) {
-      // Dispatch event for plot consumers
-      window.dispatchEvent(
-        new CustomEvent("plotNodeData", {
-          detail: { dataset },
-        })
-      );
+      window.dispatchEvent(new CustomEvent("plotNodeData", { detail: { dataset } }));
     }
   };
 
   return (
     <div
-      className={`tree-node ${componentBackgroundStyle} ${
-        isTopLevel ? " top-level" : ""
-      }`}
+      className={`tree-node ${isTopLevel ? " top-level" : ""}`}
       ref={ref}
     >
       <span
-        className={`tree-label${expanded ? " expanded" : ""}${
-          hasContent ? " pointer" : ""
-        }`}
+        className={`tree-label${expanded ? " expanded" : ""}${hasContent ? " pointer" : ""}`}
         onClick={hasContent ? () => onToggle(path) : undefined}
         onContextMenu={handleContextMenu}
+        role={hasContent ? "button" : undefined}
+        tabIndex={hasContent ? 0 : -1}
+        onKeyDown={(e) => {
+          if (!hasContent) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggle(path);
+          }
+          if (e.key === "ContextMenu") {
+            e.preventDefault();
+            setMenu?.({ x: e.clientX ?? 0, y: e.clientY ?? 0, path });
+          }
+        }}
       >
         {hasContent &&
           (expanded ? (
@@ -153,13 +156,14 @@ const TreeNode = ({
           ))}
         {badge}
         {renaming === path ? (
-          <form onSubmit={handleRenameSubmit}>
-            <input
-              type="text"
+          <form onSubmit={handleRenameSubmit} style={{ display: "inline-block" }}>
+            <TextInput
+              size="xs"
               autoFocus
               value={renameValue}
               onChange={(e) => setRenameValue?.(e.target.value)}
               onBlur={handleRenameBlur}
+              style={{ width: 180 }}
             />
           </form>
         ) : (
@@ -168,11 +172,17 @@ const TreeNode = ({
       </span>
 
       {menu && menu.path === path && isBottomLevel && (
-        <div
-          className={`tree-context-menu pointer ${componentBackgroundStyle} `}
+        <Card
+          withBorder
+          radius="sm"
+          padding="xs"
+          className={`tree-context-menu pointer ${componentBackgroundStyle}`}
           style={{
+            position: "fixed",
             top: menu.y,
             left: menu.x,
+            zIndex: 1000,
+            minWidth: 160,
           }}
         >
           <div className="tree-menu-item" onClick={handleSaveAs}>
@@ -192,7 +202,7 @@ const TreeNode = ({
               {TextStore.interface("Tree_Menu_Plot")}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {saveAsDialogOpen === path && isBottomLevel && (

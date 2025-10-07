@@ -1,5 +1,6 @@
 import React from "react";
 import { TextStore } from "../../../../utils/TextStore.js";
+import { Select, Stack, Text, Textarea, TextInput } from "@mantine/core";
 
 /**
  * Input step for General Info (name, description, dataset).
@@ -18,9 +19,9 @@ export function makeWizardGeneralInfoStep() {
           {TextStore.interface?.("Wizard_Name")}
         </label>
         <div className="wizard-grid-field">
-          <input
+          <TextInput
             id="wiz_name"
-            className="form-control form-control-sm font-xs"
+            size="xs"
             type="text"
             value={ctx.name}
             maxLength={20}
@@ -33,37 +34,33 @@ export function makeWizardGeneralInfoStep() {
           {TextStore.interface?.("Wizard_Description")}
         </label>
         <div className="wizard-grid-field align-start">
-          <textarea
+          <Textarea
             id="wiz_desc"
-            className="form-control font-xs"
             rows={3}
-            placeholder={
-              TextStore.interface?.("Wizard_DescriptionPlaceholder")
-            }
+            size="xs"
+            placeholder={TextStore.interface?.("Wizard_DescriptionPlaceholder")}
             value={ctx.description}
             onChange={(e) => ctx.setDescription(e.target.value)}
           />
         </div>
 
-        {/* Dataset (if any) */}
+        {/* Dataset */}
         {Array.isArray(ctx.datasetList) && ctx.datasetList.length > 0 && (
           <>
             <label htmlFor="wiz_dataset" className="wizard-grid-label">
               {TextStore.interface?.("Wizard_Dataset")}
             </label>
             <div className="wizard-grid-field">
-              <select
+              <Select
                 id="wiz_dataset"
-                className="form-select font-xs"
+                size="xs"
                 value={ctx.selectedDataset}
-                onChange={(e) => ctx.setSelectedDataset(e.target.value)}
-              >
-                {ctx.datasetList.map((item, idx) => (
-                  <option key={idx} value={item.name}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => ctx.setSelectedDataset(v || "")}
+                data={ctx.datasetList.map((item) => ({
+                  label: item.name,
+                  value: item.name,
+                }))}
+              />
             </div>
           </>
         )}
@@ -77,24 +74,22 @@ export function makeWizardGeneralInfoStep() {
  */
 export function GeneralInfoSummary({ name, description, selectedDataset }) {
   return (
-    <>
-      <div className="mb-2">
-        <strong>{TextStore.interface("Wizard_GeneralInfo")}</strong>
-      </div>
-      <ul className="list-unstyled mb-2 font-xs">
-        <li>
-          <strong>{TextStore.interface("Wizard_Summary_Name")}</strong>
+    <Stack gap="xs">
+      <Text fw={600}>{TextStore.interface("Wizard_GeneralInfo")}</Text>
+      <Stack gap={2}>
+        <Text size="sm">
+          <strong>{TextStore.interface("Wizard_Summary_Name")}</strong>{" "}
           {name || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
-        </li>
-        <li>
-          <strong>{TextStore.interface("Wizard_Summary_Description")}</strong>
+        </Text>
+        <Text size="sm">
+          <strong>{TextStore.interface("Wizard_Summary_Description")}</strong>{" "}
           {description || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
-        </li>
-        <li>
-          <strong>{TextStore.interface("Wizard_Summary_Dataset")}</strong>
+        </Text>
+        <Text size="sm">
+          <strong>{TextStore.interface("Wizard_Summary_Dataset")}</strong>{" "}
           {selectedDataset || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
-        </li>
-      </ul>
-    </>
+        </Text>
+      </Stack>
+    </Stack>
   );
 }

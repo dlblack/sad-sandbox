@@ -1,8 +1,9 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from "react";
+import { Card, TextInput, NumberInput, Select } from "@mantine/core";
 
 function ensureMinRows(rows, minLength = 8) {
   const next = [...rows];
-  while (next.length < minLength) next.push({x: "", y: ""});
+  while (next.length < minLength) next.push({ x: "", y: "" });
   return next;
 }
 
@@ -31,110 +32,113 @@ export default function PairedDataTableStep({
     }
   }
 
+  const ordinals = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"];
+
   return (
-    <div>
+    <Card withBorder radius="md" padding="xs">
       <table className="manual-entry-table">
         <thead>
         <tr>
-          <th className="manual-entry-th" style={{width: 80}}>Ordinate</th>
-          <th className="manual-entry-th" style={{width: 130}}>{xLabel || "X"}</th>
-          <th className="manual-entry-th" style={{width: 130}}>{yLabel || "Y"}</th>
+          <th className="manual-entry-th" style={{ width: 80 }}>Ordinate</th>
+          <th className="manual-entry-th" style={{ width: 130 }}>{xLabel || "X"}</th>
+          <th className="manual-entry-th" style={{ width: 130 }}>{yLabel || "Y"}</th>
         </tr>
         </thead>
         <tbody>
         {/* Row 0: Units */}
         <tr>
           <td>
-            <input
+            <TextInput
               className="manual-entry-input"
               value="Units"
-              disabled
+              readOnly
               tabIndex={-1}
-              style={{textAlign: "center"}}
+              styles={{ input: { textAlign: "center" } }}
             />
           </td>
           <td>
-            <input
+            <TextInput
               className="manual-entry-input"
               value={xUnits}
-              disabled
-              style={{textAlign: "center"}}
+              readOnly
+              styles={{ input: { textAlign: "center" } }}
             />
           </td>
           <td>
-            <input
+            <TextInput
               className="manual-entry-input"
               value={yUnits}
-              disabled
-              style={{textAlign: "center"}}
+              readOnly
+              styles={{ input: { textAlign: "center" } }}
             />
           </td>
         </tr>
         {/* Row 1: Type (X axis only) */}
         <tr>
           <td>
-            <input
+            <TextInput
               className="manual-entry-input"
               value="Type"
-              disabled
+              readOnly
               tabIndex={-1}
-              style={{textAlign: "center"}}
+              styles={{ input: { textAlign: "center" } }}
             />
           </td>
           <td>
-            <select
+            <Select
               className="manual-entry-input"
               value={rows[1]?.x || "Linear"}
-              onChange={e => handleCellChange(1, "x", e.target.value)}
-            >
-              <option value="Linear">Linear</option>
-              <option value="Log">Log</option>
-            </select>
+              onChange={(v) => handleCellChange(1, "x", v || "Linear")}
+              data={[
+                { label: "Linear", value: "Linear" },
+                { label: "Log", value: "Log" }
+              ]}
+            />
           </td>
           <td>
-            <input
+            <TextInput
               className="manual-entry-input"
               value=""
-              disabled
+              readOnly
               tabIndex={-1}
-              style={{textAlign: "center"}}
+              styles={{ input: { textAlign: "center" } }}
             />
           </td>
         </tr>
         {/* Data rows */}
         {rows.slice(2).map((row, idx) => (
-          <tr key={2 + idx}>
+          <tr key={`row-${idx}`}>
             <td>
-              <input
+              <TextInput
                 className="manual-entry-input"
-                value={idx + 1}
-                disabled
+                value={ordinals[idx] || String(idx + 1)}
+                readOnly
                 tabIndex={-1}
-                style={{textAlign: "center"}}
+                styles={{ input: { textAlign: "center" } }}
               />
             </td>
             <td>
-              <input
+              <NumberInput
                 className="manual-entry-input"
-                type="number"
-                value={row.x || ""}
-                onChange={e => handleCellChange(2 + idx, "x", e.target.value)}
-                placeholder=""
+                size="xs"
+                hideControls
+                value={row.x === "" ? "" : Number(row.x)}
+                onChange={(v) => handleCellChange(2 + idx, "x", v === "" || v == null ? "" : String(v))}
               />
             </td>
             <td>
-              <input
+              <NumberInput
                 className="manual-entry-input"
-                type="number"
-                value={row.y || ""}
-                onChange={e => handleCellChange(2 + idx, "y", e.target.value)}
-                placeholder=""
+                size="xs"
+                hideControls
+                value={row.y === "" ? "" : Number(row.y)}
+                onChange={(v) => handleCellChange(2 + idx, "y", v === "" || v == null ? "" : String(v))}
               />
             </td>
           </tr>
         ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }

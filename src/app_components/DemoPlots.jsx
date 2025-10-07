@@ -1,5 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import Plotly from "plotly.js-dist-min";
+import {
+  Container,
+  Grid,
+  GridCol,
+  Group,
+  Button,
+  Title,
+  Divider,
+  Box,
+  Stack,
+  Text,
+} from "@mantine/core";
 
 const AX = (xTitle, yTitle) => ({
   xaxis: { title: { text: xTitle }, automargin: true, titlefont: { size: 12 }, tickfont: { size: 11 }, title_standoff: 8 },
@@ -537,113 +549,113 @@ export default function DemoPlots() {
   }, []);
 
   return (
-    <div className="container-fluid p-3">
-      <div
-        className="d-flex align-items-center justify-content-between mb-3 border-bottom"
+    <Container size="xl" px="md" py="md">
+      {/* sticky header */}
+      <Box
         style={{
           position: "sticky",
           top: 0,
-          zIndex: 1020,
-          padding: "0.5rem 0.75rem",
+          zIndex: 5,
+          background: "var(--mantine-color-body)",
         }}
       >
-        <h6 className="mb-0">Plotly Demo Gallery</h6>
-        <button
-          type="button"
-          className="btn btn-sm btn-primary"
-          onClick={exportGalleryPNG}
-          title="Save all visible plots as a single PNG"
-        >
-          Export gallery as PNG
-        </button>
-      </div>
+        <Group justify="space-between" py="xs">
+          <Title order={4} m={0}>Plotly Demo Gallery</Title>
+          <Button size="xs" onClick={exportGalleryPNG}>
+            Export gallery as PNG
+          </Button>
+        </Group>
+        <Divider />
+      </Box>
 
-      <div className="row g-4">
-        <div className="col-12">
-          <h6 className="text-center">Hydrograph with Error Bars</h6>
-          <div ref={refs.lineErr} style={{ height: 420 }} />
-        </div>
+      <Stack gap="lg" mt="md">
+        <Grid gutter="lg">
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Hydrograph with Error Bars</Text>
+            <div ref={refs.lineErr} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Flow with Three Confidence Ribbons</h6>
-          <div ref={refs.ribbon} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Flow with Three Confidence Ribbons</Text>
+            <div ref={refs.ribbon} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Histogram of Annual Peak Flows</h6>
-          <div ref={refs.hist} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Histogram of Annual Peak Flows</Text>
+            <div ref={refs.hist} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Bar with CI</h6>
-          <div ref={refs.barErr} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Bar with CI</Text>
+            <div ref={refs.barErr} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Frequency Curve (Log–Log)</h6>
-          <div ref={refs.scatterLog} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Frequency Curve (Log–Log)</Text>
+            <div ref={refs.scatterLog} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">2D Density</h6>
-          <div ref={refs.heat2d} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>2D Density</Text>
+            <div ref={refs.heat2d} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Seasonal Flow Distributions (Box)</h6>
-          <div ref={refs.boxOnly} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Seasonal Flow Distributions (Box)</Text>
+            <div ref={refs.boxOnly} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Seasonal Flow Distributions (Violin)</h6>
-          <div ref={refs.boxViolin} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Seasonal Flow Distributions (Violin)</Text>
+            <div ref={refs.boxViolin} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Daily Stage Range (ft)</h6>
-          <div ref={refs.candlestick} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Daily Stage Range (ft)</Text>
+            <div ref={refs.candlestick} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Rainfall Intensity (Tile Heatmap)</h6>
-          <div ref={refs.heatmapTiles} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Rainfall Intensity (Tile Heatmap)</Text>
+            <div ref={refs.heatmapTiles} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Subplots (2×1)</h6>
-          <div ref={refs.subplots} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Subplots (2×1)</Text>
+            <div ref={refs.subplots} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Hydrograph with Inset</h6>
-          <div ref={refs.inset} style={{ height: 500 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Hydrograph with Inset</Text>
+            <div ref={refs.inset} style={{ height: 500 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Contour Plot (Stage Surface)</h6>
-          <div ref={refs.contour} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Contour Plot (Stage Surface)</Text>
+            <div ref={refs.contour} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">3D Ribbon Surface (Ensemble Hydrographs)</h6>
-          <div ref={refs.ribbon3d} style={{ height: 500 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>3D Ribbon Surface (Ensemble Hydrographs)</Text>
+            <div ref={refs.ribbon3d} style={{ height: 500 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Time Series with Range Slider</h6>
-          <div ref={refs.rangeSlider} style={{ height: 420 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Time Series with Range Slider</Text>
+            <div ref={refs.rangeSlider} style={{ height: 420 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">USGS Tile Map Layer (Sites)</h6>
-          <div ref={refs.tileMapLayer} style={{ height: 500 }} />
-        </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>USGS Tile Map Layer (Sites)</Text>
+            <div ref={refs.tileMapLayer} style={{ height: 500 }} />
+          </GridCol>
 
-        <div className="col-12">
-          <h6 className="text-center">Tile Density Heat Map</h6>
-          <div ref={refs.tileDensity} style={{ height: 500 }} />
-        </div>
-      </div>
-    </div>
+          <GridCol span={12}>
+            <Text ta="center" fw={600}>Tile Density Heat Map</Text>
+            <div ref={refs.tileDensity} style={{ height: 500 }} />
+          </GridCol>
+        </Grid>
+      </Stack>
+    </Container>
   );
 }

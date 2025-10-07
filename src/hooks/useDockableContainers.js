@@ -8,8 +8,7 @@ function getDefaultDockZone(type) {
       return "W";
     case "ComponentMessage":
       return "S";
-    case "ComponentInterfaceSize":
-    case "ComponentStyleSelector":
+    case "ComponentInterfaceOptions":
       return "E";
     default:
       return "CENTER";
@@ -144,7 +143,7 @@ export default function useDockableContainers({ handleWizardFinish, handleDelete
   // Type-aware logging
   const logCenterOpened = (type, title) => {
     const cat = (componentMetadata[type]?.category || "").trim() || "Component";
-    setMessages((prev) => [...prev, makeMessage(10001, [title, cat], "text-body")]);
+    setMessages((prev) => [...prev, makeMessage(10001, [title, cat], "info")]);
   };
 
   const logCenterClosed = (type, title) => {

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { TextStore } from "../../utils/TextStore.js";
+import { Button, Group } from "@mantine/core";
 
 function WizardNavigation({
                             step,
@@ -8,57 +9,93 @@ function WizardNavigation({
                             onFinish,
                             finishLabel,
                             disableNext,
-                            onCancel,          // new
+                            onCancel,
+                            backLabel = TextStore.interface("WIZARD_BACK"),
+                            nextLabel = TextStore.interface("WIZARD_NEXT"),
+                            cancelLabel = TextStore.interface("WIZARD_CANCEL"),
+                            hideCancel = false,
                           }) {
   const isFirstStep = step === 1;
   const isLastStep = step === numSteps;
 
   const finishText = finishLabel || TextStore.interface("WIZARD_FINISH");
 
-  return (
-    <div className="wizard-footer-inner d-flex justify-content-between align-items-center">
-      {/* Left side: Cancel */}
-      <div>
-        <button
-          type="button"
-          className="btn btn-danger btn-compact me-2"
-          onClick={onCancel}
-        >
-          {TextStore.interface("WIZARD_CANCEL")}
-        </button>
-      </div>
+  const goBack = useCallback(() => setStep((s) => Math.max(1, s - 1)), [setStep]);
+  const goNext = useCallback(() => setStep((s) => Math.min(numSteps, s + 1)), [setStep, numSteps]);
 
-      {/* Right side: Back + Next/Finish */}
-      <div className="d-flex align-items-center">
-        <button
+  const onKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter") {
+        if (!isLastStep && !disableNext) goNext();
+        else if (isLastStep) onFinish?.();
+      } else if (e.key === "Escape" && !hideCancel) {
+        onCancel?.();
+      }
+    },
+    [disableNext, goNext, hideCancel, isLastStep, onCancel, onFinish]
+  );
+
+  return (
+    <Group
+      justify="space-between"
+      align="center"
+      onKeyDown={onKeyDown}
+      style={{ padding: 8 }}
+      data-testid="wizard-navigation"
+    >
+      {!hideCancel && (
+        <Button
           type="button"
-          className="btn btn-secondary btn-compact me-2"
-          onClick={() => setStep((s) => Math.max(1, s - 1))}
-          disabled={isFirstStep}
+          variant="light"
+          color="red"
+          size="xs"
+          onClick={onCancel}
+          aria-label={cancelLabel}
         >
-          {TextStore.interface("WIZARD_BACK")}
-        </button>
+          {cancelLabel}
+        </Button>
+      )}
+
+      <Group align="center" gap="xs">
+        <Button
+          type="button"
+          variant="default"
+          size="xs"
+          onClick={goBack}
+          disabled={isFirstStep}
+          aria-disabled={isFirstStep}
+          aria-label={backLabel}
+        >
+          {backLabel}
+        </Button>
 
         {!isLastStep ? (
-          <button
+          <Button
             type="button"
-            className="btn btn-primary btn-compact"
-            onClick={() => setStep((s) => Math.min(numSteps, s + 1))}
+            variant="filled"
+            color="teal"
+            size="xs"
+            onClick={goNext}
             disabled={disableNext}
+            aria-disabled={disableNext}
+            aria-label={nextLabel}
           >
-            {TextStore.interface("WIZARD_NEXT")}
-          </button>
+            {nextLabel}
+          </Button>
         ) : (
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary btn-compact"
+            variant="filled"
+            color="teal"
+            size="xs"
             onClick={onFinish}
+            aria-label={finishText}
           >
             {finishText}
-          </button>
+          </Button>
         )}
-      </div>
-    </div>
+      </Group>
+    </Group>
   );
 }
 

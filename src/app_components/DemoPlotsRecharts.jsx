@@ -92,11 +92,11 @@ const Card = ({ title, children, subtitle }) => (
       <div className="text-base font-semibold">{title}</div>
       {subtitle && <div className="text-xs opacity-70">{subtitle}</div>}
     </div>
-    <div style={{ width: "100%", height: 280 }}>{children}</div>
+    {children}
   </div>
 );
 
-const CustomTooltip = ({ active, payload, label, unitX, unitY }) => {
+const CustomTooltip = ({ active, payload, label, unitY }) => {
   if (!active || !payload || !payload.length) return null;
   return (
     <div className="text-sm rounded border bg-white/90 dark:bg-[#0b0d12]/90 px-2 py-1">
@@ -126,7 +126,7 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
     <div className="w-full">
       {/* 1) Simple time series with Brush (zoom) */}
       <Card title="Flow Time Series" subtitle="Line + Brush for zooming; grid, legend, tooltip">
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={280}>
           <LineChart data={tsA} margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" minTickGap={20} />
@@ -142,7 +142,7 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
 
       {/* 2) Uncertainty ribbon (lo/hi band) + median line */}
       <Card title="Uncertainty Band" subtitle="Area band (hi–lo) stacked on baseline + median line">
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={tsA} margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" minTickGap={20} />
@@ -160,7 +160,7 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
 
       {/* 3) Dual‑axis composed chart: precipitation (bars) + flow (line) */}
       <Card title="Flow vs Precipitation" subtitle="ComposedChart with dual axes">
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={280}>
           <ComposedChart data={tsA} margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" minTickGap={20} />
@@ -175,9 +175,12 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
       </Card>
 
       {/* 4) Comparison of two series with Brush & synced domains */}
-      <Card title="Series Comparison" subtitle="Two lines with shared x‑axis + Brush">
-        <ResponsiveContainer>
-          <LineChart data={tsA.map((d, i) => ({ ...d, other: tsB[i]?.flow }))} margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
+      <Card title="Series Comparison" subtitle="Two lines with shared x-axis + Brush">
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart
+            data={tsA.map((d, i) => ({ ...d, other: tsB[i]?.flow }))}
+            margin={{ left: 24, right: 12, top: 10, bottom: 10 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" minTickGap={20} />
             <YAxis />
@@ -192,7 +195,7 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
 
       {/* 5) Paired data (rating curve) as Scatter + reference power curve */}
       <Card title="Rating Curve" subtitle="Scatter with deterministic reference curve">
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={280}>
           <ScatterChart margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="q" name="Discharge" unit=" cfs" />
@@ -209,7 +212,7 @@ export default function DemoPlotsRecharts({ seriesA, seriesB }) {
 
       {/* 6) Monthly totals bar chart */}
       <Card title="Monthly Volume" subtitle="Aggregated bars from daily flows">
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart data={monthly} margin={{ left: 24, right: 12, top: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
