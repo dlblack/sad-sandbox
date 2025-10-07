@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TimeseriesPathnameStep from "./TimeseriesPathnameStep";
 import DataInfoStepCommon from "./DataInfoStepCommon.jsx";
 import PairedDataTableStep from "./PairedDataTableStep";
@@ -7,10 +7,10 @@ import WizardNavigation from "../../common/WizardNavigation";
 import StructureSelector from "../../editor_components/combo_boxes/StructureSelector";
 import FormatSelector from "../../editor_components/combo_boxes/FormatSelector.jsx";
 import PairedCurveTypeComboBox, { CURVE_TYPE_DEFAULTS } from "../../editor_components/combo_boxes/PairedCurveTypeComboBox.jsx";
-import {getParamCategory} from "../../../utils/paramUtils.js";
-import {toJulianDay} from "../../../utils/timeUtils.js";
-import {StyleContext} from "../../../styles/StyleContext.jsx";
-import {TextStore} from "../../../utils/TextStore.js";
+import { getParamCategory } from "../../../utils/paramUtils.js";
+import { toJulianDay } from "../../../utils/timeUtils.js";
+import { TextStore } from "../../../utils/TextStore.js";
+import { Card, Stack } from "@mantine/core";
 
 // DSS date formatter
 function formatDssDate(dateStr) {
@@ -18,7 +18,7 @@ function formatDssDate(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d)) return "";
   const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, "0");
   const mon = months[d.getUTCMonth()];
   const yyyy = d.getUTCFullYear();
   return `${dd}${mon}${yyyy}`;
@@ -43,14 +43,13 @@ function getDefaultFilepath(parameter) {
 }
 
 export default function ManualDataEntryEditor(props) {
-  const {componentBackgroundStyle} = useContext(StyleContext);
   const [step, setStep] = useState(1);
 
   // Metadata
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [structureType, setStructureType] = useState(""); // "TimeSeries" or "PairedData"
-  const [dataFormat, setDataFormat] = useState("DSS");    // "DSS" or "JSON"
+  const [structureType, setStructureType] = useState("");
+  const [dataFormat, setDataFormat] = useState("DSS");
 
   // Timeseries state
   const [tsPathnameParts, setTsPathnameParts] = useState({ A:"", B:"", C:"", D:"", E:"", F:"" });
@@ -62,7 +61,7 @@ export default function ManualDataEntryEditor(props) {
   const [tsEndDate, setTsEndDate] = useState("");
   const [tsEndTime, setTsEndTime] = useState("");
   const [tsUnitType, setTsUnitType] = useState("");
-  const [tsDataRows, setTsDataRows] = useState([{dateTime: "", value: ""}]);
+  const [tsDataRows, setTsDataRows] = useState([{ dateTime: "", value: "" }]);
 
   // Paired data state
   const [pairedPathnameParts, setPairedPathnameParts] = useState({ A:"", B:"", C:"", D:"", E:"", F:"" });
@@ -71,7 +70,7 @@ export default function ManualDataEntryEditor(props) {
   const [pairedYUnits, setPairedYUnits] = useState("");
   const [pairedXLabel, setPairedXLabel] = useState("");
   const [pairedXUnits, setPairedXUnits] = useState("");
-  const [pairedRows, setPairedRows] = useState([{x:"", y:""}, {x:"", y:""}, {x:"", y:""}]);
+  const [pairedRows, setPairedRows] = useState([{ x:"", y:"" }, { x:"", y:"" }, { x:"", y:"" }]);
 
   const prevCurveType = useRef();
 
@@ -86,7 +85,7 @@ export default function ManualDataEntryEditor(props) {
     if (!pairedXLabel || prevCurveType.current !== pairedCurveType) setPairedXLabel(defaults.xLabel);
     if (!pairedXUnits || prevCurveType.current !== pairedCurveType) setPairedXUnits(defaults.xUnits);
     prevCurveType.current = pairedCurveType;
-  }, [pairedCurveType, structureType]);
+  }, [pairedCurveType, structureType, pairedYLabel, pairedYUnits, pairedXLabel, pairedXUnits]);
 
   useEffect(() => {
     setTsPathnameParts(parts => ({
@@ -99,7 +98,7 @@ export default function ManualDataEntryEditor(props) {
 
   useEffect(() => {
     if (structureType === "PairedData") {
-      setPairedPathnameParts(parts => ({...parts, D: ""}));
+      setPairedPathnameParts(parts => ({ ...parts, D: "" }));
     }
   }, [structureType]);
 
@@ -108,7 +107,7 @@ export default function ManualDataEntryEditor(props) {
       return (
         <div className="manual-entry-content">
           <legend>{TextStore.interface("ManualDataEntryEditor_Legend")}</legend>
-          <hr/>
+          <hr />
 
           {/* Name */}
           <div className="manual-entry-row">
@@ -142,7 +141,7 @@ export default function ManualDataEntryEditor(props) {
             </div>
           </div>
 
-          <hr/>
+          <hr />
 
           {/* Structure + Format */}
           <StructureSelector value={structureType} onChange={setStructureType} />
@@ -151,7 +150,7 @@ export default function ManualDataEntryEditor(props) {
       );
     }
 
-    // Step 2: TimeSeries (DSS or JSON)
+    // Step 2: TimeSeries
     if (step === 2 && structureType === "TimeSeries") {
       return (
         <div>
@@ -159,11 +158,11 @@ export default function ManualDataEntryEditor(props) {
             <TimeseriesPathnameStep
               pathnameParts={tsPathnameParts}
               setPathnameParts={setTsPathnameParts}
-              editableParts={{A:true, B:true, C:true, D:true, E:true, F:true}}
+              editableParts={{ A:true, B:true, C:true, D:true, E:true, F:true }}
             />
           )}
           <DataInfoStepCommon
-            showParameterCombo={true}
+            showParameterCombo
             parameter={tsParameter} setParameter={setTsParameter}
             units={tsUnits} setUnits={setTsUnits}
             unitType={tsUnitType} setUnitType={setTsUnitType}
@@ -177,15 +176,15 @@ export default function ManualDataEntryEditor(props) {
       );
     }
 
-    // Step 2: PairedData (DSS or JSON)
+    // Step 2: PairedData
     if (step === 2 && structureType === "PairedData") {
       if (dataFormat === "DSS") {
         return (
           <div>
             <TimeseriesPathnameStep
               pathnameParts={pairedPathnameParts}
-              setPathnameParts={parts => setPairedPathnameParts({...parts, D: ""})}
-              editableParts={{A:true, B:true, C:true, D:false, E:true, F:true}}
+              setPathnameParts={parts => setPairedPathnameParts({ ...parts, D: "" })}
+              editableParts={{ A:true, B:true, C:true, D:false, E:true, F:true }}
             />
 
             <div className="manual-entry-row">
@@ -193,10 +192,13 @@ export default function ManualDataEntryEditor(props) {
                 {TextStore.interface("ManualDataEntryEditor_CurveType")}
               </label>
               <div className="manual-entry-field">
-                <PairedCurveTypeComboBox value={pairedCurveType} onChange={val => {
-                  setPairedCurveType(val);
-                  setPairedPathnameParts(parts => ({...parts, C: val}));
-                }}/>
+                <PairedCurveTypeComboBox
+                  value={pairedCurveType}
+                  onChange={val => {
+                    setPairedCurveType(val);
+                    setPairedPathnameParts(parts => ({ ...parts, C: val }));
+                  }}
+                />
               </div>
             </div>
 
@@ -253,7 +255,8 @@ export default function ManualDataEntryEditor(props) {
             </div>
           </div>
         );
-      } else if (dataFormat === "JSON") {
+      }
+      if (dataFormat === "JSON") {
         return (
           <div>
             <div className="manual-entry-row">
@@ -261,7 +264,7 @@ export default function ManualDataEntryEditor(props) {
                 {TextStore.interface("ManualDataEntryEditor_CurveType")}
               </label>
               <div className="manual-entry-field">
-                <PairedCurveTypeComboBox value={pairedCurveType} onChange={setPairedCurveType}/>
+                <PairedCurveTypeComboBox value={pairedCurveType} onChange={setPairedCurveType} />
               </div>
             </div>
 
@@ -352,9 +355,9 @@ export default function ManualDataEntryEditor(props) {
       );
     }
 
-    // Step 4: Confirmation (optional)
+    // Step 4: Confirmation
     if (step === 4) {
-      const {A, B, C, E, F} = pairedPathnameParts;
+      const { A, B, C, E, F } = pairedPathnameParts;
       const pairedPathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
       return (
         <div>
@@ -373,14 +376,14 @@ export default function ManualDataEntryEditor(props) {
           </div>
 
           {structureType === "TimeSeries" && (
-            <div style={{maxHeight: 160, overflow: "auto"}}>
-              <table className="table table-bordered table-sm" style={{maxWidth: 340}}>
+            <div style={{ maxHeight: 160, overflow: "auto" }}>
+              <table className="table table-bordered table-sm" style={{ maxWidth: 340 }}>
                 <thead>
                 <tr>
-                  <th style={{width: 160}}>
+                  <th style={{ width: 160 }}>
                     {TextStore.interface("ManualDataEntryEditor_SummaryDateTime")}
                   </th>
-                  <th style={{width: 80}}>
+                  <th style={{ width: 80 }}>
                     {TextStore.interface("ManualDataEntryEditor_SummaryValue")}
                   </th>
                 </tr>
@@ -425,13 +428,13 @@ export default function ManualDataEntryEditor(props) {
                 <strong>{TextStore.interface("ManualDataEntryEditor_SummaryXUnits")}</strong>
                 {pairedXUnits}
               </div>
-              <div style={{maxHeight: 160, overflow: "auto"}}>
-                <table className="table table-bordered table-sm font-sm" style={{maxWidth: 380}}>
+              <div style={{ maxHeight: 160, overflow: "auto" }}>
+                <table className="table table-bordered table-sm font-sm" style={{ maxWidth: 380 }}>
                   <thead>
                   <tr>
-                    <th className="font-xs" style={{width: 80}}>#</th>
-                    <th className="font-xs" style={{width: 120}}>{pairedXLabel || "X"}</th>
-                    <th className="font-xs" style={{width: 120}}>{pairedCurveType || "Y"}</th>
+                    <th className="font-xs" style={{ width: 80 }}>#</th>
+                    <th className="font-xs" style={{ width: 120 }}>{pairedXLabel || "X"}</th>
+                    <th className="font-xs" style={{ width: 120 }}>{pairedCurveType || "Y"}</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -460,7 +463,7 @@ export default function ManualDataEntryEditor(props) {
 
     // TimeSeries
     if (structureType === "TimeSeries" && props.onDataSave) {
-      const {A, B, C, D, E, F} = tsPathnameParts;
+      const { A, B, C, D, E, F } = tsPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}/${D || ""}/${E || ""}/${F || ""}/`;
       const dataRowsFiltered = tsDataRows.filter(
         row => row.value !== "" && !isNaN(Number(row.value)) && row.dateTime !== ""
@@ -481,7 +484,7 @@ export default function ManualDataEntryEditor(props) {
         interval: tsInterval,
         startDateTime: dateTimes[0] || "",
         endDateTime: dateTimes.at(-1) || "",
-        values,
+        values
       };
 
       if (dataFormat === "DSS") {
@@ -489,7 +492,7 @@ export default function ManualDataEntryEditor(props) {
           ...payload,
           filepath,
           pathname,
-          times: dateTimes.map(dtStr => toJulianDay(new Date(dtStr))),
+          times: dateTimes.map(dtStr => toJulianDay(new Date(dtStr)))
         };
       } else {
         payload = { ...payload, times: dateTimes };
@@ -501,7 +504,7 @@ export default function ManualDataEntryEditor(props) {
 
     // PairedData DSS
     if (structureType === "PairedData" && dataFormat === "DSS" && props.onDataSave) {
-      const {A, B, C, E, F} = pairedPathnameParts;
+      const { A, B, C, E, F } = pairedPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
 
       const payload = {
@@ -517,15 +520,14 @@ export default function ManualDataEntryEditor(props) {
         yLabel: pairedYLabel,
         yUnits: pairedYUnits,
         filepath: getDefaultFilepath(pairedCurveType),
-        pathname,
+        pathname
       };
 
-      const xValues = pairedRows.filter(r => r.x !== "" && r.y !== "")
-        .map(r => Number(r.x));
-      const yValues = pairedRows.filter(r => r.x !== "" && r.y !== "")
-        .map(r => Number(r.y));
+      const filtered = pairedRows.filter(r => r.x !== "" && r.y !== "");
+      const xValues = filtered.map(r => Number(r.x));
+      const yValues = filtered.map(r => Number(r.y));
 
-      props.onDataSave(pairedCurveType, {...payload, xValues, yValues}, props.id);
+      props.onDataSave(pairedCurveType, { ...payload, xValues, yValues }, props.id);
       if (props.onRemove) props.onRemove();
     }
 
@@ -561,9 +563,10 @@ export default function ManualDataEntryEditor(props) {
     }
     if (step === 2 && structureType === "PairedData") {
       if (dataFormat === "DSS") {
-        const {C} = pairedPathnameParts;
+        const { C } = pairedPathnameParts;
         return !!C && !!pairedCurveType && !!pairedYUnits && !!pairedXLabel && !!pairedXUnits;
-      } else if (dataFormat === "JSON") {
+      }
+      if (dataFormat === "JSON") {
         return !!pairedCurveType && !!pairedYUnits && !!pairedXLabel && !!pairedXUnits;
       }
     }
@@ -577,22 +580,22 @@ export default function ManualDataEntryEditor(props) {
   }
 
   return (
-    <div className={`wizard-fixed-size card p-3 ${componentBackgroundStyle}`}>
-      <form className="d-flex flex-column h-100" onSubmit={e => e.preventDefault()}>
-        <div className="flex-grow-1 d-flex flex-column" style={{minHeight: 0}}>
-          {renderStep()}
-        </div>
-        <div className="wizard-footer">
-          <WizardNavigation
-            step={step}
-            setStep={setStep}
-            numSteps={numSteps}
-            onFinish={handleWizardFinish}
-            finishLabel="Create"
-            disableNext={!canGoNext()}
-          />
-        </div>
+    <Card withBorder radius="md" padding="md">
+      <form onSubmit={e => e.preventDefault()} style={{ height: "100%" }}>
+        <Stack gap="sm" style={{ height: "100%" }}>
+          <div style={{ flex: 1, minHeight: 0 }}>{renderStep()}</div>
+          <div className="wizard-footer">
+            <WizardNavigation
+              step={step}
+              setStep={setStep}
+              numSteps={numSteps}
+              onFinish={handleWizardFinish}
+              finishLabel="Create"
+              disableNext={!canGoNext()}
+            />
+          </div>
+        </Stack>
       </form>
-    </div>
+    </Card>
   );
 }

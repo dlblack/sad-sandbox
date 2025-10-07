@@ -1,20 +1,19 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
-import { StyleContext } from "../styles/StyleContext";
 import { TextStore } from "../utils/TextStore";
+import { Card, Button, TextInput, Text } from "@mantine/core";
 import "../styles/css/SaveAsDialog.css";
 
 function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
-  const { componentHeaderStyle, componentBackgroundStyle } = useContext(StyleContext);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const inputRef = useRef();
-  const dialogRef = useRef();
+  const inputRef = useRef(null);
+  const dialogRef = useRef(null);
 
   useEffect(() => {
-    const origOverflow = document.body.style.overflow;
+    const orig = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = origOverflow; };
+    return () => { document.body.style.overflow = orig; };
   }, []);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -29,23 +28,39 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
       }}
       tabIndex={-1}
     >
-      <div
-        className={`card saveas-dialog-card ${componentBackgroundStyle}`}
-        ref={dialogRef}
+      <Card
+        withBorder
+        radius="md"
+        padding={0}
+        className={`saveas-dialog-card ${componentBackgroundStyle}`}
         role="dialog"
         aria-modal="true"
+        ref={dialogRef}
         tabIndex={-1}
+        style={{ maxWidth: 520, width: "90%" }}
       >
-        <div className={`card-header d-flex justify-content-between align-items-center ${componentHeaderStyle} saveas-dialog-header`}>
-          <div className="card-title mb-0">{TextStore.interface("SaveAsDialog_Title", [type])}</div>
-          <button
-            type="button"
-            className="dockable-item-header-btn dockable-item-close-btn saveas-dialog-close"
+        {/* Header */}
+        <div
+          className={`saveas-dialog-header ${componentHeaderStyle}`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "6px 8px",
+          }}
+        >
+          <Text fw={600} size="sm">
+            {TextStore.interface("SaveAsDialog_Title", [type])}
+          </Text>
+          <Button
+            variant="subtle"
+            size="xs"
             onClick={onCancel}
             aria-label="Close"
+            style={{ lineHeight: 1, padding: "2px 6px" }}
           >
             ×
-          </button>
+          </Button>
         </div>
 
         <form
@@ -54,28 +69,27 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
             onConfirm(name.trim(), desc.trim());
           }}
         >
-          <div className="manual-entry-content p-2">
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2 saveas-label">
+          <div style={{ padding: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 8, marginBottom: 8 }}>
+              <label style={{ fontSize: 12 }}>
                 {TextStore.interface("SaveAsDialog_OldName")}
               </label>
-              <input
-                type="text"
-                className="form-control form-control-sm font-xs"
+              <TextInput
+                size="xs"
                 value={oldName}
-                disabled
+                readOnly
+                styles={{ input: { cursor: "not-allowed" } }}
               />
             </div>
 
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2 saveas-label">
+            <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 8, marginBottom: 8 }}>
+              <label style={{ fontSize: 12 }}>
                 {TextStore.interface("SaveAsDialog_Name")}
               </label>
-              <input
-                type="text"
-                className="form-control form-control-sm font-xs"
+              <TextInput
+                size="xs"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.currentTarget.value)}
                 ref={inputRef}
                 required
                 maxLength={64}
@@ -83,33 +97,45 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
               />
             </div>
 
-            <div className="mb-2 d-flex align-items-center">
-              <label className="form-label font-xs me-2 saveas-label">
+            <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 8, marginBottom: 8 }}>
+              <label style={{ fontSize: 12 }}>
                 {TextStore.interface("SaveAsDialog_Description")}
               </label>
               <textarea
-                className="form-control form-control-sm font-xs"
                 rows={3}
                 maxLength={200}
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
                 placeholder="Enter description"
+                style={{
+                  width: "100%",
+                  fontSize: 12,
+                  padding: "6px 8px",
+                  borderRadius: 6,
+                  border: "1px solid var(--mantine-color-dark-4)",
+                  background: "var(--mantine-color-dark-6)",
+                  color: "var(--mantine-color-text)",
+                  outline: "none",
+                }}
               />
             </div>
           </div>
 
           <div className={`saveas-dialog-footer ${componentBackgroundStyle}`}>
-            <div className="saveas-dialog-footer-inner">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel}>
+            <div
+              className="saveas-dialog-footer-inner"
+              style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+            >
+              <Button variant="outline" size="xs" onClick={onCancel}>
                 {TextStore.interface("SaveAsDialog_ButtonCancel")}
-              </button>
-              <button type="submit" className="btn btn-primary btn-sm" disabled={!name.trim()}>
+              </Button>
+              <Button variant="filled" size="xs" type="submit" disabled={!name.trim()}>
                 {TextStore.interface("SaveAsDialog_ButtonOk")}
-              </button>
+              </Button>
             </div>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 

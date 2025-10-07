@@ -1,5 +1,6 @@
 import React from "react";
 import { TextStore } from "../../../../utils/TextStore.js";
+import { Radio, NumberInput, Stack, Text } from "@mantine/core";
 
 export default function WizardSkew({
                                value,
@@ -14,7 +15,7 @@ export default function WizardSkew({
                                compact = false,
                              }) {
   const isRegional = value === "option3";
-  const cls = compact ? "form-control form-control-sm font-xs" : "form-control";
+  const size = compact ? "xs" : "sm";
 
   const SKEW_OPTIONS_STEP = {
         option1: TextStore.interface("AnalysisWizard_Skew_UseStationSkew"),
@@ -22,95 +23,81 @@ export default function WizardSkew({
         option3: TextStore.interface("AnalysisWizard_Skew_UseRegionalSkew"),
       };
 
-      return (
-        <fieldset className="wizard-grid">
-            <div className="mb-2">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="skew-choice"
-                  id="skew_option1"
-                  value="option1"
-                  disabled={!allowStation}
-                  checked={value === "option1"}
-                  onChange={(e) => onChange(e.target.value)}
-                />
-                <label className="form-check-label" htmlFor="skew_option1">
-                  {SKEW_OPTIONS_STEP.option1}
-                </label>
-              </div>
+  return (
+    <fieldset className="wizard-grid">
+      <div className="mb-2">
+        <Stack gap="xs">
+          <Radio
+            name="skew-choice"
+            value="option1"
+            checked={value === "option1"}
+            onChange={(e) => onChange(e.currentTarget.value)}
+            label={SKEW_OPTIONS_STEP.option1}
+            disabled={!allowStation}
+            size={size}
+          />
+          <Radio
+            name="skew-choice"
+            value="option2"
+            checked={value === "option2"}
+            onChange={(e) => onChange(e.currentTarget.value)}
+            label={SKEW_OPTIONS_STEP.option2}
+            disabled={!allowWeighted}
+            size={size}
+          />
+          <Radio
+            name="skew-choice"
+            value="option3"
+            checked={value === "option3"}
+            onChange={(e) => onChange(e.currentTarget.value)}
+            label={SKEW_OPTIONS_STEP.option3}
+            size={size}
+          />
+        </Stack>
+      </div>
 
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="skew-choice"
-                  id="skew_option2"
-                  value="option2"
-                  disabled={!allowWeighted}
-                  checked={value === "option2"}
-                  onChange={(e) => onChange(e.target.value)}
-                />
-                <label className="form-check-label" htmlFor="skew_option2">
-                  {SKEW_OPTIONS_STEP.option2}
-                </label>
-              </div>
+      <div className="form-group row align-items-center mb-2">
+        <label htmlFor="regionalSkew" className="col-auto col-form-label wizard-label-fixed">
+          {TextStore.interface("AnalysisWizard_Skew_RegionalSkew")}
+        </label>
+        <div className="col ps-0">
+          <NumberInput
+            id="regionalSkew"
+            size={size}
+            step={0.0001}
+            value={regionalSkew === "" || regionalSkew == null ? "" : Number(regionalSkew)}
+            onChange={(v) =>
+              setRegionalSkew(v === "" || v == null ? "" : String(v))
+            }
+            disabled={!isRegional}
+            hideControls
+          />
+        </div>
+      </div>
 
-              <div className="form-check mb-2">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="skew-choice"
-                  id="skew_option3"
-                  value="option3"
-                  checked={value === "option3"}
-                  onChange={(e) => onChange(e.target.value)}
-                />
-                <label className="form-check-label" htmlFor="skew_option3">
-                  {SKEW_OPTIONS_STEP.option3}
-                </label>
-              </div>
-            </div>
+      <div className="form-group row align-items-center mb-1">
+        <label htmlFor="regionalSkewMSE" className="col-auto col-form-label wizard-label-fixed">
+          {TextStore.interface("AnalysisWizard_Skew_RegionalSkewMSE")}
+        </label>
+        <div className="col ps-0">
+          <NumberInput
+            id="regionalSkewMSE"
+            size={size}
+            step={0.0001}
+            value={regionalSkewMSE === "" || regionalSkewMSE == null ? "" : Number(regionalSkewMSE)}
+            onChange={(v) =>
+              setRegionalSkewMSE(v === "" || v == null ? "" : String(v))
+            }
+            disabled={!isRegional}
+            hideControls
+          />
+        </div>
+      </div>
 
-            <div className="form-group row align-items-center mb-2">
-              <label htmlFor="regionalSkew" className="col-auto col-form-label wizard-label-fixed">
-                {TextStore.interface("AnalysisWizard_Skew_RegionalSkew")}
-              </label>
-              <div className="col ps-0">
-                <input
-                  id="regionalSkew"
-                  type="number"
-                  step="0.0001"
-                  className={cls}
-                  value={regionalSkew ?? ""}
-                  onChange={(e) => setRegionalSkew(e.target.value)}
-                  disabled={!isRegional}
-                />
-              </div>
-            </div>
-
-            <div className="form-group row align-items-center mb-1">
-              <label htmlFor="regionalSkewMSE" className="col-auto col-form-label wizard-label-fixed">
-                {TextStore.interface("AnalysisWizard_Skew_RegionalSkewMSE")}
-              </label>
-              <div className="col ps-0">
-                <input
-                  id="regionalSkewMSE"
-                  type="number"
-                  step="0.0001"
-                  className={cls}
-                  value={regionalSkewMSE ?? ""}
-                  onChange={(e) => setRegionalSkewMSE(e.target.value)}
-                  disabled={!isRegional}
-                />
-              </div>
-            </div>
-
-            {helpText ? <div className="form-text mt-1">{helpText}</div> : null}
-          </fieldset>
-      );
-  }
+      {helpText ? <Text size="xs" mt="xs">{helpText}</Text> : null}
+    </fieldset>
+  );
+}
 
   export function skewChoiceToOptions(choice, regionalSkew, regionalSkewMSE) {
     const useRegional = choice === "option3";

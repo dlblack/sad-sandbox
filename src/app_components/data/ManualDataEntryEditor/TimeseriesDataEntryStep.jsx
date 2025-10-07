@@ -1,8 +1,9 @@
-import React, {useMemo} from "react";
+import React, { useMemo } from "react";
 import TableSectionStep from "./TableSectionStep";
-import {INTERVAL_OPTIONS} from "../../editor_components/combo_boxes/DataIntervalComboBox";
-import {generateDateTimeRows} from "../../../utils/timeUtils.js";
+import { INTERVAL_OPTIONS } from "../../editor_components/combo_boxes/DataIntervalComboBox";
+import { generateDateTimeRows } from "../../../utils/timeUtils.js";
 import { TextStore } from "../../../utils/TextStore";
+import { Text } from "@mantine/core";
 
 function updateDataRowsWithValues(autoDateTimes, dataRows) {
   return autoDateTimes.map((dt, i) => ({
@@ -58,12 +59,13 @@ export default function TimeseriesDataEntryStep({
 
   return (
     <div>
-      <h5>Step 3: Enter Timeseries Data</h5>
-      <div className="mb-2 font-xs text-muted">
+      <Text fw={600} size="lg">Step 3: Enter Timeseries Data</Text>
+      <Text size="xs" c="dimmed" mb="xs">
         {autoDateTimes.length
           ? TextStore.interface("ManualDataEntryEditor_DateTimeAutoFilled")
           : TextStore.interface("ManualDataEntryEditor_DateTimeManual")}
-      </div>
+      </Text>
+
       <TableSectionStep
         dataRows={dataRows}
         handleRowChange={handleRowChange}

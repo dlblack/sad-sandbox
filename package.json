@@ -13,8 +13,14 @@
     "electron-build": "npm run build && electron ."
   },
   "dependencies": {
+    "@mantine/core": "^8.3.3",
+    "@mantine/dates": "^8.3.3",
+    "@mantine/hooks": "^8.3.3",
+    "@mantine/notifications": "^8.3.3",
+    "@tabler/icons-react": "^3.35.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.18",
     "express": "^5.1.0",
     "leaflet": "^1.9.4",
     "npm-check": "^6.0.1",

@@ -37,7 +37,7 @@ const INTERFACE_TEXT = {
   Navbar_Tools_Project: "Project",
   Navbar_Tools_Messages: "Messages",
   Navbar_Tools_View: "View",
-  Navbar_Tools_View_InterfaceSize: "Interface Size",
+  Navbar_Tools_View_InterfaceSize: "Interface Options",
   Navbar_Tools_View_StyleSelector: "Style Selector",
   Navbar_Tools_ToggleDevTools: "Toggle DevTools",
   Navbar_Help: "Help",
@@ -51,18 +51,21 @@ const INTERFACE_TEXT = {
   Navbar_Search_Placeholder: "Search",
 
   // --------------------------------------
-  // ComponentInterfaceSize
+  // ComponentInterfaceOptions
   // --------------------------------------
-  ComponentInterfaceSize_HeaderPrefix: "UI",
-  ComponentInterfaceSize_Decrease: "Decrease by 10%",
-  ComponentInterfaceSize_Increase: "Increase by 10%",
-  ComponentInterfaceSize_InterfaceScaleSlider: "Interface scale slider",
-  ComponentInterfaceSize_ResetButton: "Reset",
-  ComponentInterfaceSize_ResetTitle: "Increase by 10%",
-  ComponentInterfaceSize_Density: "Density",
-  ComponentInterfaceSize_Density_Compact: "Compact",
-  ComponentInterfaceSize_Density_Standard: "Standard",
-  ComponentInterfaceSize_Density_Comfy: "Comfy",
+  ComponentInterfaceOptions_ColorScheme: "Color scheme",
+  ComponentInterfaceOptions_StyleOption_Auto: "System",
+  ComponentInterfaceOptions_StyleOption_Light: "Light",
+  ComponentInterfaceOptions_StyleOption_Dark: "Dark",
+  ComponentInterfaceOptions_CurrentScheme: "Current Scheme",
+  ComponentInterfaceOptions_HeaderPrefix: "UI",
+  ComponentInterfaceOptions_InterfaceScaleSlider: "Interface scale slider",
+  ComponentInterfaceOptions_ResetButton: "Reset",
+  ComponentInterfaceOptions_ResetTitle: "Reset Interface to defaults.",
+  ComponentInterfaceOptions_Density: "Density",
+  ComponentInterfaceOptions_Density_Compact: "Compact",
+  ComponentInterfaceOptions_Density_Standard: "Standard",
+  ComponentInterfaceOptions_Density_Comfy: "Comfy",
 
   // --------------------------------------
   // ComponentStyleSelector
@@ -73,17 +76,12 @@ const INTERFACE_TEXT = {
   StyleSelector_ComponentBackgroundLabel: "Component Background Style",
   StyleOption_Primary: "Primary",
   StyleOption_Secondary: "Secondary",
-  StyleOption_Light: "Light",
-  StyleOption_Dark: "Dark",
-  StyleOption_Danger: "Danger",
-  StyleOption_Warning: "Warning",
-  StyleOption_Info: "Info",
-  StyleOption_Success: "Success",
 
   // --------------------------------------
   // componentMetadata
   // --------------------------------------
   ComponentMetadata_ComponentProject: "Project",
+  ComponentMetadata_ComponentInterfaceOptions: "Interface Options",
   ComponentMetadata_ManualDataEntryEditor: "Manual Data Entry",
   ComponentMetadata_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
   ComponentMetadata_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",

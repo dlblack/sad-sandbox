@@ -1,8 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react";
-import {Resizable} from "react-resizable";
-import {StyleContext} from "../../styles/StyleContext";
+import React, { useEffect, useRef, useState } from "react";
+import { Resizable } from "react-resizable";
+import { Card } from "@mantine/core";
 import "react-resizable/css/styles.css";
-import "../../styles/css/components/ResizableFrame.css";
 
 const MIN_WIDTH = 180;
 const MIN_HEIGHT = 120;
@@ -25,57 +24,41 @@ function DockableItem({
                         isFocused,
                         onDragStart,
                         onDragEnd,
+                        showHeader = true,
+                        fill = true,
                       }) {
-  const {componentHeaderStyle, componentBackgroundStyle} = useContext(StyleContext);
-
-  const initialWidth =
-    typeof propWidth === "number" && !isNaN(propWidth) && propWidth > 0
-      ? propWidth
-      : 380;
-  const initialHeight =
-    typeof propHeight === "number" && !isNaN(propHeight) && propHeight > 0
-      ? propHeight
-      : 240;
-
   const [dimensions, setDimensions] = useState({
-    width: initialWidth,
-    height: initialHeight,
+    width: typeof propWidth === "number" && propWidth > 0 ? propWidth : 380,
+    height: typeof propHeight === "number" && propHeight > 0 ? propHeight : 240,
   });
 
   useEffect(() => {
-    if (
-      typeof propWidth === "number" &&
-      !isNaN(propWidth) &&
-      propWidth > 0 &&
-      propWidth !== dimensions.width
-    ) {
-      setDimensions(dim => ({...dim, width: propWidth}));
+    if (fill) return;
+    if (typeof propWidth === "number" && propWidth > 0 && propWidth !== dimensions.width) {
+      setDimensions((d) => ({ ...d, width: propWidth }));
     }
-    if (
-      typeof propHeight === "number" &&
-      !isNaN(propHeight) &&
-      propHeight > 0 &&
-      propHeight !== dimensions.height
-    ) {
-      setDimensions(dim => ({...dim, height: propHeight}));
+    if (typeof propHeight === "number" && propHeight > 0 && propHeight !== dimensions.height) {
+      setDimensions((d) => ({ ...d, height: propHeight }));
     }
-  }, [propWidth, propHeight]);
+  }, [propWidth, propHeight, fill]); // eslint-disable-line
 
-  const [expanded, setExpanded] = useState(false);
-
-  const handleResize = (e, {size}) => {
-    setDimensions(size);
+  const handleResize = (e, { size }) => {
+    if (!fill) setDimensions(size);
     onResize?.(size);
   };
 
-  const containerStyle = expanded
+  const containerRef = useRef(null);
+
+  const baseContainerStyle = fill
     ? {
-      position: "absolute",
-      zIndex: 100,
-      top: 0,
-      left: 0,
+      position: "relative",
+      zIndex: isFocused ? 10 : 1,
+      display: "flex",
+      flexDirection: "column",
       width: "100%",
       height: "100%",
+      minWidth: 0,
+      minHeight: 0
     }
     : expandToContents
       ? {
@@ -95,98 +78,62 @@ function DockableItem({
         zIndex: isFocused ? 10 : 1,
       };
 
+  const headerTitle = `${type}${title ? ` — ${title}` : ""}`;
+
   const innerCard = (
-    <div className="card d-flex flex-column">
-      <div
-        className={`card-header d-flex align-items-center justify-content-between ${componentHeaderStyle}`}
-      >
-        <div
-          className="drag-handle"
-          draggable
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          {...dragHandleProps}
-          style={{cursor: "grab"}}
-        >
-          <div className="card-title mb-0">
-            {type}{title ? ` - ${title}` : ""}
+    <Card
+      withBorder={false}
+      radius="md"
+      p={0}
+      style={{ display: "flex", flexDirection: "column", flex: 1, width: "100%", height: "100%", minWidth: 0, minHeight: 0 }}
+    >
+      {showHeader && (
+        <div className="card-header d-flex align-items-center justify-content-between" style={{ padding: 6 }}>
+          <div
+            className="drag-handle"
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            {...dragHandleProps}
+            style={{ cursor: "grab" }}
+          >
+            <div className="card-title mb-0">{headerTitle}</div>
+          </div>
+          <div className="dockable-header-btns">
+            <button
+              type="button"
+              className="dockable-item-header-btn dockable-item-close-btn"
+              onClick={(e) => { e.stopPropagation(); onRemove(id); e.currentTarget.blur(); }}
+              aria-label="Close"
+              title="Close"
+            >
+              ×
+            </button>
           </div>
         </div>
-        <div className="dockable-header-btns">
-          <button
-            type="button"
-            className="dockable-item-header-btn dockable-item-expand-btn"
-            onClick={e => {
-              e.stopPropagation();
-              setExpanded(exp => !exp);
-              e.currentTarget.blur();
-            }}
-            aria-label={expanded ? "Restore" : "Expand"}
-            title={expanded ? "Restore" : "Expand"}
-          >
-            {expanded ? "▭" : "▢"}
-          </button>
-          <button
-            type="button"
-            className="dockable-item-header-btn dockable-item-close-btn"
-            onClick={e => {
-              e.stopPropagation();
-              onRemove(id);
-              e.currentTarget.blur();
-            }}
-            aria-label="Close"
-            title="Close"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-      <div
-        className={`card-body flex-grow-1 overflow-auto p-2 ${componentBackgroundStyle}`}
-      >
+      )}
+
+      <div className="card-body" style={{ flex: 1, minHeight: 0, minWidth: 0, overflow: "auto", padding: 0 }}>
         {children}
       </div>
-    </div>
+    </Card>
   );
 
-  const containerClass =
-    `card-container dockable-item${expanded ? " expanded" : ""}${isFocused ? " focused" : ""}${expandToContents ? " expand-to-contents" : ""}${className ? " " + className : ""}`;
-
-  const containerRef = useRef(null);
-
-  const handleClick = (e) => {
-    onClick?.(e);
-    if (e.target === containerRef.current) {
-      containerRef.current.focus();
-    }
-  };
-
-  const handleFocus = () => {
-    onClick?.();
-  };
-
-  useEffect(() => {
-    if (
-      isFocused &&
-      containerRef.current &&
-      !containerRef.current.contains(document.activeElement)
-    ) {
-      containerRef.current.focus();
-    }
-  }, [isFocused]);
-
-  return expanded ? (
+  const outer = (
     <div
       ref={containerRef}
-      className={containerClass}
-      style={containerStyle}
-      onClick={handleClick}
-      onFocus={handleFocus}
+      className={`dockable-item${className ? ` ${className}` : ""}`}
+      style={baseContainerStyle}
+      onClick={(e) => onClick?.(e)}
       tabIndex={0}
     >
       {innerCard}
     </div>
-  ) : (
+  );
+
+  if (fill) return outer;
+
+  return (
     <Resizable
       width={dimensions.width}
       height={dimensions.height}
@@ -202,16 +149,7 @@ function DockableItem({
         />
       )}
     >
-      <div
-        ref={containerRef}
-        className={containerClass}
-        style={containerStyle}
-        onClick={handleClick}
-        onFocus={handleFocus}
-        tabIndex={0}
-      >
-        {innerCard}
-      </div>
+      {outer}
     </Resizable>
   );
 }

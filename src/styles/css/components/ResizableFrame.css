@@ -8,7 +8,6 @@
 }
 
 /* don’t clip; handles above content */
-.react-resizable { position: relative; overflow: visible; }
 .card-container.dockable-item,
 .card-container.dockable-item .card { overflow: visible !important; }
 .react-resizable-handle { z-index: 1000; pointer-events: auto; }

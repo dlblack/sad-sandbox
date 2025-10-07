@@ -1,407 +1,171 @@
-import React, {useContext, useState} from "react";
-import {StyleContext} from "../styles/StyleContext";
+import React from "react";
 import logo from "../../assets/images/logo.png";
 import { TextStore } from "../utils/TextStore";
+import {
+  Flex,
+  Group,
+  Menu,
+  Button,
+  TextInput,
+  ActionIcon,
+  Divider,
+  Box,
+} from "@mantine/core";
 
-function Navbar({addComponent}) {
-  const {navbarStyle} = useContext(StyleContext);
-  const [showMenu, setShowMenu] = useState(false);
+const NAV_HEIGHT = 40;
 
-  const menuClass = ["collapse navbar-collapse", showMenu ? "show" : ""].join(" ");
-  const navbarClass = `navbar navbar-expand-lg ${navbarStyle || "bg-primary"}`;
+function Navbar({ addComponent }) {
 
-  const handleOpenComponent = (type, optionalProps = {}) => {
-    addComponent(type, optionalProps);
-  };
+  const open = (type, optionalProps = {}) => addComponent(type, optionalProps);
 
   return (
-    <nav className={`${navbarClass} thin-navbar`}>
-      <div className="container-fluid">
-        <span className="navbar-brand text-light">
-          <img src={logo} style={{height: "24px", width: "24px"}} alt="logo"/>
-        </span>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarColor01"
-          aria-controls="navbarColor01"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-          onClick={() => setShowMenu(!showMenu)}
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+    <nav
+      className={`thin-navbar`}
+      style={{
+        height: NAV_HEIGHT,
+        display: "flex",
+        alignItems: "center",
+        padding: "0 8px",
+        width: "100%",
+      }}
+    >
+      <Flex align="center" gap="sm" w="100%">
+        {/* LEFT: brand + primary menus */}
+        <Group gap="xs" style={{ flex: "0 0 auto" }} data-nav-left>
+          <img src={logo} alt="logo" style={{ height: 24, width: 24 }} />
 
-        <div className={menuClass} id="navbarColor01">
-          <div className="d-flex align-items-center">
-            <ul className="navbar-nav">
+          {/* File */}
+          <Menu>
+            <Menu.Target>
+              <Button size="xs" variant="subtle">{TextStore.interface("Navbar_File")}</Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item>{TextStore.interface("Navbar_File_New")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_File_Open")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_File_Close")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_File_Save")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_File_Print")}</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
-              {/* File Menu */}
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  {TextStore.interface("Navbar_File")}
-                </a>
-                <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_New")}</a></li>
-                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Open")}</a></li>
-                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Close")}</a></li>
-                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Save")}</a></li>
-                  <li><a className="dropdown-item" href="#">{TextStore.interface("Navbar_File_Print")}</a></li>
-                </ul>
-              </li>
+          {/* Maps */}
+          <Menu>
+            <Menu.Target>
+              <Button size="xs" variant="subtle">{TextStore.interface("Navbar_Maps")}</Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => open("ComponentMap")}>
+                {TextStore.interface("Navbar_Maps_Open")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
-              {/* Maps Menu */}
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  {TextStore.interface("Navbar_Maps")}
-                </a>
-                <ul className="dropdown-menu">
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("ComponentMap");
-                      }}
-                    >
-                      {TextStore.interface("Navbar_Maps_Open")}
-                    </a>
-                  </li>
-                </ul>
-              </li>
+          {/* Data */}
+          <Menu>
+            <Menu.Target>
+              <Button size="xs" variant="subtle">{TextStore.interface("Navbar_Data")}</Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => open("ManualDataEntryEditor")}>
+                {TextStore.interface("Navbar_Data_NewData_Manual")}
+              </Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Data_NewData_ImportUSGS")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Data_NewData_ImportDSS")}</Menu.Item>
+              <Divider />
+              <Menu.Item>{TextStore.interface("Navbar_Data_EditData")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Data_DataUtilities")}</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
-              {/* Data Menu */}
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  {TextStore.interface("Navbar_Data")}
-                </a>
-                <ul className="dropdown-menu">
-                  {/* New Data Submenu */}
-                  <li className="dropdown dropend">
-                    <a
-                      className="dropdown-item dropdown-toggle"
-                      href="#"
-                      data-bs-toggle="dropdown"
-                    >
-                      {TextStore.interface("Navbar_Data_NewData")}
-                    </a>
-                    <ul className="dropdown-menu">
-                      <li>
-                        <a
-                          className="dropdown-item"
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpenComponent("ManualDataEntryEditor");
-                          }}
-                        >
-                          {TextStore.interface("Navbar_Data_NewData_Manual")}
-                        </a>
-                      </li>
-                      <li>
-                        <a className="dropdown-item" href="#">
-                          {TextStore.interface("Navbar_Data_NewData_ImportUSGS")}
-                        </a>
-                      </li>
-                      <li>
-                        <a className="dropdown-item" href="#">
-                          {TextStore.interface("Navbar_Data_NewData_ImportDSS")}
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
+          {/* Analysis */}
+          <Menu>
+            <Menu.Target>
+              <Button size="xs" variant="subtle">{TextStore.interface("Navbar_Analysis")}</Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => open("PeakFlowFreqWizard")}>
+                {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
+              </Menu.Item>
+              <Menu.Item onClick={() => open("Bulletin17AnalysisWizard")}>
+                {TextStore.interface("Navbar_Analysis_Bulletin17")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
 
-                  <li>
-                    <a className="dropdown-item" href="#">{TextStore.interface("Navbar_Data_EditData")}</a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">{TextStore.interface("Navbar_Data_DataUtilities")}</a>
-                  </li>
-                </ul>
-              </li>
+        {/* CENTER: search (stays centered because left and right are fixed) */}
+        <Box style={{ flex: "1 1 0", display: "flex", justifyContent: "center" }} data-nav-center>
+          <Box style={{ display: "flex", alignItems: "center", gap: 8, width: "min(520px, 100%)" }}>
+            <TextInput
+              size="xs"
+              placeholder={TextStore.interface("Navbar_Search_Placeholder")}
+              style={{ flex: 1, height: 28 }}
+            />
+            <ActionIcon size="sm" variant="light" aria-label="Search">
+              <span className="material-icons">search</span>
+            </ActionIcon>
+          </Box>
+        </Box>
 
-              {/* Analysis Menu */}
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  {TextStore.interface("Navbar_Analysis")}
-                </a>
-                <ul className="dropdown-menu">
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("PeakFlowFreqWizard");
-                      }}
-                    >
-                      {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("Bulletin17AnalysisWizard");
-                      }}
-                    >
-                      {TextStore.interface("Navbar_Analysis_Bulletin17")}
-                    </a>
-                  </li>
-                  {/*<li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_GeneralFrequencyAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_VolumeFrequencyAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_CoincidentFrequencyAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_CurveCombinationAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_BalancedHydrographAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_DistributionFittingAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_MixedPopulationAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_CorrelationAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_RecordExtensionAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_PeaksOverThresholdAnalysis")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_LinearRegression")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_QuantileMapping")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Analysis_CopulaAnalysis")}
-                    </a>
-                  </li>*/}
-                </ul>
-              </li>
+        {/* RIGHT: tools/help */}
+        <Group gap="xs" style={{ flex: "0 0 auto" }} data-nav-right>
+          <Menu>
+            <Menu.Target>
+              <Button size="xs" variant="subtle">
+                <span className="material-icons" title="Tools">settings</span>
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => open("ComponentProject")}>
+                {TextStore.interface("Navbar_Tools_Project")}
+              </Menu.Item>
+              <Menu.Item onClick={() => open("ComponentMessage")}>
+                {TextStore.interface("Navbar_Tools_Messages")}
+              </Menu.Item>
+              <Divider />
+              <Menu.Item onClick={() => open("ComponentInterfaceOptions")}>
+                {TextStore.interface("Navbar_Tools_View_InterfaceSize")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
-              {/* Tools (gear icon) */}
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  data-bs-auto-close="outside"
-                  data-bs-toggle="dropdown"
-                  href="#"
-                  role="button"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span className="material-icons" title="Tools">settings</span>
-                </a>
-                <ul className="dropdown-menu">
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("ComponentProject");
-                      }}
-                    >
-                      {TextStore.interface("Navbar_Tools_Project")}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("ComponentMessage");
-                      }}
-                    >
-                      {TextStore.interface("Navbar_Tools_Messages")}
-                    </a>
-                  </li>
-                  <li><hr className="dropdown-divider" /></li>
-                  {/* View Submenu */}
-                  <li className="dropdown dropend">
-                    <a
-                      className="dropdown-item dropdown-toggle"
-                      href="#"
-                      data-bs-toggle="dropdown"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      {TextStore.interface("Navbar_Tools_View")}
-                    </a>
-                    <ul className="dropdown-menu">
-                      <li>
-                        <a
-                          className="dropdown-item"
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpenComponent("ComponentInterfaceSize");
-                          }}
-                        >
-                          {TextStore.interface("Navbar_Tools_View_InterfaceSize")}
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          className="dropdown-item"
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpenComponent("ComponentStyleSelector");
-                          }}
-                        >
-                          {TextStore.interface("Navbar_Tools_View_StyleSelector")}
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-
-              {/* Help Menu */}
-              <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                  <span className="material-icons">help_outline</span>
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Help_UsersManual")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Help_TutorialsAndGuides")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Help_Examples")}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="https://www.hec.usace.army.mil/training/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {TextStore.interface("Navbar_Help_Training")}
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider"/>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Help_InstallExampleData")}
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider"/>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="https://www.hec.usace.army.mil/software/terms_and_conditions.aspx"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {TextStore.interface("Navbar_Help_TermsAndConditions")}
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item" href="#">
-                      {TextStore.interface("Navbar_Help_About")}
-                    </a>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider"/>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("DemoPlots");
-                      }}
-                    >
-                      Demo Plots (Plotly)
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item"
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleOpenComponent("DemoPlotsRecharts");
-                      }}
-                    >
-                      Demo Plots (Recharts)
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-
-            {/* Search Bar */}
-            <form className="d-flex ms-3" role="search" style={{maxHeight: "2.8vh", minWidth: "45%"}}>
-              <input
-                className="form-control"
-                type="search"
-                placeholder={TextStore.interface("Navbar_Search_Placeholder")}
-                aria-label="Search"/>
-              <button className="btn btn-outline-light ms-2 d-flex align-items-center justify-content-center"
-                      type="submit">
-                <span className="material-icons">search</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+          <Menu position="bottom-end">
+            <Menu.Target>
+              <Button size="xs" variant="subtle">
+                <span className="material-icons">help_outline</span>
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item>{TextStore.interface("Navbar_Help_UsersManual")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Help_TutorialsAndGuides")}</Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Help_Examples")}</Menu.Item>
+              <Menu.Item
+                component="a"
+                href="https://www.hec.usace.army.mil/training/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {TextStore.interface("Navbar_Help_Training")}
+              </Menu.Item>
+              <Divider />
+              <Menu.Item>{TextStore.interface("Navbar_Help_InstallExampleData")}</Menu.Item>
+              <Divider />
+              <Menu.Item
+                component="a"
+                href="https://www.hec.usace.army.mil/software/terms_and_conditions.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {TextStore.interface("Navbar_Help_TermsAndConditions")}
+              </Menu.Item>
+              <Menu.Item>{TextStore.interface("Navbar_Help_About")}</Menu.Item>
+              <Divider />
+              <Menu.Item onClick={() => open("DemoPlots")}>Demo Plots (Plotly)</Menu.Item>
+              <Menu.Item onClick={() => open("DemoPlotsRecharts")}>Demo Plots (Recharts)</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+      </Flex>
     </nav>
   );
 }

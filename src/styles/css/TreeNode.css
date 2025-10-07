@@ -89,3 +89,15 @@
     font-size: inherit;
     padding: 2px 0.25rem;
 }
+
+/* TreeNode.css — remove any outer frame */
+.tree-node.top-level {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* if you had a left guide line for children */
+.tree-children {
+    border-left: 0 !important;
+}

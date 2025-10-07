@@ -98,11 +98,7 @@ function createWindow() {
           submenu: [
             {
               label: TextStore.interface('Navbar_Tools_View_InterfaceSize'),
-              click: () => win.webContents.send('menu-tools', 'ComponentInterfaceSize'),
-            },
-            {
-              label: TextStore.interface('Navbar_Tools_View_StyleSelector'),
-              click: () => win.webContents.send('menu-tools', 'ComponentStyleSelector')
+              click: () => win.webContents.send('menu-tools', 'ComponentInterfaceOptions'),
             },
           ],
         },

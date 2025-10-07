@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { StyleContext } from "./styles/StyleContext";
+// src/App.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import isElectron from "./utils/isElectron";
 import Navbar from "./app_components/Navbar.jsx";
 import DockableFrame from "./app_components/dockable/DockableFrame";
@@ -8,11 +8,12 @@ import useDockableContainers from "./hooks/useDockableContainers";
 import useElectronMenus from "./hooks/useElectronMenus";
 import { openWizard, wizardBus } from "./utils/wizardBus";
 import CenterZoneComponents, { centerTitle } from "./app_components/common/CenterZoneComponents.jsx";
+import EastZoneComponents, { eastTitle } from "./app_components/common/EastZoneComponents.jsx";
+import SouthZoneComponents from "./app_components/common/SouthZoneComponents.jsx";
+import WestZoneComponents, { westTitle } from "./app_components/common/WestZoneComponents.jsx";
 import { componentMetadata } from "./utils/componentMetadata";
 
 function App() {
-  const { appBackgroundStyle } = useContext(StyleContext);
-
   const {
     maps,
     data,
@@ -79,14 +80,12 @@ function App() {
     return () => off();
   }, [tabs]);
 
-  // Ensure activeId always points to an existing tab.
   useEffect(() => {
     if (!tabs.length) {
       if (activeId !== null) setActiveId(null);
       return;
     }
-    const stillExists = tabs.some(t => t.id === activeId);
-    if (!stillExists) {
+    if (!tabs.some((t) => t.id === activeId)) {
       setActiveId(tabs[tabs.length - 1].id);
     }
   }, [tabs, activeId]);
@@ -110,6 +109,60 @@ function App() {
 
   useElectronMenus(openComponent);
 
+  const westTabs = useMemo(() => {
+    return containers
+      .filter((c) => c.dockZone === "W")
+      .map((c) => ({
+        id: c.id,
+        kind: c.type,
+        title: westTitle(c.type, c),
+        props: { ...(c.props || {}), dataset: c.dataset },
+      }));
+  }, [containers]);
+
+  const [activeWestId, setActiveWestId] = useState(null);
+
+  useEffect(() => {
+    if (westTabs.length === 0) {
+      if (activeWestId !== null) setActiveWestId(null);
+      return;
+    }
+    if (!westTabs.some((t) => t.id === activeWestId)) {
+      setActiveWestId(westTabs[0].id);
+    }
+  }, [westTabs, activeWestId]);
+
+  const closeWestTab = (id) => {
+    removeComponent(id);
+  };
+
+  const eastTabs = useMemo(() => {
+    return containers
+      .filter((c) => c.dockZone === "E")
+      .map((c) => ({
+        id: c.id,
+        kind: c.type,
+        title: eastTitle(c.type, c),
+        props: { ...(c.props || {}), dataset: c.dataset },
+      }));
+  }, [containers]);
+
+  const [activeEastId, setActiveEastId] = useState(null);
+
+  useEffect(() => {
+    if (eastTabs.length === 0) {
+      if (activeEastId !== null) setActiveEastId(null);
+      return;
+    }
+    if (!eastTabs.some((t) => t.id === activeEastId)) {
+      setActiveEastId(eastTabs[0].id);
+    }
+  }, [eastTabs, activeEastId]);
+
+  const closeEastTab = (id) => {
+    removeComponent(id);
+  };
+
   const centerContent = (
     <CenterZoneComponents
       tabs={tabs}
@@ -122,11 +175,37 @@ function App() {
     />
   );
 
+  const westContent = (
+    <WestZoneComponents
+      tabs={westTabs}
+      activeId={activeWestId}
+      setActiveId={setActiveWestId}
+      closeTab={closeWestTab}
+      maps={maps}
+      data={data}
+      analyses={analyses}
+      handleOpenComponent={openComponent}
+    />
+  );
+
+  const southContent = (
+    <SouthZoneComponents
+      messages={messages}
+      onRemove={() => removeComponent("ComponentMessage")}
+    />
+  );
+
+  const eastContent = (
+    <EastZoneComponents
+      tabs={eastTabs}
+      activeId={activeEastId}
+      setActiveId={setActiveEastId}
+      closeTab={closeEastTab}
+    />
+  );
+
   return (
-    <div
-      className={`app-container ${appBackgroundStyle}`}
-      style={{ height: "100vh", display: "flex", flexDirection: "column" }}
-    >
+    <div className="app-container" style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {!isElectron() && <Navbar addComponent={openComponent} />}
       <div style={{ flex: 1, minHeight: 0 }}>
         <DockableFrame
@@ -147,6 +226,9 @@ function App() {
           onWizardFinish={wizardFinishWithMessages}
           onDataSave={handleDataSave}
           centerContent={centerContent}
+          westContent={westContent}
+          eastContent={eastContent}
+          southContent={southContent}
         />
       </div>
     </div>

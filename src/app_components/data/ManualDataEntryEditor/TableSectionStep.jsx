@@ -1,5 +1,6 @@
-import React, {useMemo} from "react";
-import {generateDateTimeRows} from "../../../utils/timeUtils.js";
+import React, { useMemo } from "react";
+import { generateDateTimeRows } from "../../../utils/timeUtils.js";
+import { Card, TextInput, NumberInput } from "@mantine/core";
 
 /**
  * TableSectionStep
@@ -35,7 +36,7 @@ function TableSectionStep({
     : dataRows;
 
   return (
-    <div className="manual-entry-table-panel">
+    <Card withBorder radius="md" padding="xs" className="manual-entry-table-panel">
       <table className="manual-entry-table table table-sm table-striped compact-table">
         <thead>
         <tr>
@@ -47,32 +48,34 @@ function TableSectionStep({
         {rows.map((row, idx) => (
           <tr key={idx}>
             <td>
-              <input
-                type="text"
-                className="manual-entry-input form-control font-xs"
+              <TextInput
+                size="xs"
                 value={row.dateTime}
-                onChange={e => handleRowChange(idx, "dateTime", e.target.value)}
-                pattern="\d{2}[A-Za-z]{3}\d{4} \d{2}:\d{2}"
+                onChange={(e) => handleRowChange(idx, "dateTime", e.target.value)}
+                pattern="\\d{2}[A-Za-z]{3}\\d{4} \\d{2}:\\d{2}"
                 autoComplete="off"
-                tabIndex={-1}
                 readOnly={!!autoDateTimes.length}
+                tabIndex={-1}
+                className="manual-entry-input"
               />
             </td>
             <td>
-              <input
-                type="number"
+              <NumberInput
+                size="xs"
+                hideControls
                 inputMode="decimal"
-                className="manual-entry-input form-control font-xs"
-                value={row.value}
-                onChange={e => handleValueChange(idx, e.target.value)}
-                style={{MozAppearance: "textfield"}}
+                value={row.value === "" ? "" : Number(row.value)}
+                onChange={(v) =>
+                  handleValueChange(idx, v === "" || v == null ? "" : String(v))
+                }
+                className="manual-entry-input"
               />
             </td>
           </tr>
         ))}
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }
 
