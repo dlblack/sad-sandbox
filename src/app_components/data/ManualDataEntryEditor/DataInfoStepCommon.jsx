@@ -5,7 +5,7 @@ import DataIntervalComboBox from "../../editor_components/combo_boxes/DataInterv
 import DataUnitTypeComboBox from "../../editor_components/combo_boxes/DataUnitTypeComboBox.jsx";
 import { normalizeTimeInput } from "../../../utils/timeUtils.js";
 import { TextStore } from "../../../utils/TextStore.js";
-import { TextInput, Card } from "@mantine/core";
+import { Card } from "@mantine/core";
 
 export default function DataInfoStepCommon({
                                              parameter, setParameter,

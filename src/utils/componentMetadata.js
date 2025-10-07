@@ -57,6 +57,7 @@ export const componentMetadata = {
 
   // Analysis Wizards
   Bulletin17AnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard")),
+  FloodTypeClassAnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard")),
   PeakFlowFreqWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard")),
   GeneralFreqAnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_GeneralFreqAnalysisWizard")),
   VolumeFreqAnalysisWizard: wizard(TextStore.interface("ComponentMetadata_Wizard_VolumeFreqAnalysisWizard")),

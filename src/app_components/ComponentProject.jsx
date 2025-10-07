@@ -59,6 +59,17 @@ function ComponentProject({
     []
   );
 
+  const handleSaveAs = useCallback(
+    (sectionKey, pathArr, newName, newDesc, item) => {
+      if (typeof onSaveAsNode !== "function") {
+        console.warn("ComponentProject: onSaveAsNode missing");
+        return;
+      }
+      onSaveAsNode(sectionKey, pathArr, newName, newDesc, item);
+    },
+    [onSaveAsNode]
+  );
+
   return (
     <Box className="component-content-root">
       <div className="project-tree-fill" style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
@@ -147,7 +158,7 @@ function ComponentProject({
                     section="data"
                     dataset={item}
                     onSaveAs={(newName, newDesc) =>
-                      onSaveAsNode("data", [parameter, idx], newName, newDesc, item)
+                      handleSaveAs("data", [parameter, idx], newName, newDesc, item)
                     }
                     description={item.description}
                     onRename={(newName) => onRenameNode("data", [parameter, idx], newName)}
@@ -215,7 +226,7 @@ function ComponentProject({
                       label={item.name}
                       parentLabel={folder}
                       onSaveAs={(newName, newDesc) =>
-                        onSaveAsNode("analyses", [folder, idx], newName, newDesc, item)
+                        handleSaveAs("analyses", [folder, idx], newName, newDesc, item)
                       }
                       type={folder}
                       section="analysis"

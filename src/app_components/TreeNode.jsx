@@ -1,44 +1,93 @@
 import React, { useEffect, useRef } from "react";
-import SaveAsDialog from "../dialogs/SaveAsDialog";
 import { FaFolder, FaFolderOpen } from "react-icons/fa";
-import "../styles/css/TreeNode.css";
-import dssIcon from "../../assets/images/dss.gif";
+import { Box, Group, Text, Paper, TextInput, Image, Stack, Divider } from "@mantine/core";
+import SaveAsDialog from "../dialogs/SaveAsDialog";
 import { TextStore } from "../utils/TextStore";
-import { Card, TextInput } from "@mantine/core";
 
-const hasRealChildren = (children) => {
+const dssIcon = "/assets/images/dss.gif";
+
+function hasRealChildren(children) {
   if (!children) return false;
   const arr = React.Children.toArray(children);
   const noAnalysesText = TextStore.interface("Tree_NoAnalyses");
   return arr.some((child) => {
-    if (child && child.type === TreeNode) {
+    if (child && child.type && child.type.displayName === TreeNode.displayName) {
       return !!child.props.label && child.props.label !== noAnalysesText;
     }
     return !!child;
   });
-};
+}
 
-function getNodeBadgeOrIcon(parentLabel, isLeaf, type, section) {
+function getNodeBadgeOrIcon(parentLabel, isLeaf, section) {
   if (isLeaf && section === "data") {
     return (
-      <img
-        src={dssIcon}
-        alt={TextStore.interface("Tree_Alt_DataIcon")}
-        className="tree-data-icon"
-      />
+      <Image src={dssIcon} alt={TextStore.interface("Tree_Alt_DataIcon")} w={14} h={14} fit="contain" />
     );
   }
   if (isLeaf && section === "analysis") {
     const b17Label = TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard");
     const pffLabel = TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard");
     if (parentLabel === b17Label) {
-      return <span className="tree-badge b17">{TextStore.interface("Tree_Badge_B17")}</span>;
+      return (
+        <Paper shadow="none" withBorder={false} p={0} radius="xs" style={{
+          fontSize: 10,
+          paddingInline: 6,
+          paddingBlock: 2,
+          background: "#3b82f6",
+          color: "white"
+        }}>
+          B17
+        </Paper>
+      );
     }
     if (parentLabel === pffLabel) {
-      return <span className="tree-badge pff">{TextStore.interface("Tree_Badge_PFF")}</span>;
+      return (
+        <Paper shadow="none" withBorder={false} p={0} radius="xs" style={{
+          fontSize: 10,
+          paddingInline: 6,
+          paddingBlock: 2,
+          background: "#10b981",
+          color: "white"
+        }}>
+          PFF
+        </Paper>
+      );
     }
   }
   return null;
+}
+
+function MenuItem({ children, onClick, disabled }) {
+  return (
+    <Box
+      onClick={disabled ? undefined : onClick}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={(e) => {
+        if (disabled) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      style={{
+        fontSize: 12,
+        padding: "6px 10px",
+        color: disabled ? "rgba(255,255,255,0.4)" : "inherit",
+        cursor: disabled ? "default" : "pointer",
+        userSelect: "none"
+      }}
+      onMouseEnter={(e) => {
+        if (disabled) return;
+        e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+      }}
+    >
+      {children}
+    </Box>
+  );
 }
 
 const TreeNode = ({
@@ -69,8 +118,7 @@ const TreeNode = ({
   const hasContent = hasRealChildren(children);
   const isLeaf = !hasContent;
   const isBottomLevel = isLeaf && canDelete;
-  const badge = getNodeBadgeOrIcon(parentLabel, isLeaf, type, section);
-  const ref = useRef();
+  const ref = useRef(null);
 
   useEffect(() => {
     const handle = (e) => {
@@ -125,84 +173,74 @@ const TreeNode = ({
     }
   };
 
+  const badge = getNodeBadgeOrIcon(parentLabel, isLeaf, section);
+
   return (
-    <div
-      className={`tree-node ${isTopLevel ? " top-level" : ""}`}
-      ref={ref}
-    >
-      <span
-        className={`tree-label${expanded ? " expanded" : ""}${hasContent ? " pointer" : ""}`}
-        onClick={hasContent ? () => onToggle(path) : undefined}
+    <Box ref={ref} style={{ paddingInline: 8, paddingBlock: isTopLevel ? 6 : 2 }}>
+      <Group
+        wrap="nowrap"
+        gap={6}
+        align="center"
         onContextMenu={handleContextMenu}
-        role={hasContent ? "button" : undefined}
-        tabIndex={hasContent ? 0 : -1}
-        onKeyDown={(e) => {
-          if (!hasContent) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onToggle(path);
-          }
-          if (e.key === "ContextMenu") {
-            e.preventDefault();
-            setMenu?.({ x: e.clientX ?? 0, y: e.clientY ?? 0, path });
-          }
-        }}
       >
-        {hasContent &&
-          (expanded ? (
-            <FaFolderOpen color="#f6b73c" />
-          ) : (
-            <FaFolder color="#f6b73c" />
-          ))}
+        {hasContent ? (
+          expanded ? <FaFolderOpen color="#f6b73c" /> : <FaFolder color="#f6b73c" />
+        ) : null}
+
         {badge}
+
         {renaming === path ? (
-          <form onSubmit={handleRenameSubmit} style={{ display: "inline-block" }}>
+          <form onSubmit={handleRenameSubmit}>
             <TextInput
               size="xs"
               autoFocus
               value={renameValue}
               onChange={(e) => setRenameValue?.(e.target.value)}
               onBlur={handleRenameBlur}
-              style={{ width: 180 }}
+              styles={{ input: { width: 180, paddingBlock: 4, paddingInline: 6 } }}
             />
           </form>
         ) : (
-          <span>{label}</span>
+          <Text
+            onClick={hasContent ? () => onToggle(path) : undefined}
+            style={{ cursor: hasContent ? "pointer" : "default", userSelect: "none" }}
+          >
+            {label}
+          </Text>
         )}
-      </span>
+      </Group>
 
       {menu && menu.path === path && isBottomLevel && (
-        <Card
+        <Paper
+          shadow="md"
           withBorder
-          radius="sm"
-          padding="xs"
-          className={`tree-context-menu pointer ${componentBackgroundStyle}`}
+          radius="xs"
+          p={0}
           style={{
             position: "fixed",
             top: menu.y,
             left: menu.x,
             zIndex: 1000,
-            minWidth: 160,
+            width: "auto",
+            minWidth: 120,
+            maxWidth: 260,
+            overflow: "hidden"
           }}
         >
-          <div className="tree-menu-item" onClick={handleSaveAs}>
-            {TextStore.interface("Tree_Menu_SaveAs")}
-          </div>
-          <div className="tree-menu-item" onClick={handleRename}>
-            {TextStore.interface("Tree_Menu_Rename")}
-          </div>
-          <div
-            className={`tree-menu-item${canDelete ? "" : " not-allowed"}`}
-            onClick={canDelete ? handleDelete : undefined}
-          >
-            {TextStore.interface("Tree_Menu_Delete")}
-          </div>
-          {section === "data" && (
-            <div className="tree-menu-item" onClick={handlePlot}>
-              {TextStore.interface("Tree_Menu_Plot")}
-            </div>
-          )}
-        </Card>
+          <Stack gap={0} style={{ fontSize: 12, lineHeight: 1.25 }}>
+            <MenuItem onClick={handleSaveAs}>{TextStore.interface("Tree_Menu_SaveAs")}</MenuItem>
+            <Divider opacity={0.08} />
+            <MenuItem onClick={handleRename}>{TextStore.interface("Tree_Menu_Rename")}</MenuItem>
+            <Divider opacity={0.08} />
+            <MenuItem onClick={handleDelete} disabled={!canDelete}>{TextStore.interface("Tree_Menu_Delete")}</MenuItem>
+            {section === "data" && (
+              <>
+                <Divider opacity={0.08} />
+                <MenuItem onClick={handlePlot}>{TextStore.interface("Tree_Menu_Plot")}</MenuItem>
+              </>
+            )}
+          </Stack>
+        </Paper>
       )}
 
       {saveAsDialogOpen === path && isBottomLevel && (
@@ -215,9 +253,15 @@ const TreeNode = ({
         />
       )}
 
-      {expanded && hasContent && <div className="tree-children">{children}</div>}
-    </div>
+      {expanded && hasContent && (
+        <Box style={{ paddingLeft: 18, marginTop: 4 }}>
+          {children}
+        </Box>
+      )}
+    </Box>
   );
 };
+
+TreeNode.displayName = "TreeNode";
 
 export default TreeNode;

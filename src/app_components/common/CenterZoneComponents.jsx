@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import PeakFlowFreqWizard from "../analysis/peak_flow/PeakFlowFreqWizard.jsx";
 import Bulletin17AnalysisWizard from "../analysis/bulletin17/Bulletin17AnalysisWizard.jsx";
+import FloodTypeClassAnalysisWizard from "../analysis/flood_type_classification/FloodTypeClassAnalysisWizard.jsx";
 import ManualDataEntryEditor from "../data/ManualDataEntryEditor/ManualDataEntryEditor.jsx";
 import DemoPlots from "../DemoPlots.jsx";
 import DemoPlotsRecharts from "../DemoPlotsRecharts.jsx";
@@ -11,15 +12,20 @@ import ZoneTabs from "./ZoneTabs.jsx";
 import { TextStore } from "../../utils/TextStore.js";
 
 const REGISTRY = {
-  PeakFlowFreqWizard: {
-    title: () => TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard"),
-    typeClass: "tab--wizard",
-    Component: PeakFlowFreqWizard,
-  },
   Bulletin17AnalysisWizard: {
     title: () => TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard"),
     typeClass: "tab--wizard",
     Component: Bulletin17AnalysisWizard,
+  },
+  FloodTypeClassAnalysisWizard: {
+    title: () => TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard"),
+    typeClass: "tab--wizard",
+    Component: FloodTypeClassAnalysisWizard,
+  },
+  PeakFlowFreqWizard: {
+    title: () => TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard"),
+    typeClass: "tab--wizard",
+    Component: PeakFlowFreqWizard,
   },
   ManualDataEntryEditor: {
     title: () => TextStore.interface("ComponentMetadata_ManualDataEntryEditor"),
@@ -67,6 +73,8 @@ export default function CenterZoneComponents({
                                        closeTab,
                                        data,
                                        analyses,
+                                       onDataSave,
+                                       onFinish,
                                      }) {
   const activeTab = useMemo(
     () => tabs.find((t) => t.id === activeId) || null,
@@ -77,16 +85,36 @@ export default function CenterZoneComponents({
     <div className="wizard-workspace" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
       <ZoneTabs tabs={tabs} activeId={activeId} setActiveId={setActiveId} closeTab={closeTab} registry={REGISTRY} />
       <div className="wizard-tab-body" style={{ flex: 1, minHeight: 0 }}>
-        {activeTab ? <ActivePane tab={activeTab} closeTab={closeTab} data={data} analyses={analyses} /> : null}
+        {activeTab ? (
+          <ActivePane
+            tab={activeTab}
+            closeTab={closeTab}
+            data={data}
+            analyses={analyses}
+            onDataSave={onDataSave}
+            onFinish={onFinish}
+          />
+        ) : null}
       </div>
     </div>
   );
 }
 
-function ActivePane({ tab, closeTab, data, analyses }) {
+function ActivePane({ tab, closeTab, data, analyses, onDataSave, onFinish }) {
   const reg = REGISTRY[tab.kind];
   if (!reg) return null;
   const Cmp = reg.Component;
   const onRemove = () => closeTab(tab.id);
-  return <Cmp {...tab.props} data={data} analyses={analyses} onRemove={onRemove} />;
+  return (
+    <Cmp
+      {...tab.props}
+      type={tab.kind}
+      id={tab.id}
+      data={data}
+      analyses={analyses}
+      onRemove={onRemove}
+      onDataSave={onDataSave}
+      onFinish={onFinish}
+    />
+  );
 }

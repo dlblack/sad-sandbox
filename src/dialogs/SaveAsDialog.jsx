@@ -32,7 +32,7 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
         withBorder
         radius="md"
         padding={0}
-        className={`saveas-dialog-card ${componentBackgroundStyle}`}
+        className={`saveas-dialog-card`}
         role="dialog"
         aria-modal="true"
         ref={dialogRef}
@@ -41,7 +41,7 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
       >
         {/* Header */}
         <div
-          className={`saveas-dialog-header ${componentHeaderStyle}`}
+          className={`saveas-dialog-header`}
           style={{
             display: "flex",
             alignItems: "center",
@@ -121,7 +121,7 @@ function SaveAsDialog({ type, oldName, onConfirm, onCancel }) {
             </div>
           </div>
 
-          <div className={`saveas-dialog-footer ${componentBackgroundStyle}`}>
+          <div className={`saveas-dialog-footer`}>
             <div
               className="saveas-dialog-footer-inner"
               style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}

@@ -71,8 +71,9 @@ function createWindow() {
     {
       label: TextStore.interface('Navbar_Analysis'),
       submenu: [
-        { label: TextStore.interface('Navbar_Analysis_PeakFlowFrequency'),  click: () => win.webContents.send('menu-analysis', 'PeakFlowFreqWizard') },
         { label: TextStore.interface('Navbar_Analysis_Bulletin17'),         click: () => win.webContents.send('menu-analysis', 'Bulletin17AnalysisWizard') },
+        { label: TextStore.interface('Navbar_Analysis_FloodTypeClass'),     click: () => win.webContents.send('menu-analysis', 'FloodTypeClassAnalysisWizard') },
+        { label: TextStore.interface('Navbar_Analysis_PeakFlowFrequency'),  click: () => win.webContents.send('menu-analysis', 'PeakFlowFreqWizard') },
         /*{ label: TextStore.interface('Navbar_Analysis_GeneralFrequencyAnalysis'), click: () => win.webContents.send('menu-analysis', 'GeneralFreqAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_VolumeFrequencyAnalysis'),  click: () => win.webContents.send('menu-analysis', 'VolumeFreqAnalysisWizard') },
         { label: TextStore.interface('Navbar_Analysis_CoincidentFrequencyAnalysis'), click: () => win.webContents.send('menu-analysis', 'CoincidentFreqAnalysisWizard') },
