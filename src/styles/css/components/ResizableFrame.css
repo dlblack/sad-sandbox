@@ -8,8 +8,6 @@
 }
 
 /* don’t clip; handles above content */
-.card-container.dockable-item,
-.card-container.dockable-item .card { overflow: visible !important; }
 .react-resizable-handle { z-index: 1000; pointer-events: auto; }
 
 /* === tunables === */
@@ -19,56 +17,4 @@
     --edge-out: .25rem;
     --edge-color: transparent;  /* set to rgba(80,160,255,.28) to make visible */
     --edge-color-hover: transparent;  /* set to rgba(80,160,255,.45) to make visible */
-}
-
-/* TOP */
-.react-resizable-handle-n{
-    position: absolute !important;
-    top: calc(-1 * var(--edge-out)) !important;
-    left: 0 !important; right: 0 !important;
-    height: calc(var(--edge-y) + var(--edge-out)) !important;
-    width: auto !important; margin: 0 !important;
-    cursor: ns-resize; background: var(--edge-color);
-}
-
-/* BOTTOM */
-.react-resizable-handle-s{
-    position: absolute !important;
-    bottom: calc(-1 * var(--edge-out)) !important;
-    left: 0 !important; right: 0 !important;
-    height: calc(var(--edge-y) + var(--edge-out)) !important;
-    width: auto !important; margin: 0 !important;
-    cursor: ns-resize; background: var(--edge-color);
-}
-
-/* LEFT */
-.react-resizable-handle-w{
-    position: absolute !important;
-    left: calc(-1 * var(--edge-out)) !important;
-    top: 0 !important; bottom: 0 !important;
-    width: calc(var(--edge-x) + var(--edge-out)) !important;
-    height: auto !important; margin: 0 !important;
-    cursor: ew-resize; background: var(--edge-color);
-}
-
-/* RIGHT */
-.react-resizable-handle-e{
-    position: absolute !important;
-    right: calc(-1 * var(--edge-out)) !important;
-    top: 0 !important; bottom: 0 !important;
-    width: calc(var(--edge-x) + var(--edge-out)) !important;
-    height: auto !important; margin: 0 !important;
-    cursor: ew-resize; background: var(--edge-color);
-}
-
-/* stronger on hover/focus */
-.card-container.dockable-item:hover .react-resizable-handle-n,
-.card-container.dockable-item:hover .react-resizable-handle-s,
-.card-container.dockable-item:hover .react-resizable-handle-e,
-.card-container.dockable-item:hover .react-resizable-handle-w,
-.card-container.dockable-item:focus-within .react-resizable-handle-n,
-.card-container.dockable-item:focus-within .react-resizable-handle-s,
-.card-container.dockable-item:focus-within .react-resizable-handle-e,
-.card-container.dockable-item:focus-within .react-resizable-handle-w{
-    background: var(--edge-color-hover);
 }

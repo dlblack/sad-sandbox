@@ -72,9 +72,3 @@ button, input, select, textarea{
 .dropdown-menu, .dropdown-item {
     font-size: var(--font-size-md) !important;
 }
-
-/* Project tree / lists – adjust selectors to your actual tree container if needed */
-.project-tree  {
-    font-size: var(--font-size-md) !important;
-    line-height: 1.25;
-}
