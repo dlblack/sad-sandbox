@@ -124,7 +124,7 @@ hec-neptune/
 │   ├── lib/
 │   │   └── javaHeclib.dll
 │   └── [data.json, analysis.json, etc.]
-└── vite.config.js
+└── vite.config.ts
 ```
 
 
