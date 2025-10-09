@@ -1,6 +1,5 @@
 import React from "react";
-import { Tabs } from "@mantine/core";
-import TabCloseButton from "../../ui/TabCloseButton";
+import { CloseButton, Tabs } from "@mantine/core";
 import { TextStore } from "../../utils/TextStore";
 
 export interface CenterTab {
@@ -49,13 +48,14 @@ export default function ZoneTabs({
                         return (
                             <Tabs.Tab key={t.id} value={t.id} className={typeClass}>
                                 <span className="tab-label">{t.title}</span>
-                                <TabCloseButton
+                                <CloseButton
+                                    size={"xs"}
+                                    aria-label="Close modal"
                                     title={TextStore.interface("CANCEL")}
                                     onClick={(e: React.MouseEvent) => {
                                         e.stopPropagation();
                                         closeTab(t.id);
                                     }}
-                                    style={{ marginLeft: 6 }}
                                 />
                                 {isActive ? <span className="tab-active-accent" /> : null}
                             </Tabs.Tab>

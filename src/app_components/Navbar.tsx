@@ -72,15 +72,33 @@ function Navbar({ addComponent }: NavbarProps) {
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item onClick={() => open("ManualDataEntryEditor")}>
-                  {TextStore.interface("Navbar_Data_NewData_Manual")}
-                </Menu.Item>
-                <Menu.Item>
-                  {TextStore.interface("Navbar_Data_NewData_ImportUSGS")}
-                </Menu.Item>
-                <Menu.Item>
-                  {TextStore.interface("Navbar_Data_NewData_ImportDSS")}
-                </Menu.Item>
+                <Menu
+                    withinPortal={false}
+                    trigger="hover"
+                    openDelay={80}
+                    closeDelay={120}
+                    position="right-start"
+                >
+                  <Menu.Target>
+                    <Menu.Item
+                        rightSection={<span className="material-icons" style={{ fontSize: 16 }}>chevron_right</span>}
+                    >
+                      {TextStore.interface("Navbar_Data_NewData")}
+                    </Menu.Item>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Item onClick={() => open("ManualDataEntryEditor")}>
+                      {TextStore.interface("Navbar_Data_NewData_Manual")}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {TextStore.interface("Navbar_Data_NewData_ImportUSGS")}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {TextStore.interface("Navbar_Data_NewData_ImportDSS")}
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
                 <Divider />
                 <Menu.Item>{TextStore.interface("Navbar_Data_EditData")}</Menu.Item>
                 <Menu.Item>

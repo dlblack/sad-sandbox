@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import DockableItem from "./DockableItem";
-import { componentMetadata } from "../../utils/componentMetadata";
 import { dockableContentFactory } from "../../utils/dockableContentFactory";
 import {
     Section,
@@ -80,61 +78,6 @@ export interface DockableFrameProps {
     southContent?: React.ReactNode;
 }
 
-/** ----- Draggable wrapper for a DockableItem ----- */
-function DraggableDockableItem({
-                                   container,
-                                   onRemove,
-                                   onResize,
-                                   setFocusedId,
-                                   focusedId,
-                                   setDraggingPanelId,
-                                   showHeader = true,
-                               }: {
-    container: DockContainer & { content?: React.ReactNode };
-    onRemove: (id: string) => void;
-    onResize: (size: { width: number; height: number }, id: string) => void;
-    setFocusedId: (id: string | null) => void;
-    focusedId: string | null;
-    setDraggingPanelId: (id: string | null) => void;
-    showHeader?: boolean;
-}) {
-    const { id, type } = container;
-
-    const handleDragStart: React.DragEventHandler<HTMLDivElement> = (e) => {
-        setDraggingPanelId(id);
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("application/x-dockable-id", id);
-    };
-
-    const handleDragEnd: React.DragEventHandler<HTMLDivElement> = () => setDraggingPanelId(null);
-
-    const sizeProps =
-        showHeader && typeof container.width === "number" && typeof container.height === "number"
-            ? { width: container.width, height: container.height }
-            : {};
-
-    return (
-        <div className="dockable-drag-wrapper" style={{ display: "flex", flex: 1, minWidth: 0, minHeight: 0 }}>
-            <DockableItem
-                {...container}
-                {...sizeProps}
-                type={(componentMetadata as any)?.[type]?.entityName ?? type}
-                title={container.dataset?.name || ""}
-                onRemove={onRemove}
-                onResize={(size) => onResize(size, id)}
-                onClick={() => setFocusedId(container.id)}
-                isFocused={container.id === focusedId}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                showHeader={showHeader}
-                fill
-            >
-                {container.content}
-            </DockableItem>
-        </div>
-    );
-}
-
 /** ----- Main frame ----- */
 const DockableFrame: React.FC<DockableFrameProps> = ({
                                                          containers,
@@ -155,7 +98,6 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
                                                          eastContent,
                                                          southContent,
                                                      }) => {
-    const [focusedId, setFocusedId] = useState<string | null>(null);
     const [draggingPanelId, setDraggingPanelId] = useState<string | null>(null);
 
     const [zoneWidths, setZoneWidths] = useState<{ W: number; CENTER?: number; E: number }>({
@@ -256,22 +198,6 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
         });
     }, [containers]);
 
-    const handleItemResize = useCallback(
-        (zone: DockZone) => (size: { width: number; height: number }, id: string) => {
-            if (zone === "S") {
-                setSouthHeight(() => Math.max(MIN_S_HEIGHT, Math.min(size.height + 24, MAX_S_HEIGHT)));
-            } else {
-                setZoneWidths((prev) => {
-                    const maxWidth = getZoneMaxWidth(zone);
-                    const newWidth = Math.max(MIN_WIDTH, Math.min(size.width + 24, maxWidth));
-                    return (prev as any)[zone] !== newWidth ? { ...prev, [zone]: newWidth } : prev;
-                });
-            }
-            setContainers((prev) => prev.map((c) => (c.id === id ? { ...c, width: size.width, height: size.height } : c)));
-        },
-        [setContainers]
-    );
-
     // Splitter handlers (W/E)
     const onVerticalSplitterDown = (zone: "W" | "E") => (e: React.MouseEvent) => {
         dragging.current = {
@@ -351,7 +277,6 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
                     setSouthHeight(() => Math.min(Math.max(moved.height! + 24, MIN_S_HEIGHT), MAX_S_HEIGHT));
                 }
 
-                setFocusedId(id);
                 return updated;
             });
         },
@@ -371,7 +296,6 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
     }, [containersWithContent]);
 
     function renderZone(zone: DockZone) {
-        const items = containersWithContent.filter((c) => c.dockZone === zone);
         const zoneStyle: React.CSSProperties = {};
         if (zone === "S") {
             zoneStyle.height = southHeight;
@@ -441,35 +365,6 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
                 </div>
             );
         }
-
-        // Fallback: render the items directly in the zone
-        return (
-            <div
-                key={zone}
-                className={`dock-zone dock-zone-${String(zone).toLowerCase()}`}
-                style={{ ...zoneStyle, minWidth: 0, minHeight: 0 }}
-                onDragOver={(e) => draggingPanelId && e.preventDefault()}
-                onDrop={(e) => {
-                    e.preventDefault();
-                    const panelId = e.dataTransfer.getData("application/x-dockable-id");
-                    if (panelId) moveToZone(panelId, zone);
-                    setDraggingPanelId(null);
-                }}
-            >
-                {items.map((c) => (
-                    <DraggableDockableItem
-                        key={c.id}
-                        container={c}
-                        onRemove={removeComponent}
-                        onResize={handleItemResize(zone)}
-                        setFocusedId={setFocusedId}
-                        focusedId={focusedId}
-                        setDraggingPanelId={setDraggingPanelId}
-                        showHeader
-                    />
-                ))}
-            </div>
-        );
     }
 
     const renderVerticalSplitter = (zone: "W" | "E") => (

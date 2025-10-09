@@ -235,6 +235,9 @@ export const INTERFACE_TEXT = {
   ManualDataEntryEditor_YUnits: "Y Units",
   ManualDataEntryEditor_XLabel: "X Label",
   ManualDataEntryEditor_XUnits: "X Units",
+  ManualDataEntryEditor_PairedDataTable_Ordinate: "Ordinate",
+  ManualDataEntryEditor_PairedDataTable_Units: "Units",
+  ManualDataEntryEditor_PairedDataTable_Type: "Type",
   ManualDataEntryEditor_TimeseriesPathname_A: "A",
   ManualDataEntryEditor_TimeseriesPathname_B: "B",
   ManualDataEntryEditor_TimeseriesPathname_C: "C",
@@ -250,12 +253,10 @@ export const INTERFACE_TEXT = {
   ManualDataEntryEditor_Interval: "Interval ",
   ManualDataEntryEditor_Units: "Units",
   ManualDataEntryEditor_Type: "Type",
-  ManualDataEntryEditor_DateTimeAutoFilled:
-      "Date/times auto-filled from interval and range. Enter or paste values for each date/time.",
+  ManualDataEntryEditor_DateTimeAutoFilled: "Date/times auto-filled from interval and range. Enter or paste values for each date/time.",
+  ManualDataEntryEditor_DateTime: "Date/Times",
+  ManualDataEntryEditor_Value: "Value",
   ManualDataEntryEditor_DateTimeManual: "Enter date/time and values manually.",
-  ManualDataEntryEditor_Summary: "Summary/Confirmation",
-  ManualDataEntryEditor_SummaryName: "Name: ",
-  ManualDataEntryEditor_SummaryDescription: "Description: ",
   ManualDataEntryEditor_SummaryStructureType: "Structure Type: ",
   ManualDataEntryEditor_SummaryDataFormat: "Data Format: ",
   ManualDataEntryEditor_SummaryDateTime: "Date/Time",
@@ -395,6 +396,7 @@ export const INTERFACE_TEXT = {
   Tree_Menu_Delete: "Delete",
   Tree_Menu_Plot: "Plot",
   Tree_Badge_B17: "B17",
+  Tree_Badge_FTC: "FTC",
   Tree_Badge_PFF: "PFF",
 
   // --------------------------------------

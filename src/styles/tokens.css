@@ -67,8 +67,3 @@ button, input, select, textarea{
     border-radius: var(--control-radius);
     line-height: 1.1;
 }
-
-/* Menus / navbar text follow the root scale */
-.dropdown-menu, .dropdown-item {
-    font-size: var(--font-size-md) !important;
-}

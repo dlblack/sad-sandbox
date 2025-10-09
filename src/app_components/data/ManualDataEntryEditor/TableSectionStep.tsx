@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Card, TextInput, NumberInput } from "@mantine/core";
+import { Card, TextInput, NumberInput, ScrollArea, Table } from "@mantine/core";
 import { generateDateTimeRows } from "../../../utils/timeUtils";
 
 export type IntervalUnit = "minute" | "hour" | "day" | "week" | "month" | "year";
@@ -9,7 +9,6 @@ export type IntervalOption = {
     label?: string;
     amount: number;
     unit: IntervalUnit;
-    // allow extra fields
     [key: string]: unknown;
 };
 
@@ -24,11 +23,6 @@ export interface TableSectionStepProps {
     intervalOpt?: IntervalOption;
 }
 
-/**
- * TableSectionStep
- * If all start/end/interval are present, auto-fill left column.
- * If not, let user enter dates manually.
- */
 export default function TableSectionStep({
                                              dataRows,
                                              handleRowChange,
@@ -47,14 +41,7 @@ export default function TableSectionStep({
             });
         }
         return [];
-    }, [
-        startDate,
-        startTime,
-        endDate,
-        endTime,
-        intervalOpt?.amount,
-        intervalOpt?.unit,
-    ]);
+    }, [startDate, startTime, endDate, endTime, intervalOpt?.amount, intervalOpt?.unit]);
 
     const rows =
         autoDateTimes.length > 0
@@ -64,44 +51,61 @@ export default function TableSectionStep({
             }))
             : dataRows;
 
+    const readOnlyDates = autoDateTimes.length > 0;
+
     return (
-        <Card withBorder radius="md" padding="xs" className="manual-entry-table-panel">
-            <table className="manual-entry-table table table-sm table-striped compact-table">
-                <thead>
-                <tr>
-                    <th className="manual-entry-th">Date Time</th>
-                    <th className="manual-entry-th">Value</th>
-                </tr>
-                </thead>
-                <tbody>
-                {rows.map((row, idx) => (
-                    <tr key={idx}>
-                        <td>
-                            <TextInput
-                                size="xs"
-                                value={row.dateTime}
-                                onChange={(e) => handleRowChange(idx, "dateTime", e.currentTarget.value)}
-                                pattern="\\d{2}[A-Za-z]{3}\\d{4} \\d{2}:\\d{2}"
-                                autoComplete="off"
-                                readOnly={autoDateTimes.length > 0}
-                                tabIndex={-1}
-                                className="manual-entry-input"
-                            />
-                        </td>
-                        <td>
-                            <NumberInput
-                                size="xs"
-                                hideControls
-                                inputMode="decimal"
-                                value={row.value === "" ? "" : Number(row.value)}
-                                onChange={(v) => handleValueChange(idx, v === "" || v == null ? "" : String(v))}
-                                className="manual-entry-input"
-                            />
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+        <Card withBorder radius="md" padding="xs" className={"editor-card"}>
+            <ScrollArea
+                className="editor-scroll"
+                type="always"
+                scrollbars="y"
+                offsetScrollbars
+                scrollbarSize={12}
+            >
+            <Table
+                layout="fixed"
+                withRowBorders
+                verticalSpacing="xs"
+                horizontalSpacing="sm"
+                className="manual-entry-table"
+            >
+                <Table.Thead>
+                    <Table.Tr>
+                        <Table.Th className="manual-entry-th">Date Time</Table.Th>
+                        <Table.Th className="manual-entry-th">Value</Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+
+                <Table.Tbody>
+                    {rows.map((row, idx) => (
+                        <Table.Tr key={idx}>
+                            <Table.Td>
+                                <TextInput
+                                    size="xs"
+                                    value={row.dateTime}
+                                    onChange={(e) => handleRowChange(idx, "dateTime", e.currentTarget.value)}
+                                    pattern="\\d{2}[A-Za-z]{3}\\d{4} \\d{2}:\\d{2}"
+                                    autoComplete="off"
+                                    readOnly={readOnlyDates}
+                                    tabIndex={readOnlyDates ? -1 : 0}
+                                    className="manual-entry-input"
+                                />
+                            </Table.Td>
+                            <Table.Td>
+                                <NumberInput
+                                    size="xs"
+                                    hideControls
+                                    inputMode="decimal"
+                                    value={row.value === "" ? "" : Number(row.value)}
+                                    onChange={(v) => handleValueChange(idx, v === "" || v == null ? "" : String(v))}
+                                    className="manual-entry-input"
+                                />
+                            </Table.Td>
+                        </Table.Tr>
+                    ))}
+                </Table.Tbody>
+            </Table>
+            </ScrollArea>
         </Card>
     );
 }

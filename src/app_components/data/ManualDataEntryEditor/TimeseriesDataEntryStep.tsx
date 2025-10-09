@@ -80,10 +80,7 @@ export default function TimeseriesDataEntryStep({
     }
 
     return (
-        <div>
-            <Text fw={600} size="lg">
-                Step 3: Enter Timeseries Data
-            </Text>
+        <div className={"summary-root"}>
             <Text size="xs" c="dimmed" mb="xs">
                 {autoDateTimes.length
                     ? TextStore.interface("ManualDataEntryEditor_DateTimeAutoFilled")

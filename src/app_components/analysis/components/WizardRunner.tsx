@@ -1,8 +1,7 @@
 import React, { useMemo, useEffect, useState } from "react";
-import WizardLayoutSidebar from "./WizardLayoutSidebar";
+import { Card, Stepper, Stack, ScrollArea, Divider, Group } from "@mantine/core";
 import WizardNavigation from "../../common/WizardNavigation";
 import { componentMetadata } from "../../../utils/componentMetadata";
-import { Card } from "@mantine/core";
 
 type DatasetItem = {
   name: string;
@@ -127,8 +126,6 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
 
     if (typeof onFinish === "function") {
       onFinish(type, result, id);
-    } else {
-      console.warn("WizardRunner: onFinish handler not provided");
     }
 
     if (typeof onRemove === "function") {
@@ -136,35 +133,40 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
     }
   }
 
-  const sidebarSteps = steps.map((s) => ({ label: s.label }));
-  const active0 = currentIndex;
-
-  const handleStepClick = (i: number) => {
-    if (i <= active0) setStep(i + 1);
-  };
-
-  const footer = (
-      <WizardNavigation
-          step={step}
-          setStep={setStep}
-          numSteps={steps.length}
-          onFinish={handleFinish}
-          disableNext={!!disableNext}
-          onCancel={() => onRemove?.(id)}
-          finishLabel={undefined}
-      />
-  );
-
   return (
-      <Card withBorder radius="md" padding="sm">
-        <WizardLayoutSidebar
-            steps={sidebarSteps}
-            active={active0}
-            onStepClick={handleStepClick}
-            footer={footer}
-        >
-          {current?.render(ctx)}
-        </WizardLayoutSidebar>
+      <Card withBorder radius="md" padding="sm" className="wizardFrame">
+        <Stack gap="sm" className="wizardStack">
+          <Stepper
+              active={currentIndex}
+              onStepClick={(i) => {
+                if (i <= currentIndex) setStep(i + 1);
+              }}
+              allowNextStepsSelect={false}
+          >
+            {steps.map((s, i) => (
+                <Stepper.Step key={i} label={s.label} />
+            ))}
+            <Stepper.Completed>{null}</Stepper.Completed>
+          </Stepper>
+
+          <ScrollArea className="wizardBody">
+            {current?.render(ctx)}
+          </ScrollArea>
+
+          <Divider />
+
+          <Group className="wizardFooter" justify="space-between">
+            <WizardNavigation
+                step={step}
+                setStep={setStep}
+                numSteps={steps.length}
+                onFinish={handleFinish}
+                disableNext={disableNext}
+                onCancel={() => onRemove?.(id)}
+                finishLabel={undefined}
+            />
+          </Group>
+        </Stack>
       </Card>
   );
 }
