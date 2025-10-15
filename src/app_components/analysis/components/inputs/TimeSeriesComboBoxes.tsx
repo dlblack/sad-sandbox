@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { Select, type SelectProps } from "@mantine/core";
 import { TextStore } from "../../../../utils/TextStore";
 
 type Kind = "flow" | "precipitation" | "swe";
@@ -26,85 +27,73 @@ const toStr = (v: unknown): string => (v == null ? "" : String(v)).toLowerCase()
 function getDataType(d?: Dataset): string {
   return toStr(d?.dataType || d?.type || d?.groupType);
 }
-
 function getDisplayName(d?: Dataset): string {
   return d?.name || d?.title || d?.label || d?.id || d?.pathname || "";
 }
-
 function getParam(d?: Dataset): string {
   return (
-    toStr(d?.parameter) ||
-    toStr(d?.param) ||
-    toStr(d?.Parameter) ||
-    toStr(d?.meta?.parameter) ||
-    ""
+      toStr(d?.parameter) ||
+      toStr(d?.param) ||
+      toStr(d?.Parameter) ||
+      toStr(d?.meta?.parameter) ||
+      ""
   );
 }
-
 function getDssCPart(d?: Dataset): string {
-  // DSS-style pathname: /A/B/C/D/E/F/
   const p = d?.pathname || d?.path || d?.dssPath;
-  if (!p || typeof p !== "string") return "";
+  if (!p) return "";
   const parts = p.split("/").filter(Boolean);
-  // A=0, B=1, C=2
   return toStr(parts[2] || "");
 }
-
 function concatCommonFields(d?: Dataset): string {
   return [
     d?.name,
     d?.title,
     d?.label,
-    d?.group,
+    (d as any)?.group,
     d?.type,
     d?.dataType,
     d?.pathname,
     d?.id,
   ]
-    .map(toStr)
-    .join(" ");
+      .map(toStr)
+      .join(" ");
 }
 
-/** Try to normalize a dataset to a canonical parameter "kind" */
 function classifyKind(d?: Dataset): Kind | "" {
   const param = getParam(d);
   const dtype = getDataType(d);
   const c = getDssCPart(d);
   const all = concatCommonFields(d);
 
-  // flow
   if (
-    param === "flow" ||
-    param === "discharge" ||
-    dtype === "discharge" ||
-    c.includes("flow") ||
-    c.includes("discharge") ||
-    all.includes(" cfs") ||
-    all.includes(" cms")
+      param === "flow" ||
+      param === "discharge" ||
+      dtype === "discharge" ||
+      c.includes("flow") ||
+      c.includes("discharge") ||
+      all.includes(" cfs") ||
+      all.includes(" cms")
   ) {
     return "flow";
   }
-
-  // precipitation
   if (
-    param === "precipitation" ||
-    param === "precip" ||
-    param === "pcp" ||
-    c.includes("precip") ||
-    c.includes("pcp") ||
-    all.includes("precip") ||
-    all.includes("rain") ||
-    all.includes("ppt")
+      param === "precipitation" ||
+      param === "precip" ||
+      param === "pcp" ||
+      c.includes("precip") ||
+      c.includes("pcp") ||
+      all.includes("precip") ||
+      all.includes("rain") ||
+      all.includes("ppt")
   ) {
     return "precipitation";
   }
-
-  // swe
   if (
-    param === "swe" ||
-    c.includes("swe") ||
-    all.includes("snow water equivalent") ||
-    all.includes("snow-water-equivalent")
+      param === "swe" ||
+      c.includes("swe") ||
+      all.includes("snow water equivalent") ||
+      all.includes("snow-water-equivalent")
   ) {
     return "swe";
   }
@@ -112,11 +101,10 @@ function classifyKind(d?: Dataset): Kind | "" {
 }
 
 function filterByKindOrNeedles(
-  datasetList: Dataset[] = [],
-  opts: { kind?: Kind; needles?: Array<string | number> }
+    datasetList: Dataset[] = [],
+    opts: { kind?: Kind; needles?: Array<string | number> }
 ): Dataset[] {
   if (!Array.isArray(datasetList)) return [];
-
   const { kind, needles = [] } = opts;
 
   if (kind) {
@@ -126,7 +114,6 @@ function filterByKindOrNeedles(
 
   if (needles.length) {
     const filtered = datasetList.filter((d) => {
-      // BUGFIX: getDataType(d) (previous code called getDataType() without arg)
       const hay = `${getParam(d)} ${getDataType(d)} ${getDssCPart(d)} ${concatCommonFields(d)}`.toLowerCase();
       return needles.some((n) => hay.includes(toStr(n)));
     });
@@ -137,25 +124,20 @@ function filterByKindOrNeedles(
 }
 
 type Option = { label: string; value: string };
+const toOptions = (list: Dataset[] = []): Option[] =>
+    list.map((d) => {
+      const name = getDisplayName(d);
+      return { label: name, value: name };
+    });
 
-function toOptions(list: Dataset[] = []): Option[] {
-  return list.map((d) => {
-    const name = getDisplayName(d);
-    return { label: name, value: name };
-  });
-}
-
-export type TimeSeriesComboBoxProps = Omit<
-  React.SelectHTMLAttributes<HTMLSelectElement>,
-"onChange" | "value"
-> & {
+/** Public props: keep your original API; forward any Mantine Select props except value/onChange/data */
+export type TimeSeriesComboBoxProps = Omit<SelectProps, "data" | "value" | "onChange"> & {
   id?: string;
   datasets?: Dataset[];
-  kind?: Kind;                 // "flow" | "precipitation" | "swe"
-  needles?: Array<string | number>; // fallback fuzzy search terms
-  value?: string;              // controlled value; default is "None" (empty)
+  kind?: Kind;
+  needles?: Array<string | number>;
+  value?: string;
   onChange?: (value: string) => void;
-  className?: string;
   debug?: boolean;
 };
 
@@ -166,22 +148,23 @@ export function TimeSeriesComboBox({
                                      needles = [],
                                      value,
                                      onChange,
-                                     className = "form-select font-xs",
                                      debug = false,
-                                     ...props
+                                     placeholder = TextStore.interface?.("TimeSeriesCombo_None") || "None",
+                                     searchable = true,
+                                     clearable = true,
+                                     nothingFoundMessage = TextStore.interface?.("Combo_NoneFound") || "No matches",
+                                     ...rest
                                    }: TimeSeriesComboBoxProps) {
-  const matches = filterByKindOrNeedles(datasets, { kind, needles });
-  const options = toOptions(matches);
-  const has = options.length > 0;
+  const { options, has } = useMemo(() => {
+    const matches = filterByKindOrNeedles(datasets, { kind, needles });
+    const opts = toOptions(matches);
+    return { options: opts, has: opts.length > 0 };
+  }, [datasets, kind, needles]);
 
-  const isInOptions = (val?: string): boolean =>
-    !!val && options.some((o) => o.value === val);
-
-  // Always default to "None" ("") unless parent provides a valid option.
-  const derived = has ? (isInOptions(value) ? value! : "") : "";
+  const isInOptions = (val?: string): boolean => !!val && options.some((o) => o.value === val);
+  const derived = has ? (isInOptions(value) ? value! : null) : null;
 
   if (debug) {
-    // eslint-disable-next-line no-console
     console.debug(`[${id ?? "ts-combo"}]`, {
       kind,
       needles,
@@ -194,57 +177,42 @@ export function TimeSeriesComboBox({
     });
   }
 
-  const handleChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
-    onChange?.(e.target.value);
-  };
-
   return (
-    <select
-      id={id}
-      className={className}
-      disabled={!has}              /* disabled if no options */
-      value={has ? derived : ""}   /* "" selects the "None" option */
-      onChange={handleChange}
-      {...props}
-    >
-      <option value="">
-        {TextStore.interface?.("TimeSeriesCombo_None") || "None"}
-      </option>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+      <Select
+          id={id}
+          data={options}
+          value={derived}
+          onChange={(val) => onChange?.(val ?? "")}
+          disabled={!has}
+          searchable={searchable}
+          clearable={clearable}
+          placeholder={placeholder}
+          nothingFoundMessage={nothingFoundMessage}
+          {...rest}
+      />
   );
 }
 
 export function FlowTimeSeriesComboBox(props: Omit<TimeSeriesComboBoxProps, "kind" | "needles">) {
-  return (
-    <TimeSeriesComboBox
-      {...props}
-      kind="flow"
-      needles={["flow", "discharge", "cfs", "cms"]}
-    />
-  );
+  return <TimeSeriesComboBox {...props} kind="flow" needles={["flow", "discharge", "cfs", "cms"]} />;
 }
 
 export function PrecipTimeSeriesComboBox(props: Omit<TimeSeriesComboBoxProps, "kind" | "needles">) {
   return (
-    <TimeSeriesComboBox
-      {...props}
-      kind="precipitation"
-      needles={["precip", "precipitation", "rain", "ppt", "pcp"]}
-    />
+      <TimeSeriesComboBox
+          {...props}
+          kind="precipitation"
+          needles={["precip", "precipitation", "rain", "ppt", "pcp"]}
+      />
   );
 }
 
 export function SweTimeSeriesComboBox(props: Omit<TimeSeriesComboBoxProps, "kind" | "needles">) {
   return (
-    <TimeSeriesComboBox
-      {...props}
-      kind="swe"
-      needles={["swe", "snow water equivalent", "snow-water-equivalent"]}
-    />
+      <TimeSeriesComboBox
+          {...props}
+          kind="swe"
+          needles={["swe", "snow water equivalent", "snow-water-equivalent"]}
+      />
   );
 }

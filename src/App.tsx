@@ -44,9 +44,12 @@ function App() {
   const [tabs, setTabs] = useState<CenterTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  function addTab({ kind, props = {} }: { kind: string; props?: Record<string, unknown> }) {
+  function addTab(payload: { kind: string; props?: unknown }) {
+    const { kind, props } = payload;
+    const propsObj = (props && typeof props === "object" ? props : {}) as Record<string, unknown>;
+
     const title =
-        (typeof centerTitle === "function" && centerTitle(kind, props)) ||
+        (typeof centerTitle === "function" && centerTitle(kind, propsObj)) ||
         (componentMetadata as any)[kind]?.entityName ||
         kind;
 
@@ -58,7 +61,7 @@ function App() {
     }
 
     const id = `wiz_${Math.random().toString(36).slice(2, 9)}`;
-    setTabs((prev) => [...prev, { id, kind, title, props }]);
+    setTabs((prev) => [...prev, { id, kind, title, props: propsObj }]);
     setActiveId(id);
     logCenterOpened(kind, title);
   }
@@ -69,12 +72,14 @@ function App() {
 
     setTabs((prev) => {
       const idx = prev.findIndex((t) => t.id === id);
-      if (idx === -1) return prev;
+      if (idx < 0) return prev;
 
       const next = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
 
       if (activeId === id) {
-        const neighbor = next[idx - 1] || next[idx] || null;
+        // previous neighbor without using index arithmetic
+        const prevNeighbor = next.slice(0, idx).pop();
+        const neighbor = prevNeighbor ?? next[idx] ?? null;
         setActiveId(neighbor ? neighbor.id : null);
       }
       return next;
@@ -86,7 +91,7 @@ function App() {
     return () => {
       off();
     };
-  }, [tabs]);
+  }, []);
 
   useEffect(() => {
     if (!tabs.length) {
@@ -194,18 +199,26 @@ function App() {
           data={data}
           analyses={analyses}
           handleOpenComponent={openComponent}
-          onSaveAsNode={handleSaveAsNode}
-          onRenameNode={handleRenameNode}
+          onSaveAsNode={handleSaveAsNode as any}
+          onRenameNode={handleRenameNode as any}
           onDeleteNode={deleteNodeWithMessages}
       />
   );
 
   const southContent = (
-      <SouthZoneComponents messages={messages} onRemove={() => removeComponent("ComponentMessage")} />
+      <SouthZoneComponents
+          messages={messages}
+          onRemove={() => removeComponent("ComponentMessage")}
+      />
   );
 
   const eastContent = (
-      <EastZoneComponents tabs={eastTabs} activeId={activeEastId} setActiveId={setActiveEastId} closeTab={closeEastTab} />
+      <EastZoneComponents
+          tabs={eastTabs}
+          activeId={activeEastId}
+          setActiveId={setActiveEastId}
+          closeTab={closeEastTab}
+      />
   );
 
   return (
@@ -220,8 +233,8 @@ function App() {
               messages={messages}
               messageType={messageType}
               setMessageType={setMessageType}
-              onSaveAsNode={handleSaveAsNode}
-              onRenameNode={handleRenameNode}
+              onSaveAsNode={handleSaveAsNode as any}
+              onRenameNode={handleRenameNode as any}
               onDeleteNode={deleteNodeWithMessages}
               maps={maps}
               data={data}

@@ -57,13 +57,10 @@ function hasRealChildren(children: React.ReactNode): boolean {
     return arr.some((child) => {
         if (React.isValidElement(child)) {
             const label = (child.props as any)?.label;
-            // treat elements with a non-placeholder label as real content
             if (label && label !== noAnalysesText) return true;
-            // otherwise still count any element as content
             return true;
         }
-        // plain text node or anything truthy counts as content
-        return !!child;
+        return Boolean(child);
     });
 }
 
@@ -85,6 +82,7 @@ function getNodeBadgeOrIcon(
     }
     if (isLeaf && section === "analysis") {
         const b17Label = TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard");
+        const ftcLabel = TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard");
         const pffLabel = TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard");
 
         if (parentLabel === b17Label) {
@@ -103,6 +101,25 @@ function getNodeBadgeOrIcon(
                     }}
                 >
                     B17
+                </Paper>
+            );
+        }
+        if (parentLabel === ftcLabel) {
+            return (
+                <Paper
+                    shadow="none"
+                    withBorder={false}
+                    p={0}
+                    radius="xs"
+                    style={{
+                        fontSize: 10,
+                        paddingInline: 6,
+                        paddingBlock: 2,
+                        background: "#fdbb84",
+                        color: "white",
+                    }}
+                >
+                    FTC
                 </Paper>
             );
         }
@@ -245,7 +262,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
     const handleDelete = () => {
         setMenu?.(null);
-        onDelete?.( );
+        onDelete?.();
     };
 
     const handlePlot = () => {

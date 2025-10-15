@@ -1,5 +1,5 @@
-import {useEffect, useState} from "react";
-import {componentMetadata} from "../utils/componentMetadata";
+import { useEffect, useState } from "react";
+import { componentMetadata } from "../utils/componentMetadata";
 
 /** ----------------------- Types ----------------------- */
 
@@ -45,7 +45,6 @@ type RenameArgs =
 /** ----------------------- Helpers ----------------------- */
 
 function groupAnalysesByType(payload: any = {}): AnalysesRecord {
-  // Currently just passthrough; keep the function for future grouping logic
   return payload;
 }
 
@@ -80,7 +79,6 @@ export default function useAppData() {
   const [data, setData] = useState<DataRecord>({});
   const [analyses, setAnalyses] = useState<AnalysesRecord>({});
 
-  // initial loads
   useEffect(() => {
     getJSON<AnalysesRecord>("/api/analyses")
         .then((payload) => setAnalyses(groupAnalysesByType(payload)))
@@ -93,17 +91,22 @@ export default function useAppData() {
 
   /** ----------------------- Delete ----------------------- */
   async function handleDeleteNode(args: DeleteArgs) {
+    if (typeof args !== "object" || args === null) return;
+
     const { section } = args;
 
     if (section === "maps") {
       const [idx] = args.pathArr;
-      setMaps((prev) => (Array.isArray(prev) ? prev.filter((_, i) => i !== idx) : prev));
+      setMaps((prev) => {
+        const list = Array.isArray(prev) ? prev : [];
+        return list.filter((_, i) => i !== idx);
+      });
       return;
     }
 
     if (section === "data") {
       const [param, idx] = args.pathArr;
-      // optimistic update
+
       setData((prev) => {
         const next = { ...prev };
         const list = Array.isArray(next[param]) ? next[param] : [];
@@ -112,7 +115,6 @@ export default function useAppData() {
         return next;
       });
 
-      // persist + refresh
       try {
         await del(`/api/data/${encodeURIComponent(param)}/${idx}`);
         const refreshed = await getJSON<DataRecord>("/api/data");
@@ -125,7 +127,7 @@ export default function useAppData() {
 
     if (section === "analyses") {
       const [folder, idx] = args.pathArr;
-      // optimistic update
+
       setAnalyses((prev) => {
         const next = { ...prev };
         const list = Array.isArray(next[folder]) ? next[folder] : [];
@@ -134,7 +136,6 @@ export default function useAppData() {
         return next;
       });
 
-      // persist + refresh
       try {
         await del(`/api/analyses/${encodeURIComponent(folder)}/${idx}`);
         const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
@@ -147,13 +148,14 @@ export default function useAppData() {
 
   /** ----------------------- Save As (duplicate) ----------------------- */
   async function handleSaveAsNode(args: SaveAsArgs) {
+    if (typeof args !== "object" || args === null) return;
+
     const { section, pathArr, newName, newDesc, item } = args;
     if (!newName) return;
 
     if (section === "data") {
       const [param, idx] = pathArr;
 
-      // optimistic append
       setData((prev) => {
         const next = { ...prev };
         const list = Array.isArray(next[param]) ? next[param] : [];
@@ -178,7 +180,6 @@ export default function useAppData() {
     if (section === "analyses") {
       const [folder, idx] = pathArr;
 
-      // optimistic append
       setAnalyses((prev) => {
         const next = { ...prev };
         const list = Array.isArray(next[folder]) ? next[folder] : [];
@@ -214,6 +215,8 @@ export default function useAppData() {
 
   /** ----------------------- Rename ----------------------- */
   async function handleRenameNode(args: RenameArgs) {
+    if (typeof args !== "object" || args === null) return;
+
     const { section, pathArr, newName } = args;
     if (!newName) return;
 
@@ -223,12 +226,27 @@ export default function useAppData() {
       const src = list[idx];
       if (!src || src.name === newName) return;
 
+      const signature = JSON.stringify(src);
+
       try {
         const copy = { ...src, name: newName };
+
         await postJSON("/api/analyses", { type: folder, data: copy });
-        await del(`/api/analyses/${encodeURIComponent(folder)}/${idx}`);
+
         const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-        setAnalyses(groupAnalysesByType(refreshed));
+
+        const refreshedList = Array.isArray(refreshed[folder]) ? refreshed[folder] : [];
+        let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
+        if (deleteIndex === -1) {
+          deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
+        }
+
+        if (deleteIndex !== -1) {
+          await del(`/api/analyses/${encodeURIComponent(folder)}/${deleteIndex}`);
+        }
+
+        const finalState = await getJSON<AnalysesRecord>("/api/analyses");
+        setAnalyses(groupAnalysesByType(finalState));
       } catch {
         /* ignore */
       }
@@ -241,12 +259,27 @@ export default function useAppData() {
       const src = list[idx];
       if (!src || src.name === newName) return;
 
+      const signature = JSON.stringify(src);
+
       try {
         const copy = { ...src, name: newName };
+
         await postJSON("/api/data", { type: param, data: copy });
-        await del(`/api/data/${encodeURIComponent(param)}/${idx}`);
+
         const refreshed = await getJSON<DataRecord>("/api/data");
-        setData(refreshed);
+
+        const refreshedList = Array.isArray(refreshed[param]) ? refreshed[param] : [];
+        let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
+        if (deleteIndex === -1) {
+          deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
+        }
+
+        if (deleteIndex !== -1) {
+          await del(`/api/data/${encodeURIComponent(param)}/${deleteIndex}`);
+        }
+
+        const finalState = await getJSON<DataRecord>("/api/data");
+        setData(finalState);
       } catch {
         /* ignore */
       }
@@ -268,15 +301,23 @@ export default function useAppData() {
   /** ----------------------- Wizards & Data Save ----------------------- */
   const handleWizardFinish = async (type: string, valuesObj: any) => {
     const friendlyType = componentMetadata?.[type]?.entityName ?? type;
-    await postJSON("/api/analyses", { type: friendlyType, data: valuesObj });
-    const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-    setAnalyses(groupAnalysesByType(refreshed));
+    try {
+      await postJSON("/api/analyses", { type: friendlyType, data: valuesObj });
+      const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
+      setAnalyses(groupAnalysesByType(refreshed));
+    } catch {
+      /* ignore */
+    }
   };
 
   const handleDataSave = async (category: string, valuesObj: any) => {
-    await postJSON("/api/data", { type: category, data: valuesObj });
-    const refreshed = await getJSON<DataRecord>("/api/data");
-    setData(refreshed);
+    try {
+      await postJSON("/api/data", { type: category, data: valuesObj });
+      const refreshed = await getJSON<DataRecord>("/api/data");
+      setData(refreshed);
+    } catch {
+      /* ignore */
+    }
   };
 
   /** ----------------------- Return ----------------------- */

@@ -7,6 +7,7 @@ import {
 } from "../inputs/TimeSeriesComboBoxes";
 import { TextStore } from "../../../../utils/TextStore";
 import TimeField from "../../../common/TimeField";
+import { DateInput } from '@mantine/dates';
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 
@@ -37,12 +38,12 @@ export function makeFlowDataSourceStep(): WizardStep {
                     />
 
                     <label htmlFor="ft_start_date">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_StartDate")}</label>
-                    <input
-                        id="ft_start_date"
+                    <DateInput
+                        value={(bag as any).classStartDate ? new Date((bag as any).classStartDate) : null}
+                        onChange={(d) => set({ classStartDate: d ? d.toString().slice(0, 10) : "" })}
+                        placeholder="mm/dd/yyyy"
+                        aria-label="Classification Start Date"
                         style={inputNarrow}
-                        type="date"
-                        value={((bag as any).classStartDate as string) ?? ""}
-                        onChange={(e) => set({ classStartDate: e.target.value })}
                     />
 
                     <label htmlFor="ft_start_time">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_StartTime")}</label>
@@ -54,12 +55,12 @@ export function makeFlowDataSourceStep(): WizardStep {
                     />
 
                     <label htmlFor="ft_end_date">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_EndDate")}</label>
-                    <input
-                        id="ft_end_date"
+                    <DateInput
+                        value={(bag as any).classStartDate ? new Date((bag as any).classStartDate) : null}
+                        onChange={(d) => set({ classStartDate: d ? d.toString().slice(0, 10) : "" })}
+                        placeholder="mm/dd/yyyy"
+                        aria-label="Classification End Date"
                         style={inputNarrow}
-                        type="date"
-                        value={((bag as any).classEndDate as string) ?? ""}
-                        onChange={(e) => set({ classEndDate: e.target.value })}
                     />
 
                     <label htmlFor="ft_end_time">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_EndTime")}</label>

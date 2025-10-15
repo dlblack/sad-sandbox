@@ -72,7 +72,7 @@ export default function useDockableContainers({
     });
 
     const category = (meta.category || "").trim();
-    setMessages((prevMsgs) => [...prevMsgs, makeMessage(10001, [meta.entityName || type, category], "text-body")]);
+    setMessages((prevMsgs) => [...prevMsgs, makeMessage(10001, [meta.entityName || type, category], "info")]);
   }, []);
 
   const wizardFinishWithMessages: WizardFinishFn = async (type, valuesObj, id) => {
@@ -95,27 +95,21 @@ export default function useDockableContainers({
   );
 
   const removeComponent = (id: string) => {
-    let removedInfo: { name: string; category: string } | null = null;
-
-    setContainers((prev) => {
-      const removed = prev.find((c: any) => c.id === id);
-      if (!removed) return prev;
+    const removed = containers.find((c: any) => c.id === id);
+    if (!removed) return;
 
       const meta = (componentMetadata as any)[removed.type] || {};
-      removedInfo = {
+      const removedInfo = {
         name: meta.entityName || removed.type,
         category: (meta.category || "").trim(),
       };
 
-      return prev.filter((c: any) => c.id !== id);
-    });
+    setContainers((prev) => prev.filter((c: any) => c.id !== id));
 
-    if (removedInfo) {
-      setMessages((prevMsgs) => [
-        ...prevMsgs,
-        makeMessage(10030, [removedInfo.name, removedInfo.category], "text-body-secondary"),
-      ]);
-    }
+    setMessages((prevMsgs) => [
+      ...prevMsgs,
+      makeMessage(10030, [removedInfo.name, removedInfo.category], "info"),
+    ]);
   };
 
   const onDragStart = (id: string, event: MouseEvent) => {
@@ -147,7 +141,7 @@ export default function useDockableContainers({
   const logCenterClosed = (type: string, title: string) => {
     const cat = ((componentMetadata as any)[type]?.category || "").trim() || "Component";
     setMessages((prevMsgs) => {
-      const msg = makeMessage(10030, [title, cat], "text-body-secondary");
+      const msg = makeMessage(10030, [title, cat], "info");
       const last = prevMsgs[prevMsgs.length - 1];
       if (last?.text === msg.text) return prevMsgs;
       return [...prevMsgs, msg];

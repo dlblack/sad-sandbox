@@ -11,10 +11,10 @@ import { DataUnitType } from "../../editor_components/combo_boxes/DataUnitTypeCo
 import { getParamCategory } from "../../../utils/paramUtils";
 import { toJulianDay } from "../../../utils/timeUtils";
 import { TextStore } from "../../../utils/TextStore";
-import { Card, Stack } from "@mantine/core";
+import { Card, Stack, TextInput, Textarea, ScrollArea, Table, Text, Title, Code } from "@mantine/core";
 
 /** ---------- Types ---------- */
-type StructureType = "" | "TimeSeries" | "PairedData";
+type StructureType = "TimeSeries" | "PairedData";
 type DataFormat = "DSS" | "JSON";
 
 type PathParts = { A: string; B: string; C: string; D: string; E: string; F: string };
@@ -33,7 +33,7 @@ function formatDssDate(dateStr?: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return "";
-  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
   const dd = String(d.getUTCDate()).padStart(2, "0");
   const mon = months[d.getUTCMonth()];
   const yyyy = d.getUTCFullYear();
@@ -64,11 +64,11 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
   // Metadata
   const [name, setName] = useState<string>("");
   const [desc, setDesc] = useState<string>("");
-  const [structureType, setStructureType] = useState<StructureType>("");
+  const [structureType, setStructureType] = useState<StructureType>("TimeSeries");
   const [dataFormat, setDataFormat] = useState<DataFormat>("DSS");
 
   // TimeSeries state
-  const [tsPathnameParts, setTsPathnameParts] = useState<PathParts>({ A:"", B:"", C:"", D:"", E:"", F:"" });
+  const [tsPathnameParts, setTsPathnameParts] = useState<PathParts>({ A: "", B: "", C: "", D: "", E: "", F: "" });
   const [tsParameter, setTsParameter] = useState<string>("");
   const [tsUnits, setTsUnits] = useState<string>("");
   const [tsInterval, setTsInterval] = useState<string>("");
@@ -81,13 +81,13 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
   const [tsDataRows, setTsDataRows] = useState<TimeSeriesRow[]>([{ dateTime: "", value: "" }]);
 
   // Paired data state
-  const [pairedPathnameParts, setPairedPathnameParts] = useState<PathParts>({ A:"", B:"", C:"", D:"", E:"", F:"" });
+  const [pairedPathnameParts, setPairedPathnameParts] = useState<PathParts>({ A: "", B: "", C: "", D: "", E: "", F: "" });
   const [pairedCurveType, setPairedCurveType] = useState<string>("");
   const [pairedYLabel, setPairedYLabel] = useState<string>("");
   const [pairedYUnits, setPairedYUnits] = useState<string>("");
   const [pairedXLabel, setPairedXLabel] = useState<string>("");
   const [pairedXUnits, setPairedXUnits] = useState<string>("");
-  const [pairedRows, setPairedRows] = useState<PairedRow[]>([{ x:"", y:"" }, { x:"", y:"" }, { x:"", y:"" }]);
+  const [pairedRows, setPairedRows] = useState<PairedRow[]>([{ x: "", y: "" }, { x: "", y: "" }, { x: "", y: "" }]);
 
   const prevCurveType = useRef<string | undefined>(undefined);
 
@@ -107,7 +107,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
 
   /** Keep DSS timeseries pathname parts synced with inputs */
   useEffect(() => {
-    setTsPathnameParts(parts => ({
+    setTsPathnameParts((parts) => ({
       ...parts,
       C: tsParameter || "",
       D: tsStartDate ? formatDssDate(tsStartDate) : "",
@@ -118,7 +118,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
   /** PairedData uses empty D part */
   useEffect(() => {
     if (structureType === "PairedData") {
-      setPairedPathnameParts(parts => ({ ...parts, D: "" }));
+      setPairedPathnameParts((parts) => ({ ...parts, D: "" }));
     }
   }, [structureType]);
 
@@ -127,46 +127,37 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
     if (step === 1) {
       return (
           <div className="manual-entry-content">
-            <legend>{TextStore.interface("ManualDataEntryEditor_Legend")}</legend>
-            <hr />
+            <Title size="h4">{TextStore.interface("ManualDataEntryEditor_Legend")}</Title>
 
             {/* Name */}
             <div className="manual-entry-row">
-              <label className="manual-entry-label">
-                {TextStore.interface("ManualDataEntryEditor_Name")}
-              </label>
+              <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_Name")}</label>
               <div className="manual-entry-field">
-                <input
-                    className="form-control form-control-sm"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    maxLength={64}
-                    required
-                />
+                <TextInput size="sm" value={name} onChange={(e) => setName(e.currentTarget.value)} maxLength={64} required />
               </div>
             </div>
 
             {/* Description */}
             <div className="manual-entry-row">
-              <label className="manual-entry-label">
-                {TextStore.interface("ManualDataEntryEditor_Description")}
-              </label>
+              <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_Description")}</label>
               <div className="manual-entry-field">
-              <textarea
-                  className="form-control form-control-sm"
-                  value={desc}
-                  onChange={e => setDesc(e.target.value)}
-                  maxLength={256}
-                  rows={2}
-              />
+                <Textarea
+                    size="sm"
+                    value={desc}
+                    onChange={(e) => setDesc(e.currentTarget.value)}
+                    maxLength={256}
+                    autosize
+                    minRows={2}
+                />
               </div>
             </div>
 
-            <hr />
-
             {/* Structure + Format */}
-            <StructureSelector value={structureType} onChange={(v: StructureType) => setStructureType(v)} />
-            <FormatSelector value={dataFormat} onChange={(v: DataFormat) => setDataFormat(v)} />
+            <StructureSelector
+                value={structureType}
+                onChange={(v: "" | "TimeSeries" | "PairedData") => setStructureType(v === "" ? "TimeSeries" : v)}
+            />
+            <FormatSelector value={dataFormat} onChange={(v: "" | "DSS" | "JSON") => setDataFormat(v === "" ? "DSS" : v)} />
           </div>
       );
     }
@@ -179,19 +170,27 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
                 <TimeseriesPathnameStep
                     pathnameParts={tsPathnameParts}
                     setPathnameParts={setTsPathnameParts}
-                    editableParts={{ A:true, B:true, C:true, D:true, E:true, F:true }}
+                    editableParts={{ A: true, B: true, C: true, D: true, E: true, F: true }}
                 />
             )}
             <DataInfoStepCommon
                 showParameterCombo
-                parameter={tsParameter} setParameter={setTsParameter}
-                units={tsUnits} setUnits={setTsUnits}
-                unitType={tsUnitType} setUnitType={setTsUnitType}
-                dataInterval={tsInterval} setDataInterval={setTsInterval}
-                startDate={tsStartDate} setStartDate={setTsStartDate}
-                startTime={tsStartTime} setStartTime={setTsStartTime}
-                endDate={tsEndDate} setEndDate={setTsEndDate}
-                endTime={tsEndTime} setEndTime={setTsEndTime}
+                parameter={tsParameter}
+                setParameter={setTsParameter}
+                units={tsUnits}
+                setUnits={setTsUnits}
+                unitType={tsUnitType}
+                setUnitType={setTsUnitType}
+                dataInterval={tsInterval}
+                setDataInterval={setTsInterval}
+                startDate={tsStartDate}
+                setStartDate={setTsStartDate}
+                startTime={tsStartTime}
+                setStartTime={setTsStartTime}
+                endDate={tsEndDate}
+                setEndDate={setTsEndDate}
+                endTime={tsEndTime}
+                setEndTime={setTsEndTime}
             />
           </div>
       );
@@ -205,139 +204,88 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
               <TimeseriesPathnameStep
                   pathnameParts={pairedPathnameParts}
                   setPathnameParts={(parts: PathParts) => setPairedPathnameParts({ ...parts, D: "" })}
-                  editableParts={{ A:true, B:true, C:true, D:false, E:true, F:true }}
+                  editableParts={{ A: true, B: true, C: true, D: false, E: true, F: true }}
               />
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_CurveType")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_CurveType")}</label>
                 <div className="manual-entry-field">
                   <PairedCurveTypeComboBox
                       value={pairedCurveType}
                       onChange={(val: string) => {
                         setPairedCurveType(val);
-                        setPairedPathnameParts(parts => ({ ...parts, C: val }));
+                        setPairedPathnameParts((parts) => ({ ...parts, C: val }));
                       }}
                   />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_YLabel")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_YLabel")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedYLabel}
-                      onChange={e => setPairedYLabel(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedYLabel} onChange={(e) => setPairedYLabel(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_YUnits")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_YUnits")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedYUnits}
-                      onChange={e => setPairedYUnits(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedYUnits} onChange={(e) => setPairedYUnits(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_XLabel")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_XLabel")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedXLabel}
-                      onChange={e => setPairedXLabel(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedXLabel} onChange={(e) => setPairedXLabel(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_XUnits")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_XUnits")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedXUnits}
-                      onChange={e => setPairedXUnits(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedXUnits} onChange={(e) => setPairedXUnits(e.currentTarget.value)} />
                 </div>
               </div>
             </div>
         );
       }
+
       if (dataFormat === "JSON") {
         return (
             <div>
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_CurveType")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_CurveType")}</label>
                 <div className="manual-entry-field">
                   <PairedCurveTypeComboBox value={pairedCurveType} onChange={setPairedCurveType} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_YLabel")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_YLabel")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedYLabel}
-                      onChange={e => setPairedYLabel(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedYLabel} onChange={(e) => setPairedYLabel(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_YUnits")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_YUnits")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedYUnits}
-                      onChange={e => setPairedYUnits(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedYUnits} onChange={(e) => setPairedYUnits(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_XLabel")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_XLabel")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedXLabel}
-                      onChange={e => setPairedXLabel(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedXLabel} onChange={(e) => setPairedXLabel(e.currentTarget.value)} />
                 </div>
               </div>
 
               <div className="manual-entry-row">
-                <label className="manual-entry-label">
-                  {TextStore.interface("ManualDataEntryEditor_XUnits")}
-                </label>
+                <label className="manual-entry-label">{TextStore.interface("ManualDataEntryEditor_XUnits")}</label>
                 <div className="manual-entry-field">
-                  <input
-                      className="form-control font-xs"
-                      value={pairedXUnits}
-                      onChange={e => setPairedXUnits(e.target.value)}
-                  />
+                  <TextInput size="sm" value={pairedXUnits} onChange={(e) => setPairedXUnits(e.currentTarget.value)} />
                 </div>
               </div>
             </div>
@@ -379,96 +327,55 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
       const { A, B, C, E, F } = pairedPathnameParts;
       const pairedPathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
       return (
-          <div>
-            <h6>{TextStore.interface("ManualDataEntryEditor_Summary")}</h6>
-            <div className="my-2 font-xs">
-              <strong>{TextStore.interface("ManualDataEntryEditor_SummaryName")}</strong>{name}
+          <div className={"summary-root"}>
+            <h4>{TextStore.interface("Wizard_Summary_Title")}</h4>
+            <div className="my-2 font-s">
+              {TextStore.interface("Wizard_Summary_Name")}
+              {name}
             </div>
-            <div className="my-2 font-xs">
-              <strong>{TextStore.interface("ManualDataEntryEditor_SummaryDescription")}</strong>{desc}
+            <div className="my-2 font-s">
+              {TextStore.interface("Wizard_Summary_Description")}
+              {desc}
             </div>
-            <div className="my-2 font-xs">
-              <strong>{TextStore.interface("ManualDataEntryEditor_SummaryStructureType")}</strong>{structureType}
+            <div className="my-2 font-s">
+              {TextStore.interface("ManualDataEntryEditor_SummaryStructureType")}
+              {structureType}
             </div>
-            <div className="my-2 font-xs">
-              <strong>{TextStore.interface("ManualDataEntryEditor_SummaryDataFormat")}</strong>{dataFormat}
+            <div className="my-2 font-s">
+              {TextStore.interface("ManualDataEntryEditor_SummaryDataFormat")}
+              {dataFormat}
             </div>
 
-            {structureType === "TimeSeries" && (
-                <div style={{ maxHeight: 160, overflow: "auto" }}>
-                  <table className="table table-bordered table-sm" style={{ maxWidth: 340 }}>
-                    <thead>
-                    <tr>
-                      <th style={{ width: 160 }}>
-                        {TextStore.interface("ManualDataEntryEditor_SummaryDateTime")}
-                      </th>
-                      <th style={{ width: 80 }}>
-                        {TextStore.interface("ManualDataEntryEditor_SummaryValue")}
-                      </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {tsDataRows
-                        .filter(row => row.dateTime && row.value !== "")
-                        .map((row, i) => (
-                            <tr key={i}>
-                              <td>{row.dateTime}</td>
-                              <td>{row.value}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-            )}
+            {structureType === "TimeSeries" && <TimeSeriesSummaryTable rows={tsDataRows} />}
 
             {structureType === "PairedData" && (
                 <>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryFilepath")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryFilepath")}
                     {getDefaultFilepath(pairedCurveType)}
                   </div>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryPathname")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryPathname")}
                     {pairedPathname}
                   </div>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryCurveType")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryCurveType")}
                     {pairedCurveType}
                   </div>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryYUnits")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryYUnits")}
                     {pairedYUnits}
                   </div>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryXLabel")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryXLabel")}
                     {pairedXLabel}
                   </div>
-                  <div className="my-2 font-xs">
-                    <strong>{TextStore.interface("ManualDataEntryEditor_SummaryXUnits")}</strong>
+                  <div className="my-2 font-s">
+                    {TextStore.interface("ManualDataEntryEditor_SummaryXUnits")}
                     {pairedXUnits}
                   </div>
-                  <div style={{ maxHeight: 160, overflow: "auto" }}>
-                    <table className="table table-bordered table-sm font-sm" style={{ maxWidth: 380 }}>
-                      <thead>
-                      <tr>
-                        <th className="font-xs" style={{ width: 80 }}>#</th>
-                        <th className="font-xs" style={{ width: 120 }}>{pairedXLabel || "X"}</th>
-                        <th className="font-xs" style={{ width: 120 }}>{pairedCurveType || "Y"}</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      {pairedRows
-                          .filter(row => row.x !== "" && row.y !== "")
-                          .map((row, idx) => (
-                              <tr key={idx}>
-                                <td className="font-xs">{idx + 1}</td>
-                                <td className="font-xs">{row.x}</td>
-                                <td className="font-xs">{row.y}</td>
-                              </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
+
+                  <PairedSummaryTable rows={pairedRows} xLabel={pairedXLabel} yLabel={pairedCurveType} />
                 </>
             )}
           </div>
@@ -486,11 +393,9 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
     if (structureType === "TimeSeries" && props.onDataSave) {
       const { A, B, C, D, E, F } = tsPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}/${D || ""}/${E || ""}/${F || ""}/`;
-      const dataRowsFiltered = tsDataRows.filter(
-          row => row.value !== "" && !Number.isNaN(Number(row.value)) && row.dateTime !== ""
-      );
-      const values = dataRowsFiltered.map(row => Number(row.value));
-      const dateTimes = dataRowsFiltered.map(row => row.dateTime);
+      const dataRowsFiltered = tsDataRows.filter((row) => row.value !== "" && !Number.isNaN(Number(row.value)) && row.dateTime !== "");
+      const values = dataRowsFiltered.map((row) => Number(row.value));
+      const dateTimes = dataRowsFiltered.map((row) => row.dateTime);
       const paramCategory = getParamCategory(tsParameter);
       const filepath = getDefaultFilepath(tsParameter);
 
@@ -513,7 +418,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
           ...payload,
           filepath,
           pathname,
-          times: dateTimes.map(dtStr => toJulianDay(new Date(dtStr))),
+          times: dateTimes.map((dtStr) => toJulianDay(new Date(dtStr))),
         };
       } else {
         payload = { ...payload, times: dateTimes };
@@ -544,9 +449,9 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         pathname,
       };
 
-      const filtered = pairedRows.filter(r => r.x !== "" && r.y !== "");
-      const xValues = filtered.map(r => Number(r.x));
-      const yValues = filtered.map(r => Number(r.y));
+      const filtered = pairedRows.filter((r) => r.x !== "" && r.y !== "");
+      const xValues = filtered.map((r) => Number(r.x));
+      const yValues = filtered.map((r) => Number(r.y));
 
       props.onDataSave(pairedCurveType, { ...payload, xValues, yValues }, props.id);
       props.onRemove?.();
@@ -564,7 +469,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         yUnits: pairedYUnits,
         xLabel: pairedXLabel,
         xUnits: pairedXUnits,
-        rows: pairedRows.filter(r => r.x !== "" && r.y !== ""),
+        rows: pairedRows.filter((r) => r.x !== "" && r.y !== ""),
       };
 
       props.onDataSave(pairedCurveType, payload, props.id);
@@ -578,15 +483,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
     if (step === 1) return !!name.trim() && !!structureType && !!dataFormat;
 
     if (step === 2 && structureType === "TimeSeries") {
-      return (
-          !!tsParameter &&
-          !!tsUnits &&
-          !!tsUnitType &&
-          !!tsStartDate &&
-          !!tsStartTime &&
-          !!tsEndDate &&
-          !!tsEndTime
-      );
+      return !!tsParameter && !!tsUnits && !!tsUnitType && !!tsStartDate && !!tsStartTime && !!tsEndDate && !!tsEndTime;
     }
 
     if (step === 2 && structureType === "PairedData") {
@@ -600,21 +497,80 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
     }
 
     if (step === 3 && structureType === "TimeSeries") {
-      return tsDataRows.some(row => row.value !== "");
+      return tsDataRows.some((row) => row.value !== "");
     }
 
     if (step === 3 && structureType === "PairedData") {
-      return pairedRows.some(row => row.x !== "" && row.y !== "");
+      return pairedRows.some((row) => row.x !== "" && row.y !== "");
     }
 
     return true;
   }
 
+  /* ---------- Summary tables ---------- */
+  function TimeSeriesSummaryTable({ rows }: { rows: { dateTime: string; value: string }[] }) {
+    const data = rows.filter((r) => r.dateTime && r.value !== "");
+    return (
+        <ScrollArea
+            className="summary-scroll"
+            type="always"
+            scrollbars="y"
+            offsetScrollbars
+            scrollbarSize={12}
+        >
+          <Table stickyHeader layout="fixed" withRowBorders verticalSpacing="xs" horizontalSpacing="sm" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>{TextStore.interface("ManualDataEntryEditor_SummaryDateTime")}</Table.Th>
+                <Table.Th>{TextStore.interface("ManualDataEntryEditor_SummaryValue")}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row, i) => (
+                  <Table.Tr key={i}>
+                    <Table.Td><Code fw={500}>{row.dateTime}</Code></Table.Td>
+                    <Table.Td><Text>{row.value}</Text></Table.Td>
+                  </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
+    );
+  }
+
+  function PairedSummaryTable({
+                                rows, xLabel, yLabel,
+                              }: { rows: { x: string; y: string }[]; xLabel?: string; yLabel?: string }) {
+    const data = rows.filter((r) => r.x !== "" && r.y !== "");
+    return (
+        <ScrollArea className="summary-scroll" type="auto" scrollbars="y">
+          <Table stickyHeader layout="fixed" withRowBorders verticalSpacing="xs" horizontalSpacing="sm" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>#</Table.Th>
+                <Table.Th>{xLabel || "X"}</Table.Th>
+                <Table.Th>{yLabel || "Y"}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row, idx) => (
+                  <Table.Tr key={idx}>
+                    <Table.Td><Text ta="center">{idx + 1}</Text></Table.Td>
+                    <Table.Td><Code>{row.x}</Code></Table.Td>
+                    <Table.Td><Code>{row.y}</Code></Table.Td>
+                  </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </ScrollArea>
+    );
+  }
+
   return (
       <Card withBorder radius="md" padding="md">
-        <form onSubmit={e => e.preventDefault()} style={{ height: "100%" }}>
+        <form onSubmit={(e) => e.preventDefault()} style={{ height: "100%" }}>
           <Stack gap="sm" style={{ height: "100%" }}>
-            <div style={{ flex: 1, minHeight: 0 }}>{renderStep()}</div>
+            <div className="wizard-body">{renderStep()}</div>
             <div className="wizard-footer">
               <WizardNavigation
                   step={step}

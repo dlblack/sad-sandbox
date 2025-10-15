@@ -28,11 +28,6 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
    Navbar
    ========================================================= */
 .thin-navbar{max-height:calc(5vh * var(--ui-scale));padding:0!important;font-size:.875rem;z-index:2000}
-.dropdown-menu{background-color:#808080;border-color:#eee;border-width:.1em}
-.dropdown-menu .dropdown-menu{display:none;position:absolute;top:0;left:100%;margin-top:-.25rem}
-.dropdown-menu>.dropdown.dropend:hover>.dropdown-menu,
-.dropdown-menu>.dropdown.dropend.show>.dropdown-menu{display:block}
-.dropdown-item{font-size:.875rem;padding:.25rem .75rem}
 
 /* =========================================================
    Dockable frame + zones
@@ -106,83 +101,12 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
 .dock-zone-center>*{flex:1 1 auto;min-width:0;min-height:0;width:100%}
 
 /* =========================================================
-   Dockable cards
-   ========================================================= */
-.dockable-drag-wrapper.dragging{opacity:.7;z-index:10}
-.dockable-drag-wrapper{display:inline-block;min-width:200px;max-width:100%}
-.dockable-header-btns{display:flex;gap:0;align-items:center}
-.dockable-item,.card-container,.card{display:flex;flex-direction:column;min-width:200px;min-height:100px;background:#222;border-radius:0;box-shadow:0 2px 6px #0002;overflow:hidden;box-sizing:border-box;flex:0 0 auto;font-size:1rem}
-.dockable-item.focused{outline:2px solid #dfe9f6;box-shadow:0 0 0 2px #a6c8ff;z-index:11!important}
-.dockable-item.expanded{z-index:100!important}
-.card.d-flex.flex-column{height:100%}
-
-/* Header */
-.card-header{display:flex;align-items:center;justify-content:space-between;min-height:16px;font-size:.875rem;padding:4px 10px;border-bottom:1px solid #8e8e8e;user-select:none;background:#212529;color:#eee}
-.drag-handle{cursor:grab;display:flex;align-items:center;user-select:none;max-height:2.5vh}
-.drag-handle:active{cursor:grabbing}
-.card-title.mb-0{font-size:1rem;font-weight:500;letter-spacing:.01em}
-.card-title{font-size:1rem;font-weight:100;color:#f1f1f1}
-
-/* Header buttons */
-.dockable-item-header-btn{background:none;border:none;color:#444;padding:0;margin-left:1px;font-size:1rem;font-weight:700;line-height:1;border-radius:1px;cursor:pointer;height:1.4em;width:1.4em;display:flex;align-items:center;justify-content:center}
-.dockable-item-header-btn:hover,.dockable-item-header-btn:focus{background:#333;color:#fff}
-.dockable-item-close-btn:hover,.dockable-item-close-btn:focus{background:#ffd6d6;color:#d12d2d}
-.dockable-item-header-btn:focus:not(:focus-visible){outline:none}
-.dockable-item-close-btn{font-size:1.24em}
-
-/* Body */
-.card-body.flex-grow-1.overflow-auto.p-2{overflow:auto;padding:10px;background:#1a1a1a;color:#e2e2e2;font-size:1rem;border-bottom-left-radius:0;border-bottom-right-radius:0}
-.component-content-root{display:flex;flex-direction:column;width:100%;height:100%;min-width:0;min-height:0;box-sizing:border-box;padding:0}
-.card-body,.wizard-fixed-size,.manual-entry-main{flex:1 1 0;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding:0;margin:0;box-sizing:border-box}
-
-/* =========================================================
    Center zone tabs
    ========================================================= */
 .wizard-workspace{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden}
 
 .wizard-tab-body{flex:1 1 auto;min-height:0;display:flex;background:inherit;overflow:auto}
 .wizard-tab-body>*{flex:1 1 0;min-width:0}
-.wizard-tab-body .wizard-fixed-size.card{height:100%}
-.wizard-tab-body .wizard-main-inner{height:100%}
-
-.tab-close-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    user-select: none;
-    transition: background .12s ease, border-color .12s ease, opacity .12s ease, box-shadow .12s ease;
-    opacity: .85;
-}
-.tab-close-btn:hover { opacity: 1; }
-
-/* light */
-html[data-mantine-color-scheme="light"] .tab-close-btn:hover {
-    background: rgba(0,0,0,.06);
-    border-color: rgba(0,0,0,.25);
-}
-
-/* dark */
-html[data-mantine-color-scheme="dark"] .tab-close-btn:hover {
-    background: rgba(255,255,255,.12);
-    border-color: rgba(255,255,255,.35);
-}
-
-/* keyboard focus ring */
-.tab-close-btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(59,130,246,.45);
-}
-
-
 
 /* =========================================================
    Wizard / Manual Entry (unchanged from your version)
@@ -200,8 +124,21 @@ html[data-mantine-color-scheme="dark"] .tab-close-btn:hover {
    Manual Data Entry Editor
    ========================================================= */
 .manual-entry-content{flex:1 1 0;min-height:0;max-height:100%;max-width:100%;overflow-y:auto;display:flex;flex-direction:column;margin:0;padding:0;border:none}
-.manual-entry-table-panel{width:90%;min-width:0;max-width:100%;overflow:auto;margin-top:1em;min-height:25vh;max-height:25vh;box-sizing:border-box;padding-bottom:.5em}
-select.form-select.font-xs{padding-left:1rem}
+.manual-entry-content > legend + * {margin-top: var(--mantine-spacing-md);}
+.manual-entry-content > legend {display: block;}
+.manual-entry-table-panel{
+    width: 90%;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 1em;
+    padding-bottom: .5em;
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+}
+
 .manual-entry-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
 .manual-entry-label{min-width:90px;font-size:.875rem;line-height:1.2;margin-bottom:0;text-align:left;white-space:nowrap}
 .manual-entry-field{flex:1 1 0;min-width:0}
@@ -220,4 +157,63 @@ select.form-select.font-xs{padding-left:1rem}
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 
+.wizardFrame {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.wizardStack {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.wizardBody {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--mantine-spacing-sm);
+}
+
+.wizardFooter {
+    position: sticky;
+    bottom: 0;
+    padding: var(--mantine-spacing-xs);
+    z-index: 1;
+}
+
+.editor-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.editor-scroll {
+    flex: 1;
+    min-height: 0;
+}
+
+.wizard-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.summary-root {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+}
 

@@ -30,11 +30,25 @@ import LinearRegressionWizard from "../app_components/analysis/LinearRegressionW
 import QuantileMappingWizard from "../app_components/analysis/QuantileMappingWizard";
 import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizard";
 
-/** ---------------- Types to mirror what DockableFrame is passing ---------------- */
+/** ---------- Types that match ComponentProject’s object-style API ---------- */
+export type Section = "maps" | "data" | "analyses";
 
-type Section = "maps" | "data" | "analyses";
+export type SaveAsArgs =
+    | { section: "maps"; pathArr: [number]; newName: string; newDesc?: string; item?: any }
+    | { section: "data"; pathArr: [string, number]; newName: string; newDesc?: string; item?: any }
+    | { section: "analyses"; pathArr: [string, number]; newName: string; newDesc?: string; item?: any };
 
-// Legacy positional signatures (ComponentProject expects these)
+export type RenameArgs =
+    | { section: "maps"; pathArr: [number]; newName: string }
+    | { section: "data"; pathArr: [string, number]; newName: string }
+    | { section: "analyses"; pathArr: [string, number]; newName: string };
+
+export type DeleteArgs =
+    | { section: "maps"; pathArr: [number] }
+    | { section: "data"; pathArr: [string, number] }
+    | { section: "analyses"; pathArr: [string, number] };
+
+/** ---------- Legacy positional shapes (what some callers may still use) ---------- */
 export type SaveAsPositional = (
     section: Section,
     pathArr: (string | number)[],
@@ -73,9 +87,11 @@ export interface DockableFactoryProps {
   messages?: any[];
 
   // tree operations (legacy positional, as used by ComponentProject)
-  onSaveAsNode?: SaveAsPositional;
-  onRenameNode?: RenamePositional;
-  onDeleteNode?: DeletePositional;
+  onSaveAsNode?: SaveAsPositional | ((args: SaveAsArgs) => void | Promise<void>);
+  onRenameNode?: RenamePositional | ((args: RenameArgs) => void | Promise<void>);
+  onDeleteNode?:
+      | DeletePositional
+      | ((args: DeleteArgs & { name?: string }) => void | Promise<void>);
 
   // actions
   onRemove?: () => void;
@@ -87,8 +103,44 @@ export interface DockableFactoryProps {
   [key: string]: any;
 }
 
-/** ---------------- Factory ---------------- */
+/** ---------- Adapters: always present object-style handlers to ComponentProject ---------- */
+function toObjectSaveAs(
+    fn?: DockableFactoryProps["onSaveAsNode"]
+): ((args: SaveAsArgs) => void | Promise<void>) | undefined {
+  if (!fn) return undefined;
+  // If the function’s declared parameters suggest positional, wrap it
+  if ((fn as SaveAsPositional).length >= 3) {
+    const pos = fn as SaveAsPositional;
+    return (args: SaveAsArgs) =>
+        pos(args.section, args.pathArr, args.newName, (args as any).newDesc, (args as any).item);
+  }
+  return fn as (args: SaveAsArgs) => void | Promise<void>;
+}
 
+function toObjectRename(
+    fn?: DockableFactoryProps["onRenameNode"]
+): ((args: RenameArgs) => void | Promise<void>) | undefined {
+  if (!fn) return undefined;
+  if ((fn as RenamePositional).length >= 3) {
+    const pos = fn as RenamePositional;
+    return (args: RenameArgs) => pos(args.section, args.pathArr, args.newName);
+  }
+  return fn as (args: RenameArgs) => void | Promise<void>;
+}
+
+function toObjectDelete(
+    fn?: DockableFactoryProps["onDeleteNode"]
+): ((args: DeleteArgs & { name?: string }) => void | Promise<void>) | undefined {
+  if (!fn) return undefined;
+  if ((fn as DeletePositional).length >= 2) {
+    const pos = fn as DeletePositional;
+    return (args: DeleteArgs & { name?: string }) =>
+        pos(args.section, args.pathArr, (args as any).name);
+  }
+  return fn as (args: DeleteArgs & { name?: string }) => void | Promise<void>;
+}
+
+/** ---------- Factory ---------- */
 export const dockableContentFactory = (
     type: string,
     props: DockableFactoryProps = {}
@@ -101,9 +153,14 @@ export const dockableContentFactory = (
               maps={props.maps}
               data={props.data}
               analyses={props.analyses}
-              onSaveAsNode={props.onSaveAsNode}
-              onRenameNode={props.onRenameNode}
-              onDeleteNode={props.onDeleteNode}
+              onSaveAsNode={toObjectSaveAs(props.onSaveAsNode)}
+              onRenameNode={toObjectRename(props.onRenameNode)}
+              onDeleteNode={
+                // ComponentProject now expects object-style DeleteArgs
+                toObjectDelete(props.onDeleteNode)
+                    ? (args) => toObjectDelete(props.onDeleteNode)!(args)
+                    : undefined
+              }
               handleOpenComponent={props.handleOpenComponent}
           />
       );
@@ -115,12 +172,10 @@ export const dockableContentFactory = (
       return <ComponentMap />;
 
     case "ComponentMessage":
-      // Pass only what the component actually expects:
-      // { messages?: any[]; onRemove: any }
       return (
           <ComponentMessage
-              messages={props.messages}
-              onRemove={props.onRemove}
+              messages={props.messages ?? []}
+              onRemove={props.onRemove ?? (() => {})}
           />
       );
 
@@ -131,7 +186,6 @@ export const dockableContentFactory = (
       return <PairedDataPlot dataset={props.dataset} />;
 
     case "DemoPlots":
-      // This component expects no props; don't spread anything.
       return <DemoPlots />;
 
       /** ---------- EDITORS ---------- */
@@ -206,5 +260,3 @@ export const dockableContentFactory = (
       return <div>Unknown Component</div>;
   }
 };
-
-export default dockableContentFactory;
