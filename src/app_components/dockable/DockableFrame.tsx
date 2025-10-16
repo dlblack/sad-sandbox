@@ -15,6 +15,7 @@ import {
     RenameHandler,
     DeleteHandler,
 } from "../../types/treeActions";
+import type { AppMessage } from "../ComponentMessage";
 
 /** ----- Layout constants ----- */
 const MIN_WIDTH = 120;
@@ -46,10 +47,10 @@ export interface DockContainer {
 export interface DockableFrameProps {
     containers: DockContainer[];
     setContainers: React.Dispatch<React.SetStateAction<DockContainer[]>>;
-    removeComponent: (id: string) => void;
+    removeComponent: (id: string, reason?: AppMessage) => void;
 
     // drag
-    onDragStart?: (id: string, event: any) => void;
+    onDragStart?: (id: string, reason?: any) => void;
 
     // messages
     messages: any[];
@@ -157,7 +158,7 @@ const DockableFrame: React.FC<DockableFrameProps> = ({
             id: c.id,
             type: c.type,
             onFinish: onWizardFinish, // Promise<void>
-            onRemove: () => removeComponent(c.id),
+            onRemove: (reason?: AppMessage) => removeComponent(c.id, reason),
             onDataSave,
             messages,
             onSaveAsNode: saveAsAdapter,
