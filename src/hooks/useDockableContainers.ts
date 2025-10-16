@@ -94,22 +94,29 @@ export default function useDockableContainers({
       [handleDeleteNode]
   );
 
-  const removeComponent = (id: string) => {
+  const removeComponent = (id: string, reason?: { code?: number; args?: any[]; type?: any }) => {
     const removed = containers.find((c: any) => c.id === id);
     if (!removed) return;
 
-      const meta = (componentMetadata as any)[removed.type] || {};
-      const removedInfo = {
-        name: meta.entityName || removed.type,
-        category: (meta.category || "").trim(),
-      };
+    const meta = (componentMetadata as any)[removed.type] || {};
+    const removedInfo = {
+      name: meta.entityName || removed.type,
+      category: (meta.category || "").trim(),
+    };
 
     setContainers((prev) => prev.filter((c: any) => c.id !== id));
 
-    setMessages((prevMsgs) => [
-      ...prevMsgs,
-      makeMessage(10030, [removedInfo.name, removedInfo.category], "info"),
-    ]);
+    if (reason && (reason.code || reason.args || reason.type)) {
+      setMessages((prevMsgs) => [
+        ...prevMsgs,
+        makeMessage(reason.code ?? 10002, reason.args ?? [], reason.type ?? "success"),
+      ]);
+    } else {
+      setMessages((prevMsgs) => [
+        ...prevMsgs,
+        makeMessage(10030, [removedInfo.name, removedInfo.category], "info"),
+      ]);
+    }
   };
 
   const onDragStart = (id: string, event: MouseEvent) => {

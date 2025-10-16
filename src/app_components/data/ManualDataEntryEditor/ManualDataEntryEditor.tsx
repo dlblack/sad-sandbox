@@ -26,6 +26,7 @@ export interface ManualDataEntryEditorProps {
   id?: string;
   onDataSave?: (category: string, payload: any, id?: string) => void | Promise<void>;
   onRemove?: () => void;
+  onFinish?: (type: string, valuesObj: any, id?: string) => Promise<void> | void; // wired by DockableFrame
 }
 
 /** DSS date formatter (DDMONYYYY in UTC) */
@@ -386,16 +387,31 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
   }
 
   /** Save logic */
-  function handleWizardFinish(e?: React.FormEvent) {
+  async function handleWizardFinish(e?: React.FormEvent) {
     if (e) e.preventDefault();
+
+    const createdText = (_category: string, itemName: string) =>
+        TextStore.message(10002, [
+          TextStore.interface("ComponentMetadata_ManualDataEntryEditor"),
+          itemName
+        ]);
+
+    function closeWithCreatedMessage(text: string) {
+      const close = props.onRemove as unknown as (
+          reason?: { text: string; type?: "success" | "info" | "warning" | "error" }
+      ) => void;
+      close?.({ text, type: "success" });
+    }
 
     // TimeSeries
     if (structureType === "TimeSeries" && props.onDataSave) {
       const { A, B, C, D, E, F } = tsPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}/${D || ""}/${E || ""}/${F || ""}/`;
-      const dataRowsFiltered = tsDataRows.filter((row) => row.value !== "" && !Number.isNaN(Number(row.value)) && row.dateTime !== "");
-      const values = dataRowsFiltered.map((row) => Number(row.value));
-      const dateTimes = dataRowsFiltered.map((row) => row.dateTime);
+      const dataRowsFiltered = tsDataRows.filter(
+          r => r.value !== "" && !Number.isNaN(Number(r.value)) && r.dateTime !== ""
+      );
+      const values = dataRowsFiltered.map(r => Number(r.value));
+      const dateTimes = dataRowsFiltered.map(r => r.dateTime);
       const paramCategory = getParamCategory(tsParameter);
       const filepath = getDefaultFilepath(tsParameter);
 
@@ -424,14 +440,19 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         payload = { ...payload, times: dateTimes };
       }
 
-      props.onDataSave(paramCategory, payload, props.id);
-      props.onRemove?.();
+      await props.onDataSave(paramCategory, payload, props.id);
+      closeWithCreatedMessage(createdText(paramCategory, name));
+      return;
     }
 
     // PairedData DSS
     if (structureType === "PairedData" && dataFormat === "DSS" && props.onDataSave) {
       const { A, B, C, E, F } = pairedPathnameParts;
       const pathname = `/${A || ""}/${B || ""}/${C || ""}//${E || ""}/${F || ""}/`;
+
+      const filtered = pairedRows.filter(r => r.x !== "" && r.y !== "");
+      const xValues = filtered.map(r => Number(r.x));
+      const yValues = filtered.map(r => Number(r.y));
 
       const payload = {
         structureType,
@@ -447,14 +468,13 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         yUnits: pairedYUnits,
         filepath: getDefaultFilepath(pairedCurveType),
         pathname,
+        xValues,
+        yValues
       };
 
-      const filtered = pairedRows.filter((r) => r.x !== "" && r.y !== "");
-      const xValues = filtered.map((r) => Number(r.x));
-      const yValues = filtered.map((r) => Number(r.y));
-
-      props.onDataSave(pairedCurveType, { ...payload, xValues, yValues }, props.id);
-      props.onRemove?.();
+      await props.onDataSave(pairedCurveType, payload, props.id);
+      closeWithCreatedMessage(createdText(pairedCurveType, name));
+      return;
     }
 
     // PairedData JSON
@@ -472,8 +492,9 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         rows: pairedRows.filter((r) => r.x !== "" && r.y !== ""),
       };
 
-      props.onDataSave(pairedCurveType, payload, props.id);
-      props.onRemove?.();
+      await props.onDataSave(pairedCurveType, payload, props.id);
+      closeWithCreatedMessage(createdText(pairedCurveType, name));
+      return;
     }
   }
 
