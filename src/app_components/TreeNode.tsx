@@ -45,7 +45,7 @@ export interface TreeNodeProps {
     saveAsDialogOpen?: string | null;
     setSaveAsDialogOpen?: (path: string | null) => void;
 
-    dataset?: unknown;
+    dataset?: any;
 }
 
 /* -------------------------------- Helpers -------------------------------- */
@@ -265,10 +265,20 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         onDelete?.();
     };
 
+    /** ------------------ Plot Handler (Generic for Data + Analysis) ------------------ */
     const handlePlot = () => {
         setMenu?.(null);
         if (section === "data" && dataset) {
             window.dispatchEvent(new CustomEvent("plotNodeData", { detail: { dataset } }));
+            return;
+        }
+
+        // Analysis nodes
+        if (section === "analysis" && dataset) {
+            const a = dataset as any;
+            if (a.filepath && Array.isArray(a.pathname) && Array.isArray(a.frequencies)) {
+                window.dispatchEvent(new CustomEvent("plotNodeData", { detail: { dataset: a } }));
+            }
         }
     };
 
@@ -329,7 +339,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                         <MenuItem onClick={handleDelete} disabled={!canDelete}>
                             {TextStore.interface("Tree_Menu_Delete")}
                         </MenuItem>
-                        {section === "data" && (
+                        {(section === "data" || section === "analysis") && (
                             <>
                                 <Divider opacity={0.08} />
                                 <MenuItem onClick={handlePlot}>{TextStore.interface("Tree_Menu_Plot")}</MenuItem>

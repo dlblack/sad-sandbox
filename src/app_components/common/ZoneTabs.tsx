@@ -46,17 +46,25 @@ export default function ZoneTabs({
                         const typeClass = registry?.[t.kind]?.typeClass || "";
                         const isActive = t.id === activeId;
                         return (
-                            <Tabs.Tab key={t.id} value={t.id} className={typeClass}>
+                            <Tabs.Tab
+                                key={t.id}
+                                value={t.id}
+                                className={typeClass}
+                                rightSection={
+                                    <CloseButton
+                                        component="div"
+                                        size="xs"
+                                        aria-label="Close tab"
+                                        title={TextStore.interface("CANCEL")}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            closeTab(t.id);
+                                        }}
+                                    />
+                                }
+                            >
                                 <span className="tab-label">{t.title}</span>
-                                <CloseButton
-                                    size={"xs"}
-                                    aria-label="Close modal"
-                                    title={TextStore.interface("CANCEL")}
-                                    onClick={(e: React.MouseEvent) => {
-                                        e.stopPropagation();
-                                        closeTab(t.id);
-                                    }}
-                                />
                                 {isActive ? <span className="tab-active-accent" /> : null}
                             </Tabs.Tab>
                         );

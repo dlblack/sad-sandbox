@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Chart from "./Chart";
-import Loader from "./Loader";
-import {TextStore} from "../utils/TextStore";
+import Loader from "../Loader";
+import {TextStore} from "../../utils/TextStore";
 
 type DSSJson = {
   x?: Array<string | number>;

@@ -142,7 +142,7 @@ Frontend:
 -React 19
 -Vite
 -Leaflet
--Plotly.js (not yet implemented)
+-Plotly.js
 
 Backend:
 -express

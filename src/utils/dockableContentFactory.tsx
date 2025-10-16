@@ -5,9 +5,10 @@ import ComponentInterfaceOptions from "../app_components/ComponentInterfaceOptio
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
 import ComponentProject from "../app_components/ComponentProject";
-import PairedDataPlot from "../app_components/PairedDataPlot";
-import TimeSeriesPlot from "../app_components/TimeSeriesPlot";
-import DemoPlots from "../app_components/DemoPlots";
+import GenericPairedPlot from "../app_components/plots/GenericPairedPlot";
+import PairedDataPlot from "../app_components/plots/PairedDataPlot";
+import TimeSeriesPlot from "../app_components/plots/TimeSeriesPlot";
+import DemoPlots from "../app_components/plots/DemoPlots";
 
 // Editors
 import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/ManualDataEntryEditor";
@@ -139,7 +140,6 @@ function toObjectDelete(
   }
   return fn as (args: DeleteArgs & { name?: string }) => void | Promise<void>;
 }
-
 /** ---------- Factory ---------- */
 export const dockableContentFactory = (
     type: string,
@@ -183,7 +183,20 @@ export const dockableContentFactory = (
       return <TimeSeriesPlot dataset={props.dataset} />;
 
     case "PairedDataPlot":
-      return <PairedDataPlot dataset={props.dataset} />;
+    {
+      const d = props.dataset;
+      const looksLikeMulti =
+          d && typeof d.filepath === "string" && Array.isArray(d.pathname) && d.pathname.length > 0;
+      if (looksLikeMulti) {
+        return (
+            <GenericPairedPlot
+                analysis={{ ...d, typeFolder: "Peak Flow Frequency" }}
+                title={d?.name || "Analysis"}
+            />
+        );
+      }
+      return <PairedDataPlot dataset={d} />;
+    }
 
     case "DemoPlots":
       return <DemoPlots />;

@@ -1,16 +1,16 @@
-import React, {JSX, useEffect, useRef} from "react";
+import React, { JSX, useEffect, useRef } from "react";
 import Plotly from "plotly.js-dist-min";
 import {
+  Box,
+  Button,
   Container,
+  Divider,
   Grid,
   GridCol,
   Group,
-  Button,
-  Title,
-  Divider,
-  Box,
   Stack,
   Text,
+  Title,
 } from "@mantine/core";
 
 type Fig = {
@@ -37,11 +37,36 @@ const AX = (xTitle: string, yTitle: string) => ({
   margin: { l: 64, r: 16, b: 56, t: 42 },
 });
 
-// plotly.js-dist-min doesn’t ship types, so we keep this loose but safe.
+// If you ever provide a real Mapbox token, Plotly will use it.
+// Otherwise, we render with a public MapLibre style URL (no token).
 if (typeof window !== "undefined" && (window as any).MAPBOX_TOKEN) {
   Plotly.setPlotConfig({ mapboxAccessToken: (window as any).MAPBOX_TOKEN });
 }
 
+// Public MapLibre style that includes sprite/glyphs (prevents font CORS errors)
+const PUBLIC_OSM_STYLE_URL = "https://demotiles.maplibre.org/style.json";
+
+// Wait until MapLibre’s style is fully loaded before adding sources/layers/traces
+function waitForMapLoaded(
+    gd: any,
+    key: "mapbox" | `mapbox${number}` = "mapbox",
+    timeoutMs = 8000
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const start = performance.now();
+    function tick() {
+      const sub = gd?._fullLayout?.[key]?._subplot;
+      const map = sub?.map; // MapLibre instance
+      if (map && typeof map.loaded === "function" && map.loaded()) return resolve();
+      if (performance.now() - start > timeoutMs)
+        return reject(new Error("Map style load timeout"));
+      requestAnimationFrame(tick);
+    }
+    tick();
+  });
+}
+
+// Simple helper for all *non-map* figures
 function plot(div: HTMLDivElement | null, fig: Fig) {
   if (!div) return;
   Plotly.react(div, fig.data, fig.layout, fig.config || { displayModeBar: true, responsive: true });
@@ -84,6 +109,7 @@ export default function DemoPlots(): JSX.Element {
     rangeSlider: useRef<HTMLDivElement | null>(null),
     tileMapLayer: useRef<HTMLDivElement | null>(null),
     tileDensity: useRef<HTMLDivElement | null>(null),
+    freq: useRef<HTMLDivElement | null>(null),
   };
 
   const plotList = [
@@ -92,6 +118,7 @@ export default function DemoPlots(): JSX.Element {
     { ref: () => refs.hist.current, title: "Histogram of Annual Peak Flows" },
     { ref: () => refs.barErr.current, title: "Bar with CI" },
     { ref: () => refs.scatterLog.current, title: "Frequency Curve (Log–Log)" },
+    { ref: () => refs.freq.current, title: "Flow Frequency (Exceedance Probability)" },
     { ref: () => refs.heat2d.current, title: "2D Density" },
     { ref: () => refs.boxOnly.current, title: "Seasonal Flow Distributions (Box)" },
     { ref: () => refs.boxViolin.current, title: "Seasonal Flow Distributions (Violin)" },
@@ -178,6 +205,128 @@ export default function DemoPlots(): JSX.Element {
     return { x, y };
   }
 
+  // ----- map helpers (two-phase render) -----
+  async function renderSitesMap(div: HTMLDivElement | null) {
+    if (!div) return;
+
+    const lats = [21.36, 21.317, 21.34, 21.35];
+    const lons = [-157.88, -157.858, -157.89, -157.91];
+    const names = ["Gage A", "Gage B", "Gage C", "Gage D"];
+
+    // Phase 1: empty map with URL style
+    await Plotly.react(
+        div,
+        [],
+        {
+          mapbox: {
+            style: PUBLIC_OSM_STYLE_URL,
+            center: { lat: 21.34, lon: -157.89 },
+            zoom: 11,
+          },
+          margin: { l: 0, r: 0, t: 40, b: 0 },
+          height: 360,
+          title: { text: "USGS Tile Map Layer (Sites)" },
+        },
+        { displayModeBar: true, responsive: true }
+    );
+
+    // Wait for MapLibre’s style to finish
+    await waitForMapLoaded(div).catch(() => { /* swallow to avoid noisy console */ });
+
+    // Phase 2: add traces (+ optional raster overlay)
+    await Plotly.react(
+        div,
+        [
+          {
+            type: "scattermapbox",
+            lat: lats,
+            lon: lons,
+            mode: "markers",
+            marker: { size: 10 },
+            hovertext: names,
+            hoverinfo: "text",
+            name: "Sites",
+          },
+        ],
+        {
+          mapbox: {
+            style: PUBLIC_OSM_STYLE_URL,
+            center: { lat: 21.34, lon: -157.89 },
+            zoom: 11,
+            layers: [
+              {
+                sourcetype: "raster",
+                source: [
+                  "https://basemap.nationalmap.gov/ArcGIS/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+                ],
+                below: "traces",
+              },
+            ],
+          },
+          margin: { l: 0, r: 0, t: 40, b: 0 },
+          height: 360,
+          title: { text: "USGS Tile Map Layer (Sites)" },
+        },
+        { displayModeBar: true, responsive: true }
+    );
+  }
+
+  async function renderDensityMap(div: HTMLDivElement | null) {
+    if (!div) return;
+
+    const center = { lat: 21.34, lon: -157.89 };
+    const N = 400;
+    const lat: number[] = [];
+    const lon: number[] = [];
+    const mag: number[] = [];
+    for (let i = 0; i < N; i++) {
+      const r = Math.abs(randn(1, 0, 0.02)[0]);
+      const theta = Math.random() * 2 * Math.PI;
+      lat.push(center.lat + r * Math.cos(theta));
+      lon.push(center.lon + r * Math.sin(theta));
+      mag.push(1000 + Math.abs(randn(1, 0, 700)[0]));
+    }
+
+    // Phase 1: empty map with URL style
+    await Plotly.react(
+        div,
+        [],
+        {
+          mapbox: { style: PUBLIC_OSM_STYLE_URL, center, zoom: 10.8 },
+          margin: { l: 0, r: 0, t: 40, b: 0 },
+          height: 360,
+          title: { text: "Tile Density Heat Map (High-Flow Event Density)" },
+        },
+        { displayModeBar: true, responsive: true }
+    );
+
+    // Wait for MapLibre’s style to finish
+    await waitForMapLoaded(div).catch(() => { /* swallow to avoid noisy console */ });
+
+    // Phase 2: add densitymapbox trace
+    await Plotly.react(
+        div,
+        [
+          ({
+            type: "densitymapbox",
+            lat,
+            lon,
+            z: mag,
+            radius: 25,
+            name: "Flow Events",
+          } as any),
+        ],
+        {
+          mapbox: { style: PUBLIC_OSM_STYLE_URL, center, zoom: 10.8 },
+          margin: { l: 0, r: 0, t: 40, b: 0 },
+          height: 360,
+          title: { text: "Tile Density Heat Map (High-Flow Event Density)" },
+        },
+        { displayModeBar: true, responsive: true }
+    );
+  }
+  // ----- end map helpers -----
+
   useEffect(() => {
     const t = linspace(0, 24, 40);
     const base = t.map((x) => 800 + 300 * Math.sin((Math.PI / 12) * x));
@@ -204,34 +353,34 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 2) Confidence ribbons for three series (thinned)
+    // 2) Confidence ribbons
     const upper1 = flow.map((y, i) => y + err[i] * 0.8);
     const lower1 = flow.map((y, i) => y - err[i] * 0.8);
 
-    const base2 = t.map((x) => 950 + 200 * Math.cos((Math.PI / 12) * x));
+    const base2  = t.map((x) => 950 + 200 * Math.cos((Math.PI / 12) * x));
     const noise2 = randn(t.length, 0, 60);
-    const flow2 = base2.map((b, i) => b + noise2[i]);
-    const err2 = t.map(() => 80 + Math.random() * 50);
+    const flow2  = base2.map((b, i) => b + noise2[i]);
+    const err2   = t.map(() => 80 + Math.random() * 50);
     const upper2 = flow2.map((y, i) => y + err2[i] * 0.8);
     const lower2 = flow2.map((y, i) => y - err2[i] * 0.8);
 
-    const base3 = t.map((x) => 880 + 180 * Math.sin((Math.PI / 8) * x + Math.PI / 3));
+    const base3  = t.map((x) => 880 + 180 * Math.sin((Math.PI / 8) * x + Math.PI / 3));
     const noise3 = randn(t.length, 0, 45);
-    const flow3 = base3.map((b, i) => b + noise3[i]);
-    const err3 = t.map(() => 60 + Math.random() * 40);
+    const flow3  = base3.map((b, i) => b + noise3[i]);
+    const err3   = t.map(() => 60 + Math.random() * 40);
     const upper3 = flow3.map((y, i) => y + err3[i] * 0.8);
     const lower3 = flow3.map((y, i) => y - err3[i] * 0.8);
 
     const dsStep = 4;
-    const f1 = downsample(t, flow, dsStep);
+    const f1 = downsample(t, flow,   dsStep);
     const u1 = downsample(t, upper1, dsStep);
     const l1 = downsample(t, lower1, dsStep);
 
-    const f2 = downsample(t, flow2, dsStep);
+    const f2 = downsample(t, flow2,  dsStep);
     const u2 = downsample(t, upper2, dsStep);
     const l2 = downsample(t, lower2, dsStep);
 
-    const f3 = downsample(t, flow3, dsStep);
+    const f3 = downsample(t, flow3,  dsStep);
     const u3 = downsample(t, upper3, dsStep);
     const l3 = downsample(t, lower3, dsStep);
 
@@ -294,7 +443,101 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 6) 2D density
+    // 6) Flow Frequency (custom axis)
+    {
+      const pTicks = [1, 0.99, 0.9, 0.5, 0.1, 0.01, 0.001];
+      const xPos = [0, 1, 2, 3, 4, 5, 6];
+      const logPT = pTicks.map((v) => Math.log10(v));
+      function probFromX(x: number) {
+        if (x <= xPos[0]) return pTicks[0];
+        if (x >= xPos[xPos.length - 1]) return pTicks[pTicks.length - 1];
+        const i = Math.floor(x);
+        const t = x - xPos[i];
+        const l0 = logPT[i];
+        const l1 = logPT[i + 1];
+        const lp = l0 * (1 - t) + l1 * t;
+        return Math.pow(10, lp);
+      }
+      const cQuad = 0.02;
+      const aLog10 = 2.494448508572121;
+      const bLog10 = 0.47979400086720386;
+      function flowFromX(x: number) {
+        const partA = Math.pow(10, aLog10);
+        const partB = Math.pow(10, bLog10 * x);
+        const partC = Math.pow(10, cQuad * x * x);
+        return (partA * partB) / partC;
+      }
+      const n = 360;
+      const xs = Array.from({ length: n }, (_, k) => (6 * k) / (n - 1));
+      xs.map((x) => probFromX(x));
+      const computed = xs.map((x) => flowFromX(x));
+      function widen(x: number) {
+        const t = x / 6;
+        return 0.16 + 0.1 * t;
+      }
+      const hiBand = xs.map((x, i) => computed[i] * Math.exp(Math.log1p(widen(x))));
+      const loBand = xs.map((x, i) => computed[i] / Math.exp(Math.log1p(widen(x))));
+      function pickEvery<T>(arr: T[], step: number): T[] {
+        const out: T[] = [];
+        for (let i = 0; i < arr.length; i += step) out.push(arr[i]);
+        return out;
+      }
+      const xSys = pickEvery(xs, 3);
+      const sysFlows = xSys.map((x, i) => {
+        const base = flowFromX(x);
+        const wave = Math.exp(0.06 * Math.sin(i * 0.8));
+        const jitterSeq = [1.0, 1.02, 0.98, 1.03, 0.97, 1.01, 0.99];
+        const jitter = jitterSeq[i % jitterSeq.length];
+        return base * wave * jitter;
+      });
+      const yMin = 100;
+      const yMax = Math.pow(10, Math.ceil(Math.log10(Math.max(...computed))));
+      const decadeTicks = [100, 1000, 10000, 100000].filter((v) => v >= yMin && v <= yMax);
+
+      plot(refs.freq.current, {
+        data: [
+          { x: xs, y: loBand, type: "scatter", mode: "lines", name: "5th Confidence Limit", line: { width: 2, color: "rgb(220,50,47)", dash: "dash" } },
+          { x: xs, y: hiBand, type: "scatter", mode: "lines", name: "95th Confidence Limit", line: { width: 2, color: "rgb(220,50,47)", dash: "dash" } },
+          { x: xs, y: computed, type: "scatter", mode: "lines", name: "Computed Curve", line: { width: 3, color: "black" } },
+          { x: xSys, y: sysFlows, type: "scatter", mode: "markers", name: "Systematic Record", marker: { size: 6, symbol: "diamond", color: "rgb(30,30,30)", opacity: 0.9 } },
+        ],
+        layout: {
+          title: { text: "Flow Frequency (Exceedance Probability)" },
+          xaxis: {
+            title: { text: "Exceedance Probability" },
+            type: "linear",
+            range: [-0.6, 6.6],
+            tickmode: "array",
+            tickvals: xPos,
+            ticktext: ["1", "0.99", "0.9", "0.5", "0.1", "0.01", "0.001"],
+            ticklabelposition: "outside",
+            tickangle: 0,
+            showgrid: true,
+            gridcolor: "rgba(0,0,0,0.15)",
+            zeroline: false,
+          },
+          yaxis: {
+            title: { text: "Flow (cfs)" },
+            type: "log",
+            range: [Math.log10(yMin), Math.log10(yMax)],
+            tickmode: "array",
+            tickvals: decadeTicks,
+            ticktext: decadeTicks.map((v) => v.toLocaleString()),
+            ticks: "",
+            ticklen: 0,
+            showgrid: true,
+            gridcolor: "rgba(0,0,0,0.22)",
+            gridwidth: 1.2,
+            minor: { showgrid: true, dtick: "D1", gridcolor: "rgba(0,0,0,0.12)", gridwidth: 0.7 },
+          },
+          legend: { orientation: "v", x: 1.03, y: 0.5, xanchor: "left", yanchor: "middle", bgcolor: "rgba(255,255,255,0.85)" },
+          margin: { l: 92, r: 220, b: 64, t: 52 },
+          height: 450,
+        },
+      });
+    }
+
+    // 7) 2D density
     const x2 = randn(1000, 0, 1.0);
     const y2 = x2.map((v) => 0.6 * v + randn(1, 0, 0.8)[0]);
     plot(refs.heat2d.current, {
@@ -306,12 +549,11 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 7) Box plots (grouped seasonal)
+    // 8) Box plots
     const springBox = randn(220, 1500, 420);
     const summerBox = randn(220, 900, 260);
     const fallBox = randn(220, 1800, 520);
     const winterBox = randn(220, 2200, 740);
-
     plot(refs.boxOnly.current, {
       data: [
         { y: springBox, name: "Spring", type: "box", boxmean: true, jitter: 0.35, pointpos: 0, marker: { size: 3 }, line: { width: 1.5 } },
@@ -327,7 +569,7 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 8) Violin distributions
+    // 9) Violin
     const spring = randn(200, 1500, 400);
     const summer = randn(200, 900, 250);
     const fall = randn(200, 1800, 500);
@@ -346,7 +588,7 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 9) Candlestick (daily stage range)
+    // 10) Candlestick
     const days = linspace(1, 30, 30).map((d) => `Day ${Math.round(d)}`);
     const open = randn(30, 10, 0.6);
     const close = open.map((v) => v + randn(1, 0, 0.6)[0]);
@@ -361,7 +603,7 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 10) Tile heatmap (rainfall intensity)
+    // 11) Tile heatmap (not a map, just a heatmap)
     const xh = linspace(0, 24, 25);
     const yh = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const z = yh.map(() => xh.map(() => Math.max(0, randn(1, 0.25, 0.35)[0])));
@@ -374,7 +616,7 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 11) Subplots (2×1)
+    // 12) Subplots (2×1)
     const gX = linspace(0, 10, 200);
     const s1 = gX.map((x) => Math.sin(x));
     const s2 = gX.map((x) => Math.cos(x));
@@ -395,9 +637,11 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 12) Inset plot
+    // 13) Inset plot
     const mainX = linspace(0, 72, 289);
-    const mainY = mainX.map((x) => 1000 + 600 * Math.exp(-Math.pow((x - 36) / 10, 2)) + randn(1, 0, 25)[0]);
+    const mainY = mainX.map(
+        (x) => 1000 + 600 * Math.exp(-Math.pow((x - 36) / 10, 2)) + randn(1, 0, 25)[0]
+    );
     const insetX = linspace(30, 42, 60);
     const insetY = insetX.map((x) => 1000 + 600 * Math.exp(-Math.pow((x - 36) / 10, 2)));
     plot(refs.inset.current, {
@@ -415,13 +659,15 @@ export default function DemoPlots(): JSX.Element {
       },
     });
 
-    // 13) Contour plot
+    // 14) Contour
     {
       const x = linspace(-5, 5, 80);
       const y = linspace(-5, 5, 80);
-      const z = y.map((yv) => x.map((xv) => 10 * Math.exp(-((xv * xv + yv * yv) / 10)) + 0.5 * xv - 0.3 * yv));
+      const z2 = y.map((yv) =>
+          x.map((xv) => 10 * Math.exp(-((xv * xv + yv * yv) / 10)) + 0.5 * xv - 0.3 * yv)
+      );
       plot(refs.contour.current, {
-        data: [{ x, y, z, type: "contour", contours: { coloring: "heatmap" }, colorbar: { title: "Stage (ft)" } }],
+        data: [{ x, y, z: z2, type: "contour", contours: { coloring: "heatmap" }, colorbar: { title: "Stage (ft)" } }],
         layout: {
           ...AX("X", "Y"),
           title: { text: "Contour Plot (Stage Surface)" },
@@ -430,14 +676,14 @@ export default function DemoPlots(): JSX.Element {
       });
     }
 
-    // 14) 3D Ribbon surface
+    // 15) 3D ribbon
     {
       const xs = linspace(0, 24, 60);
       const scenarios = 20;
-      const z: number[][] = [];
+      const z3: number[][] = [];
       for (let i = 0; i < scenarios; i++) {
         const phase = (i / scenarios) * Math.PI;
-        z.push(xs.map((x) => 900 + 250 * Math.sin((Math.PI / 12) * x + phase) + randn(1, 0, 15)[0]));
+        z3.push(xs.map((x) => 900 + 250 * Math.sin((Math.PI / 12) * x + phase) + randn(1, 0, 15)[0]));
       }
       plot(refs.ribbon3d.current, {
         data: [
@@ -445,7 +691,7 @@ export default function DemoPlots(): JSX.Element {
             type: "surface",
             x: xs,
             y: linspace(1, scenarios, scenarios),
-            z,
+            z: z3,
             showscale: true,
             colorbar: { title: "cfs" },
           },
@@ -463,10 +709,12 @@ export default function DemoPlots(): JSX.Element {
       });
     }
 
-    // 15) Time series with range slider
+    // 16) Time series with range slider
     {
       const time = linspace(0, 365, 365);
-      const series = time.map((d) => 1500 + 500 * Math.sin((2 * Math.PI * d) / 365) + randn(1, 0, 80)[0]);
+      const series = time.map(
+          (d) => 1500 + 500 * Math.sin((2 * Math.PI * d) / 365) + randn(1, 0, 80)[0]
+      );
       plot(refs.rangeSlider.current, {
         data: [
           {
@@ -497,87 +745,15 @@ export default function DemoPlots(): JSX.Element {
       });
     }
 
-    // 16) Tile map w/ sites
-    {
-      const lats = [21.36, 21.317, 21.34, 21.35];
-      const lons = [-157.88, -157.858, -157.89, -157.91];
-      const names = ["Gage A", "Gage B", "Gage C", "Gage D"];
+    // 17) Map (sites) — two-phase
+    (async () => {
+      await renderSitesMap(refs.tileMapLayer.current);
+    })();
 
-      plot(refs.tileMapLayer.current, {
-        data: [
-          {
-            type: "scattermapbox",
-            lat: lats,
-            lon: lons,
-            mode: "markers+text",
-            marker: { size: 10 },
-            text: names,
-            textposition: "top right",
-            name: "Sites",
-          },
-        ],
-        layout: {
-          title: { text: "USGS Tile Map Layer (Sites)" },
-          mapbox: {
-            style: "open-street-map",
-            center: { lat: 21.34, lon: -157.89 },
-            zoom: 11,
-            layers: [
-              {
-                sourcetype: "raster",
-                source: [
-                  "https://basemap.nationalmap.gov/ArcGIS/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
-                ],
-                below: "traces",
-              },
-            ],
-          },
-          margin: { l: 0, r: 0, t: 40, b: 0 },
-          height: 360,
-        },
-        config: { displayModeBar: true, responsive: true },
-      });
-    }
-
-    // 17) Tile density heat map
-    {
-      const center = { lat: 21.34, lon: -157.89 };
-      const N = 400;
-      const lat: number[] = [];
-      const lon: number[] = [];
-      const mag: number[] = [];
-      for (let i = 0; i < N; i++) {
-        const r = Math.abs(randn(1, 0, 0.02)[0]);
-        const theta = Math.random() * 2 * Math.PI;
-        lat.push(center.lat + r * Math.cos(theta));
-        lon.push(center.lon + r * Math.sin(theta));
-        mag.push(1000 + Math.abs(randn(1, 0, 700)[0]));
-      }
-
-      plot(refs.tileDensity.current, {
-        data: [
-          {
-            type: "densitymapbox",
-            lat,
-            lon,
-            z: mag,
-            radius: 25,
-            name: "Flow Events",
-          },
-        ],
-        layout: {
-          title: { text: "Tile Density Heat Map (High-Flow Event Density)" },
-          mapbox: {
-            style: "open-street-map",
-            center: center,
-            zoom: 10.8,
-          },
-          margin: { l: 0, r: 0, t: 40, b: 0 },
-          height: 360,
-        },
-        config: { displayModeBar: true, responsive: true },
-      });
-    }
+    // 18) Map (density) — two-phase
+    (async () => {
+      await renderDensityMap(refs.tileDensity.current);
+    })();
   }, []);
 
   return (
@@ -605,121 +781,92 @@ export default function DemoPlots(): JSX.Element {
         <Stack gap="lg" mt="md">
           <Grid gutter="lg">
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Hydrograph with Error Bars
-              </Text>
+              <Text ta="center" fw={600}>Hydrograph with Error Bars</Text>
               <div ref={refs.lineErr} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Flow with Three Confidence Ribbons
-              </Text>
+              <Text ta="center" fw={600}>Flow with Three Confidence Ribbons</Text>
               <div ref={refs.ribbon} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Histogram of Annual Peak Flows
-              </Text>
+              <Text ta="center" fw={600}>Histogram of Annual Peak Flows</Text>
               <div ref={refs.hist} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Bar with CI
-              </Text>
+              <Text ta="center" fw={600}>Bar with CI</Text>
               <div ref={refs.barErr} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Frequency Curve (Log–Log)
-              </Text>
+              <Text ta="center" fw={600}>Frequency Curve (Log–Log)</Text>
               <div ref={refs.scatterLog} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                2D Density
-              </Text>
+              <Text ta="center" fw={600}>Flow Frequency (Exceedance Probability)</Text>
+              <div ref={refs.freq} style={{ height: 420 }} />
+            </GridCol>
+
+            <GridCol span={12}>
+              <Text ta="center" fw={600}>2D Density</Text>
               <div ref={refs.heat2d} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Seasonal Flow Distributions (Box)
-              </Text>
+              <Text ta="center" fw={600}>Seasonal Flow Distributions (Box)</Text>
               <div ref={refs.boxOnly} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Seasonal Flow Distributions (Violin)
-              </Text>
+              <Text ta="center" fw={600}>Seasonal Flow Distributions (Violin)</Text>
               <div ref={refs.boxViolin} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Daily Stage Range (ft)
-              </Text>
+              <Text ta="center" fw={600}>Daily Stage Range (ft)</Text>
               <div ref={refs.candlestick} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Rainfall Intensity (Tile Heatmap)
-              </Text>
+              <Text ta="center" fw={600}>Rainfall Intensity (Tile Heatmap)</Text>
               <div ref={refs.heatmapTiles} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Subplots (2×1)
-              </Text>
+              <Text ta="center" fw={600}>Subplots (2×1)</Text>
               <div ref={refs.subplots} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Hydrograph with Inset
-              </Text>
+              <Text ta="center" fw={600}>Hydrograph with Inset</Text>
               <div ref={refs.inset} style={{ height: 500 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Contour Plot (Stage Surface)
-              </Text>
+              <Text ta="center" fw={600}>Contour Plot (Stage Surface)</Text>
               <div ref={refs.contour} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                3D Ribbon Surface (Ensemble Hydrographs)
-              </Text>
+              <Text ta="center" fw={600}>3D Ribbon Surface (Ensemble Hydrographs)</Text>
               <div ref={refs.ribbon3d} style={{ height: 500 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Time Series with Range Slider
-              </Text>
+              <Text ta="center" fw={600}>Time Series with Range Slider</Text>
               <div ref={refs.rangeSlider} style={{ height: 420 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                USGS Tile Map Layer (Sites)
-              </Text>
+              <Text ta="center" fw={600}>USGS Tile Map Layer (Sites)</Text>
               <div ref={refs.tileMapLayer} style={{ height: 500 }} />
             </GridCol>
 
             <GridCol span={12}>
-              <Text ta="center" fw={600}>
-                Tile Density Heat Map
-              </Text>
+              <Text ta="center" fw={600}>Tile Density Heat Map</Text>
               <div ref={refs.tileDensity} style={{ height: 500 }} />
             </GridCol>
           </Grid>

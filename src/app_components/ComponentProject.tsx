@@ -121,6 +121,12 @@ export default function ComponentProject({
     const [saveAsDialogOpen, setSaveAsDialogOpen] = useState<any>(null);
 
     useEffect(() => {
+        const isAnalysisMulti = (d: any) =>
+            d &&
+            typeof d.filepath === "string" &&
+            Array.isArray(d.pathname) &&
+            Array.isArray(d.frequencies);
+
         const listener = (e: Event) => {
             const detail = (e as CustomEvent)?.detail as any;
             const dataset = detail?.dataset;
@@ -128,7 +134,14 @@ export default function ComponentProject({
 
             if (dataset.structureType === "TimeSeries") {
                 handleOpenComponent("TimeSeriesPlot", { dataset });
-            } else if (dataset.structureType === "PairedData") {
+                return;
+            }
+            if (dataset.structureType === "PairedData") {
+                handleOpenComponent("PairedDataPlot", { dataset });
+                return;
+            }
+            if (isAnalysisMulti(dataset)) {
+                // analysis object: open a PairedDataPlot tab
                 handleOpenComponent("PairedDataPlot", { dataset });
             }
         };
@@ -419,19 +432,16 @@ export default function ComponentProject({
                                             setRenameValue={setRenameValue}
                                             saveAsDialogOpen={saveAsDialogOpen}
                                             setSaveAsDialogOpen={setSaveAsDialogOpen}
+                                            dataset={item}
                                         />
                                     ))
                                 ) : (
-                                    <Text size="xs" className="tree-label">
-                                        No analyses
-                                    </Text>
+                                    <Text size="xs" className="tree-label">No analyses</Text>
                                 )}
                             </TreeNode>
                         ))
                     ) : (
-                        <Text size="xs" className="tree-label">
-                            No analyses
-                        </Text>
+                        <Text size="xs" className="tree-label">No analyses</Text>
                     )}
                 </TreeNode>
             </div>

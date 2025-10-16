@@ -71,8 +71,6 @@ export const componentMetadata: Record<string, ComponentMeta> = {
     entityName: "Map",
     category: "panel",
     centerTab: true,
-    width: vw(0.30),
-    height: vh(0.30),
   },
   ComponentMessage: {
     entityName: "Messages",
@@ -84,15 +82,11 @@ export const componentMetadata: Record<string, ComponentMeta> = {
     entityName: "Paired Data Plot",
     category: "panel",
     centerTab: true,
-    width: vw(0.50),
-    height: vh(0.40),
   },
   TimeSeriesPlot: {
     entityName: "Time Series Plot",
     category: "panel",
     centerTab: true,
-    width: vw(0.50),
-    height: vh(0.40),
   },
 
   // Data editors
