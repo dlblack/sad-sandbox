@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from "ele
 import path from "path";
 import { fileURLToPath } from "url";
 import { TextStore } from "../src/utils/TextStore";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,16 +15,19 @@ app.commandLine.appendSwitch("high-dpi-support", "1");
 app.commandLine.appendSwitch("force-device-scale-factor", "1");
 
 function createWindow(): void {
+  const preloadPath = path.join(__dirname, 'preload.js');
+  console.log('[Electron] __dirname:', __dirname);
+  console.log('[Electron] preload path:', preloadPath, 'exists:', fs.existsSync(preloadPath));
+
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    icon: path.join(process.cwd(), "assets/images", "favicon.ico"),
+    icon: path.join(process.cwd(), 'assets/images', 'favicon.ico'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      // In dev & prod, vite-plugin-electron builds preload to dist-electron/preload.ts,
-      // and __dirname points to that build folder.
-      preload: path.join(__dirname, "preload.ts"),
+      sandbox: false,
+      preload: preloadPath,
       zoomFactor: 0.75,
     },
   });
@@ -142,13 +146,8 @@ function createWindow(): void {
           click: () => win.webContents.send("menu-tools", "ComponentMessage"),
         },
         {
-          label: TextStore.interface("Navbar_Tools_View"),
-          submenu: [
-            {
-              label: TextStore.interface("Navbar_Tools_View_InterfaceSize"),
-              click: () => win.webContents.send("menu-tools", "ComponentInterfaceOptions"),
-            },
-          ],
+          label: TextStore.interface("Navbar_Tools_View_InterfaceSize"),
+          click: () => win.webContents.send("menu-tools", "ComponentInterfaceOptions"),
         },
         {
           label: TextStore.interface("Navbar_Tools_ToggleDevTools"),

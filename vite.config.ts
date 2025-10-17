@@ -8,30 +8,30 @@ export default defineConfig({
         electron([
             {
                 entry: 'src-electron/main.ts',
-                onstart({ startup }): void {
-                    void startup();
-                },
-                vite: {
-                    build: { outDir: 'dist-electron', minify: false },
-                },
+                onstart({ startup }) { void startup(); },
+                vite: { build: { outDir: 'dist-electron', minify: false } },
             },
             {
                 entry: 'src-electron/preload.ts',
-                onstart({ reload }): void {
-                    void reload();
-                },
+                onstart({ reload }) { void reload(); },
                 vite: {
-                    build: { outDir: 'dist-electron', minify: false },
+                    build: {
+                        outDir: 'dist-electron',
+                        minify: false,
+                        target: 'node18',
+                        rollupOptions: {
+                            output: {
+                                format: 'cjs',                // <<< CommonJS
+                                entryFileNames: 'preload.js', // <<< name it preload.js
+                            },
+                        },
+                    },
                 },
             },
         ]),
     ],
     server: {
-        proxy: {
-            '/api': 'http://localhost:5001',
-        },
+        proxy: { '/api': 'http://localhost:5001' },
     },
-    build: {
-        outDir: 'dist',
-    },
+    build: { outDir: 'dist' },
 });

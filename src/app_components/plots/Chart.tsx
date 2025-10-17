@@ -64,12 +64,21 @@ export default function Chart({
     const resolvedTitleText =
         typeof title === "string"
             ? title
-            : typeof layout?.title === "string"
-                ? (layout?.title as unknown as string)
-                : (layout?.title as any)?.text ?? "";
+            : (layout?.title as any)?.text ?? "";
 
     const xaxisIncoming = layout?.xaxis ?? {};
     const yaxisIncoming = layout?.yaxis ?? {};
+
+    // Respect an explicit incoming type if it exists
+    const incomingType = (xaxisIncoming as any).type;
+    const resolvedXType =
+        incomingType !== undefined
+            ? incomingType
+            : forceLinearX
+                ? "linear"
+                : looksLikeDate
+                    ? "date"
+                    : "linear";
 
     const plotLayout: Partial<Layout> = {
       ...layout,
@@ -77,7 +86,7 @@ export default function Chart({
       xaxis: {
         ...xaxisIncoming,
         title: { text: xLabel ?? (xaxisIncoming as any)?.title?.text ?? "" },
-        type: forceLinearX ? "linear" : looksLikeDate ? "date" : (xaxisIncoming as any)?.type ?? "linear",
+        type: resolvedXType,
       },
       yaxis: {
         ...yaxisIncoming,

@@ -13,5 +13,5 @@ export default function isElectron(): boolean {
 
   // User agent check (fallback)
   const ua: string | undefined = g?.navigator?.userAgent;
-  return !!(typeof ua === "string" && /Electron/i.test(ua));
+  return (typeof ua === "string" && /Electron/i.test(ua));
 }
