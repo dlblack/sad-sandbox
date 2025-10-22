@@ -77,7 +77,11 @@ export const componentMetadata: Record<string, ComponentMeta> = {
     category: "panel",
     centerTab: false,
   },
-
+  ComponentPlotStyle: {
+    entityName: "Plot Styles",
+    category: "panel",
+    centerTab: false,
+  },
   PairedDataPlot: {
     entityName: "Paired Data Plot",
     category: "panel",

@@ -4,8 +4,8 @@ import React from "react";
 import ComponentInterfaceOptions from "../app_components/ComponentInterfaceOptions";
 import ComponentMap from "../app_components/ComponentMap";
 import ComponentMessage from "../app_components/ComponentMessage";
+import ComponentPlotStyle from "../app_components/ComponentPlotStyle"; // ⬅️ no named imports
 import ComponentProject from "../app_components/ComponentProject";
-import GenericPairedPlot from "../app_components/plots/GenericPairedPlot";
 import PairedDataPlot from "../app_components/plots/PairedDataPlot";
 import TimeSeriesPlot from "../app_components/plots/TimeSeriesPlot";
 import DemoPlots from "../app_components/plots/DemoPlots";
@@ -15,7 +15,8 @@ import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/
 
 // Analysis wizards
 import Bulletin17AnalysisWizard from "../app_components/analysis/bulletin17/Bulletin17AnalysisWizard";
-import FloodTypeClassAnalysisWizard from "../app_components/analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
+import FloodTypeClassAnalysisWizard
+  from "../app_components/analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
 import PeakFlowFreqWizard from "../app_components/analysis/peak_flow/PeakFlowFreqWizard";
 import GeneralFreqAnalysisWizard from "../app_components/analysis/GeneralFreqAnalysisWizard";
 import VolumeFreqAnalysisWizard from "../app_components/analysis/VolumeFreqAnalysisWizard";
@@ -179,24 +180,14 @@ export const dockableContentFactory = (
           />
       );
 
+    case "ComponentPlotStyle":
+      return <ComponentPlotStyle />;
+
     case "TimeSeriesPlot":
       return <TimeSeriesPlot dataset={props.dataset} />;
 
     case "PairedDataPlot":
-    {
-      const d = props.dataset;
-      const looksLikeMulti =
-          d && typeof d.filepath === "string" && Array.isArray(d.pathname) && d.pathname.length > 0;
-      if (looksLikeMulti) {
-        return (
-            <GenericPairedPlot
-                analysis={{ ...d, typeFolder: "Peak Flow Frequency" }}
-                title={d?.name || "Analysis"}
-            />
-        );
-      }
-      return <PairedDataPlot dataset={d} />;
-    }
+      return <PairedDataPlot dataset={props.dataset} />;
 
     case "DemoPlots":
       return <DemoPlots />;

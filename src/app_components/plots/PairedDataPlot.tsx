@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
-import Chart from "./Chart";
-import Loader from "../Loader";
+import Plot from "./Plot";
+import Loader from "./Loader";
 import { TextStore } from "../../utils/TextStore";
-import GenericPairedPlotFromAnalysis from "./GenericPairedPlot"; // ← add
-
-// treat “file + pathname[] + frequencies[]” as an analysis plot
-const isAnalysisMulti = (d: any) =>
-    d &&
-    typeof d.filepath === "string" &&
-    Array.isArray(d.pathname) &&
-    Array.isArray(d.frequencies);
+import type { Datum } from "plotly.js";
+import { buildPairedCategoryXAxis, isFlowFrequency, prettyProbLabel } from "./axisHelpers";
+import { styleForPeakFlowFreq } from "./styleHelpers";
 
 type DSSJson = {
   x?: Array<number | string>;
@@ -24,63 +19,70 @@ interface PairedDataset {
   name?: string;
   dataFormat?: "DSS" | string;
   filepath?: string;
-  pathname?: string; // single-path mode
+  pathname?: string;
   rows?: Array<{ x: number | string; y: number | string }>;
   xLabel?: string;
   yLabel?: string;
   xUnits?: string;
   yUnits?: string;
+
+  // analysis/multi
+  typeFolder?: string;
+  frequencies?: string[];
+  yScale?: "linear" | "log";
+  xReverse?: boolean;
+  styleMap?: Record<string, any>;
+  parameter?: string; // e.g., "Discharge"
 }
 
-async function loadDSSData(filepath?: string, pathname?: string): Promise<DSSJson> {
-  const res = await fetch(
-      `/api/read-dss?file=${encodeURIComponent(filepath || "")}&path=${encodeURIComponent(pathname || "")}`
-  );
+const isMultiPaired = (d: any) =>
+    d && typeof d.filepath === "string" && Array.isArray(d.pathname) && d.pathname.length > 0;
+
+async function readPaired(file?: string, path?: string): Promise<DSSJson> {
+  const url = `/api/read-dss?file=${encodeURIComponent(file || "")}&path=${encodeURIComponent(path || "")}`;
+  const res = await fetch(url);
   return res.json();
 }
 
 function normalizePairedData(json: DSSJson, dataset: PairedDataset) {
-  let xVals = (json.x || []).map(Number);
-  let yVals = (json.y || []).map(Number);
+  const xVals = (json.x || []).map((v) => Number(v));
+  const yVals = (json.y || []).map((v) => Number(v));
 
   let xLabel = json.xLabel || dataset.xLabel || TextStore.interface("PairedDataPlot_DefaultXLabel");
   let xUnits = json.xUnits || dataset.xUnits || "";
   let yLabel = json.yLabel || dataset.yLabel || TextStore.interface("PairedDataPlot_DefaultYLabel");
   let yUnits = json.yUnits || dataset.yUnits || "";
 
-  if (xLabel.toLowerCase().includes("elev") && yLabel.toLowerCase().includes("stor")) {
-    [xVals, yVals] = [yVals, xVals];
-    [xLabel, yLabel] = [yLabel, xLabel];
-    [xUnits, yUnits] = [yUnits, xUnits];
+  if ((xLabel || "").toLowerCase().includes("elev") && (yLabel || "").toLowerCase().includes("stor")) {
+    return {
+      x: yVals as any[],
+      y: xVals as any[],
+      xLabel: yLabel,
+      yLabel: xLabel,
+      xUnits: yUnits,
+      yUnits: xUnits
+    };
   }
 
-  return { x: xVals, y: yVals, xLabel, yLabel, xUnits, yUnits };
+  return { x: xVals as any[], y: yVals as any[], xLabel, yLabel, xUnits, yUnits };
 }
 
 export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | any }) {
-  // NEW: analysis (multi-pathname) → delegate to generic plotter
-  if (isAnalysisMulti(dataset)) {
-    return (
-        <GenericPairedPlotFromAnalysis
-            analysis={dataset}
-            title={dataset?.name || TextStore.interface("PairedDataPlot_DefaultTitle")}
-        />
-    );
-  }
-
-  // legacy single-series paired data
-  const [data, setData] = useState<ReturnType<typeof normalizePairedData> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [singleData, setSingleData] = useState<ReturnType<typeof normalizePairedData> | null>(null);
+  const [multiLoaded, setMultiLoaded] = useState<Array<DSSJson>>([]);
+
+  const isMulti = isMultiPaired(dataset);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    async function loadSingle() {
       setLoading(true);
       try {
         let json: DSSJson;
         if (dataset.dataFormat === "DSS" && typeof dataset.pathname === "string") {
-          json = await loadDSSData(dataset.filepath, dataset.pathname);
-        } else if (dataset.rows) {
+          json = await readPaired(dataset.filepath, dataset.pathname);
+        } else if (Array.isArray(dataset.rows)) {
           json = {
             x: dataset.rows.map((r: any) => Number(r.x)),
             y: dataset.rows.map((r: any) => Number(r.y)),
@@ -93,32 +95,119 @@ export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | a
           json = { x: [], y: [] };
         }
         const normalized = normalizePairedData(json, dataset);
-        if (!cancelled) setData(normalized);
-      } catch (err) {
-        console.error("PairedData load failed", err);
-        if (!cancelled) setData(null);
+        if (!cancelled) setSingleData(normalized);
+      } catch {
+        if (!cancelled) setSingleData(null);
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
+    }
+
+    async function loadMulti() {
+      setLoading(true);
+      try {
+        const paths = Array.isArray(dataset.pathname) ? dataset.pathname : [];
+        const items = await Promise.all(
+            paths.map((p: string) => readPaired(dataset.filepath, p).catch(() => null))
+        );
+        const safe = items.filter(Boolean) as DSSJson[];
+        if (!cancelled) setMultiLoaded(safe);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    if (isMulti) {
+      setSingleData(null);
+      setMultiLoaded([]);
+      loadMulti();
+    } else {
+      setMultiLoaded([]);
+      loadSingle();
+    }
+
     return () => {
       cancelled = true;
     };
-  }, [dataset]);
+  }, [isMulti, dataset]);
 
   if (loading) return <Loader />;
-  if (!data || data.x.length === 0 || data.y.length === 0) {
+
+  const parameter = dataset.parameter || "Discharge";
+
+  if (isMulti) {
+    if (!multiLoaded.length) {
+      return <div>{TextStore.interface("PairedDataPlot_InvalidData")}</div>;
+    }
+
+    const labelsFromAnalysis = Array.isArray(dataset.frequencies) ? dataset.frequencies.slice() : [];
+    const labelsFromFirst = Array.isArray(multiLoaded[0]?.x)
+        ? (multiLoaded[0].x as Array<number | string>).map((s) => String(s))
+        : [];
+    const rawLabels = labelsFromAnalysis.length ? labelsFromAnalysis : labelsFromFirst;
+
+    const flowFreq = isFlowFrequency(
+        { typeFolder: dataset?.typeFolder, pathname: dataset?.pathname },
+        dataset?.pathname
+    );
+
+    const labels = flowFreq ? rawLabels.map((v: any) => prettyProbLabel(Number(v))) : rawLabels;
+
+    const styleMapAcc: Record<string, any> = { ...(dataset.styleMap || {}) };
+
+    const series = (dataset.pathname as string[]).map((p: string, idx: number) => {
+      const s = multiLoaded[idx] || { x: [], y: [] };
+      const xArr = Array.isArray(s.x) ? (s.x as Datum[]) : [];
+      const yArr = Array.isArray(s.y) ? (s.y as Datum[]) : [];
+
+      if (flowFreq) {
+        const preset = styleForPeakFlowFreq(p);
+        const display = preset.label;
+        styleMapAcc[display] = preset.trace;
+        return { name: display, x: xArr, y: yArr };
+      }
+
+      return { name: p, x: xArr, y: yArr };
+    });
+
+    const options: any = {
+      labels,
+      xReverse: flowFreq ? true : Boolean(dataset.xReverse),
+      yScale: flowFreq ? "log" : (dataset.yScale || "linear"),
+      styleMap: styleMapAcc,
+      parameter
+    };
+
+    if (flowFreq) {
+      options.xaxis = buildPairedCategoryXAxis(labels, true);
+    }
+
+    return (
+        <Plot
+            kind="paired_xy"
+            title={dataset.name || "Analysis"}
+            x_label={flowFreq ? "Exceedance Probability" : dataset.xLabel}
+            y_label={dataset.yLabel || "Flow (cfs)"}
+            input={{ series }}
+            options={options}
+            parameter={parameter}
+        />
+    );
+  }
+
+  if (!singleData || singleData.x.length === 0 || singleData.y.length === 0) {
     return <div>{TextStore.interface("PairedDataPlot_InvalidData")}</div>;
   }
 
   return (
-      <Chart
-          x={data.x}
-          y={data.y}
+      <Plot
+          kind="paired_xy"
           title={dataset.name || TextStore.interface("PairedDataPlot_DefaultTitle")}
-          xLabel={data.xUnits ? `${data.xLabel} (${data.xUnits})` : data.xLabel}
-          yLabel={data.yUnits ? `${data.yLabel} (${data.yUnits})` : data.yLabel}
-          forceLinearX
+          x_label={singleData.xLabel}
+          y_label={singleData.yLabel}
+          input={{ series: [{ x: singleData.x as any[], y: singleData.y as any[] }] }}
+          options={{ parameter }}
+          parameter={parameter}
       />
   );
 }

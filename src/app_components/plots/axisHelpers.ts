@@ -1,7 +1,7 @@
 export type AnalysisShape = {
     name?: string;
-    typeFolder?: string;        // e.g., "Peak Flow Frequency"
-    frequencies?: string[];     // optional, preferred order
+    typeFolder?: string;
+    frequencies?: string[];
     filepath?: string;
     pathname?: string[];
 };
@@ -20,14 +20,11 @@ export function isFlowFrequency(analysis?: AnalysisShape, paths?: string[]): boo
     return arr.some((p) => getCPart(p) === "FLOW-FREQ");
 }
 
-// ---- Add/keep this ----
 export function prettyProbLabel(p: number): string {
-    // snap near common frequencies to exact labels
     const targets = [1, 0.99, 0.9, 0.5, 0.1, 0.01, 0.001];
     const tol = 1e-6;
     for (const t of targets) if (Math.abs(p - t) <= tol) return String(t);
 
-    // otherwise format compactly without trailing junk
     if (p >= 0.1) return Number(p.toFixed(2)).toString();
     if (p >= 0.01) return Number(p.toFixed(3)).toString();
     return Number(p.toPrecision(3)).toString();
@@ -40,7 +37,6 @@ export function buildPairedCategoryXAxis(labels: string[], reverse = false) {
         type: "category" as const,
         categoryorder: "array" as const,
         categoryarray: arr,
-        // REMOVE autorange: "reversed" — it fights categoryarray on category axes
         title: { text: "Exceedance Probability" },
         ticklabelposition: "outside" as const,
         showgrid: true,

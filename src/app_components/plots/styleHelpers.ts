@@ -1,8 +1,5 @@
-// src/app_components/plots/styleHelpers.ts
-
 /** Pull the F-part (or last token) from a DSS pathname. */
 export function seriesKeyFromPath(path: string): string {
-    // Typical: /A/B/C/D/E/F/
     const m = String(path).trim().match(/\/([^/]+)\/?$/);
     return (m?.[1] || "").toUpperCase();
 }
