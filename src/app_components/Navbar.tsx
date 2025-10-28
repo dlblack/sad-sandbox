@@ -170,6 +170,9 @@ function Navbar({ addComponent }: NavbarProps) {
                 <Menu.Item onClick={() => open("ComponentInterfaceOptions")}>
                   {TextStore.interface("Navbar_Tools_View_InterfaceSize")}
                 </Menu.Item>
+                <Menu.Item onClick={() => open("ComponentPlotStyle")}>
+                  {TextStore.interface("Navbar_Tools_View_PlotStyle")}
+                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
 

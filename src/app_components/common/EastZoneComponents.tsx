@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { TextStore } from "../../utils/TextStore";
 import ComponentInterfaceOptions from "../ComponentInterfaceOptions";
+import ComponentPlotStyle from "../ComponentPlotStyle";
 import ZoneTabs from "./ZoneTabs";
 import { Registry } from "../../types/app";
 
@@ -15,6 +16,11 @@ const REGISTRY: Registry = {
         title: () => TextStore.interface("ComponentMetadata_ComponentInterfaceOptions"),
         typeClass: "tab--panel",
         Component: ComponentInterfaceOptions,
+    },
+    ComponentPlotStyle: {
+        title: () => TextStore.interface("ComponentMetadata_ComponentPlotStyle"),
+        typeClass: "tab--panel",
+        Component: ComponentPlotStyle,
     },
 };
 

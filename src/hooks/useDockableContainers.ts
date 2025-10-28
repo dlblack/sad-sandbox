@@ -11,6 +11,7 @@ function getDefaultDockZone(type: string): DockZone {
     case "ComponentMessage":
       return "S";
     case "ComponentInterfaceOptions":
+    case "ComponentPlotStyle":
       return "E";
     default:
       return "CENTER";

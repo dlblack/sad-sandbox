@@ -150,6 +150,10 @@ function createWindow(): void {
           click: () => win.webContents.send("menu-tools", "ComponentInterfaceOptions"),
         },
         {
+          label: TextStore.interface("Navbar_Tools_View_PlotStyle"),
+          click: () => win.webContents.send("menu-tools", "ComponentPlotStyle"),
+        },
+        {
           label: TextStore.interface("Navbar_Tools_ToggleDevTools"),
           accelerator: process.platform === "darwin" ? "Alt+Command+I" : "Ctrl+Shift+I",
           click: () => {
