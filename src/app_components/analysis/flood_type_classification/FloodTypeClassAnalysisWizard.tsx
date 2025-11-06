@@ -12,7 +12,7 @@ import {
   makeThresholdsStep,
   makeReviewInputsStep,
   makeResultsStep,
-} from "../components/steps/FloodTypeClassSteps";
+} from "./FloodTypeClassSteps";
 import {
   makeWizardGeneralInfoStep,
   GeneralInfoSummary,

@@ -1,12 +1,12 @@
 import React from "react";
-import type { WizardStep, WizardCtx } from "../WizardRunner";
+import type { WizardStep, WizardCtx } from "../components/WizardRunner";
 import {
     FlowTimeSeriesComboBox,
     PrecipTimeSeriesComboBox,
     SweTimeSeriesComboBox
-} from "../inputs/TimeSeriesComboBoxes";
-import { TextStore } from "../../../../utils/TextStore";
-import TimeField from "../../../common/TimeField";
+} from "../components/inputs/TimeSeriesComboBoxes";
+import { TextStore } from "../../../utils/TextStore";
+import TimeField from "../../common/TimeField";
 import { DateInput } from '@mantine/dates';
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
@@ -15,9 +15,9 @@ export function makeFlowDataSourceStep(): WizardStep {
     return {
         label: TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData") ?? "Flow data",
         render: (ctx: WizardCtx) => {
-            const { bag, setBag, data = {} as Record<string, unknown> } = ctx as any;
+            const { bag, setBag} = ctx as any;
             const inputNarrow: React.CSSProperties = { width: "50ch" };
-            const datasets = (data as any)?.Discharge ?? [];
+
 
             const set = (patch: Record<string, unknown>) =>
                 setBag((prev: Record<string, unknown>) => ({ ...(prev as Record<string, unknown>), ...patch }));
@@ -27,15 +27,6 @@ export function makeFlowDataSourceStep(): WizardStep {
                     <div style={{ fontWeight: 600, paddingBottom: 8 }}>
                         {TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_Label")}
                     </div>
-
-                    <label htmlFor="ft_flow_ts">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_TimeSeries")}</label>
-                    <FlowTimeSeriesComboBox
-                        id="ft_flow_ts"
-                        style={inputNarrow}
-                        datasets={datasets}
-                        value={(bag as any).flowTimeSeries as string}
-                        onChange={(val: string) => set({ flowTimeSeries: val })}
-                    />
 
                     <label htmlFor="ft_start_date">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_StartDate")}</label>
                     <DateInput
@@ -124,12 +115,13 @@ export function makeFloodTypeStep(): WizardStep {
 
 export function makeDataSourcesStep(): WizardStep {
     return {
-        label: L("FloodTypeClass_Wizard_StepDataSources") || "Data sources",
+        label: L("FloodTypeClass_Wizard_StepDataSources"),
         render: (ctx: WizardCtx) => {
             const { bag, setBag, data = {} as Record<string, unknown> } = ctx as any;
             const inputNarrow: React.CSSProperties = { width: "50ch" };
             const precipList = (data as any).Precipitation ?? [];
             const sweList = (data as any).SWE ?? (data as any)["Snow Water Equivalent"] ?? [];
+            const datasets = (data as any)?.Discharge ?? [];
 
             const set = (patch: Record<string, unknown>) =>
                 setBag((prev: Record<string, unknown>) => ({ ...(prev as Record<string, unknown>), ...patch }));
@@ -139,6 +131,15 @@ export function makeDataSourcesStep(): WizardStep {
                     <div style={{ fontWeight: 600, paddingBottom: 8 }}>
                         {L("FloodTypeClass_Wizard_StepDataSources_Label")}
                     </div>
+
+                    <label htmlFor="ft_flow_ts">{TextStore.interface?.("FloodTypeClass_Wizard_StepFlowData_TimeSeries")}</label>
+                    <FlowTimeSeriesComboBox
+                        id="ft_flow_ts"
+                        style={inputNarrow}
+                        datasets={datasets}
+                        value={(bag as any).flowTimeSeries as string}
+                        onChange={(val: string) => set({ flowTimeSeries: val })}
+                    />
 
                     <label htmlFor="ft_precip">{L("FloodTypeClass_Wizard_StepDataSources_PrecipTS")}</label>
                     <PrecipTimeSeriesComboBox

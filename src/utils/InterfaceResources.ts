@@ -394,8 +394,7 @@ export const INTERFACE_TEXT = {
   // FloodTypeClassWizard
   // --------------------------------------
   FloodTypeClass_Wizard_StepFlowData: "Flow Data Source",
-  FloodTypeClass_Wizard_StepFlowData_Label:
-      "Select a flow data source and enter the time window over which to classify events.",
+  FloodTypeClass_Wizard_StepFlowData_Label: "Select a flow data source and enter the time window over which to classify events.",
   FloodTypeClass_Wizard_StepFlowData_TimeSeries: "Select time series:",
   FloodTypeClass_Wizard_StepFlowData_StartDate: "Classification Start Date:",
   FloodTypeClass_Wizard_StepFlowData_StartTime: "Classification Start Time:",
@@ -410,7 +409,7 @@ export const INTERFACE_TEXT = {
       "Mountainous West | Upper Colorado River",
   FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsRedRiver: "Central Plains | Red River of the North",
   FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsIowaRiver: "Central Plains | Iowa River",
-  FloodTypeClass_Wizard_StepDataSources: "Data Sources",
+  FloodTypeClass_Wizard_StepDataSources: "Flood Indicator Time Series",
   FloodTypeClass_Wizard_StepDataSources_Label: "Select data sources for flood type indicators.",
   FloodTypeClass_Wizard_StepDataSources_PrecipTS: "Precipitation time series:",
   FloodTypeClass_Wizard_StepDataSources_SweTS: "SWE time series:",
