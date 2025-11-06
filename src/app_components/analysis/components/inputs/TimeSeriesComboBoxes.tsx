@@ -149,10 +149,10 @@ export function TimeSeriesComboBox({
                                      value,
                                      onChange,
                                      debug = false,
-                                     placeholder = TextStore.interface?.("TimeSeriesCombo_None") || "None",
+                                     placeholder = TextStore.interface?.("TimeSeriesCombo_None"),
                                      searchable = true,
                                      clearable = true,
-                                     nothingFoundMessage = TextStore.interface?.("Combo_NoneFound") || "No matches",
+                                     nothingFoundMessage = TextStore.interface?.("Combo_NoneFound"),
                                      ...rest
                                    }: TimeSeriesComboBoxProps) {
   const { options, has } = useMemo(() => {
@@ -194,7 +194,13 @@ export function TimeSeriesComboBox({
 }
 
 export function FlowTimeSeriesComboBox(props: Omit<TimeSeriesComboBoxProps, "kind" | "needles">) {
-  return <TimeSeriesComboBox {...props} kind="flow" needles={["flow", "discharge", "cfs", "cms"]} />;
+  return (
+      <TimeSeriesComboBox
+          {...props}
+          kind="flow"
+          needles={["flow", "discharge", "cfs", "cms"]}
+      />
+  );
 }
 
 export function PrecipTimeSeriesComboBox(props: Omit<TimeSeriesComboBoxProps, "kind" | "needles">) {
