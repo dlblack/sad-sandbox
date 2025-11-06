@@ -4,15 +4,13 @@ import WizardRunner, {
   WizardCtx,
   WizardStep,
 } from "../components/WizardRunner";
-import {
-  makeFlowDataSourceStep,
-  makeFloodTypeStep,
-  makeDataSourcesStep,
-  makeLookbackStep,
-  makeThresholdsStep,
-  makeReviewInputsStep,
-  makeResultsStep,
-} from "./FloodTypeClassSteps";
+import makeFlowDataSourceStep from "./steps/FlowDataSourceStep";
+import makeFloodTypeStep from "./steps/FloodTypeStep";
+import makeDataSourcesStep from "./steps/DataSourcesStep";
+import makeLookbackStep from "./steps/LookbackStep";
+import makeThresholdsStep from "./steps/ThresholdsStep";
+import makeReviewInputsStep from "./steps/ReviewInputsStep";
+import makeResultsStep from "./steps/ResultsStep";
 import {
   makeWizardGeneralInfoStep,
   GeneralInfoSummary,
@@ -56,9 +54,7 @@ export default function FloodTypeClassAnalysisWizard(
     makeResultsStep(),
   ];
 
-  const validateNext = (_ctx: WizardCtx, _stepIndex: number) => {
-    return true;
-  };
+  const validateNext = (_ctx: WizardCtx, _stepIndex: number) => true;
 
   const buildResult = (ctx: WizardCtx<WizardBag>): FloodTypeResult => {
     const b = ctx.bag as Record<string, unknown>;
