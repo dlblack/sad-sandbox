@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Plot from "./Plot";
 import Loader from "./Loader";
 import { TextStore } from "../../utils/TextStore";
+import { useProject } from "../../context/ProjectContext";
 
 type DSSJson = {
   x?: Array<string | number>;
@@ -24,10 +25,15 @@ interface TimeSeriesDataset {
   units?: string;
 }
 
-async function loadDSSData(filepath?: string, pathname?: string): Promise<DSSJson> {
-  const res = await fetch(
-      `/api/read-dss?file=${encodeURIComponent(filepath || "")}&path=${encodeURIComponent(pathname || "")}`
-  );
+async function loadDSSData(apiPrefix: string, filepath?: string, pathname?: string): Promise<DSSJson> {
+  const dir = localStorage.getItem("lastProjectDir") || "";
+  const url =
+      `${apiPrefix}/read-dss` +
+      `?file=${encodeURIComponent(filepath || "")}` +
+      `&path=${encodeURIComponent(pathname || "")}` +
+      (dir ? `&dir=${encodeURIComponent(dir)}` : "");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to read DSS");
   return res.json();
 }
 
@@ -59,15 +65,12 @@ function normalizeTimeSeries(json: DSSJson) {
   };
 }
 
-/** Extract DSS C-part (3rd index) from pathname like /A/B/C/D/E/F/ */
-function getCPart(path?: string): string | undefined {
-  if (!path) return undefined;
-  const parts = path.split("/");
-  // ['', 'A', 'B', 'C', 'D', 'E', 'F', ''] -> index 3 is C
+function getCPart(pathname?: string): string | undefined {
+  if (!pathname) return undefined;
+  const parts = pathname.split("/");
   return parts.length >= 4 ? parts[3] : undefined;
 }
 
-/** Canonicalize parameter so rules can match aliases. */
 function canonicalParam(p?: string): string | undefined {
   if (!p) return undefined;
   const t = String(p).trim().toUpperCase();
@@ -92,9 +95,7 @@ function canonicalParam(p?: string): string | undefined {
   return ALIASES[t] || t;
 }
 
-/** Derive a best-guess parameter from dataset and DSS meta (no hard-coding). */
 function inferParameter(ds: TimeSeriesDataset, normalized: { yLabel?: string }): string | undefined {
-  // preference order: dataset.parameter → dataset.dataType → DSS C-part → normalized.yLabel
   const raw =
       ds.parameter ||
       ds.dataType ||
@@ -104,6 +105,7 @@ function inferParameter(ds: TimeSeriesDataset, normalized: { yLabel?: string }):
 }
 
 export default function TimeSeriesPlot({ dataset }: { dataset: TimeSeriesDataset }) {
+  const { apiPrefix } = useProject();
   const [data, setData] = useState<ReturnType<typeof normalizeTimeSeries> | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -115,7 +117,8 @@ export default function TimeSeriesPlot({ dataset }: { dataset: TimeSeriesDataset
       try {
         let json: DSSJson;
         if (dataset.dataFormat === "DSS") {
-          json = await loadDSSData(dataset.filepath, dataset.pathname);
+          const prefix = apiPrefix || "/api/unknown";
+          json = await loadDSSData(prefix, dataset.filepath, dataset.pathname);
         } else {
           json = {
             times: dataset.times || [],
@@ -137,14 +140,13 @@ export default function TimeSeriesPlot({ dataset }: { dataset: TimeSeriesDataset
     return () => {
       cancelled = true;
     };
-  }, [dataset]);
+  }, [dataset, apiPrefix]);
 
   if (loading) return <Loader />;
   if (!data || !Array.isArray(data.x) || !Array.isArray(data.y) || data.x.length === 0) {
     return <div>{TextStore.interface("TimeSeriesPlot_InvalidData")}</div>;
   }
 
-  // Derive the canonical parameter at render-time (no hardcoding)
   const canonical = inferParameter(dataset, { yLabel: data.yLabel });
 
   return (

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useProject } from "../context/ProjectContext";
 import { componentMetadata } from "../utils/componentMetadata";
 
 /** ----------------------- Types ----------------------- */
-
 type MapsSection = "maps";
 type DataSection = "data";
 type AnalysesSection = "analyses";
@@ -43,14 +43,17 @@ type RenameArgs =
     | { section: AnalysesSection; pathArr: [string, number]; newName: string };
 
 /** ----------------------- Helpers ----------------------- */
-
 function groupAnalysesByType(payload: any = {}): AnalysesRecord {
   return payload;
 }
 
 async function safeJson<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return (await res.json()) as T;
+  const raw = await res.text().catch(() => "");
+  if (!res.ok) {
+    throw new Error(`${res.status} ${res.statusText} ${raw ? raw : ""}`.trim());
+  }
+  const parsed = raw ? JSON.parse(raw) : {};
+  return parsed as T;
 }
 
 async function getJSON<T>(url: string): Promise<T> {
@@ -67,137 +70,195 @@ async function postJSON<T>(url: string, body: any): Promise<T> {
   );
 }
 
-async function del(url: string): Promise<void> {
-  const res = await fetch(url, { method: "DELETE" });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+async function delJSON<T = any>(url: string, body?: any): Promise<T> {
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const raw = await res.text().catch(() => "");
+  if (!res.ok) {
+    throw new Error(`${res.status} ${res.statusText} ${raw ? raw : ""}`.trim());
+  }
+  try {
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed as T;
+  } catch {
+    return {} as T;
+  }
+}
+
+// Always append ?dir=<absolute path> to API URLs
+function withDir(url: string): string {
+  const dir = localStorage.getItem("lastProjectDir") || "";
+  return dir
+      ? `${url}${url.includes("?") ? "&" : "?"}dir=${encodeURIComponent(dir)}`
+      : url;
 }
 
 /** ----------------------- Hook ----------------------- */
-
 export default function useAppData() {
+  const { apiPrefix } = useProject();
   const [maps, setMaps] = useState<any[]>([]);
   const [data, setData] = useState<DataRecord>({});
   const [analyses, setAnalyses] = useState<AnalysesRecord>({});
+  const pollRef = useRef<number | null>(null);
+  const mountedRef = useRef(false);
+
+  const getLocalName = useCallback(
+      (args: DeleteArgs): string | null => {
+        if (args.section === "maps") {
+          const [idx] = args.pathArr;
+          const list = Array.isArray(maps) ? maps : [];
+          const item = list[idx];
+          return item?.name ?? null;
+        }
+        if (args.section === "data") {
+          const [type, idx] = args.pathArr;
+          const list = Array.isArray(data[type]) ? data[type] : [];
+          const item = list[idx];
+          return item?.name ?? null;
+        }
+        if (args.section === "analyses") {
+          const [type, idx] = args.pathArr;
+          const list = Array.isArray(analyses[type]) ? analyses[type] : [];
+          const item = list[idx];
+          return item?.name ?? null;
+        }
+        return null;
+      },
+      [maps, data, analyses]
+  );
+
+  const refreshAll = useCallback(async () => {
+    if (!apiPrefix) return;
+    try {
+      const aUrl = withDir(`${apiPrefix}/analyses`);
+      const dUrl = withDir(`${apiPrefix}/data`);
+      const [a, d] = await Promise.all([
+        getJSON<AnalysesRecord>(aUrl).catch(() => ({} as AnalysesRecord)),
+        getJSON<DataRecord>(dUrl).catch(() => ({} as DataRecord)),
+      ]);
+      setAnalyses(groupAnalysesByType(a));
+      setData(d);
+    } catch {
+      // ignore
+    }
+  }, [apiPrefix]);
 
   useEffect(() => {
-    getJSON<AnalysesRecord>("/api/analyses")
-        .then((payload) => setAnalyses(groupAnalysesByType(payload)))
-        .catch(() => setAnalyses({}));
+    if (!apiPrefix) return;
+    mountedRef.current = true;
+    refreshAll();
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [apiPrefix, refreshAll]);
 
-    getJSON<DataRecord>("/api/data")
-        .then((payload) => setData(payload))
-        .catch(() => setData({}));
-  }, []);
+  // light polling so external edits are reflected
+  useEffect(() => {
+    if (!apiPrefix) return;
+    if (pollRef.current) window.clearInterval(pollRef.current);
+    pollRef.current = window.setInterval(() => {
+      if (mountedRef.current) refreshAll();
+    }, 1500) as unknown as number;
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current);
+      pollRef.current = null;
+    };
+  }, [apiPrefix, refreshAll]);
 
   /** ----------------------- Delete ----------------------- */
-  async function handleDeleteNode(args: DeleteArgs) {
-    if (typeof args !== "object" || args === null) return;
+  async function handleDeleteNode(args: DeleteArgs): Promise<string | null> {
+    if (typeof args !== "object" || args === null) return null;
+    const localName = getLocalName(args);
 
-    const { section } = args;
-
-    if (section === "maps") {
+    if (args.section === "maps") {
       const [idx] = args.pathArr;
-      setMaps((prev) => {
-        const list = Array.isArray(prev) ? prev : [];
-        return list.filter((_, i) => i !== idx);
-      });
-      return;
+      setMaps((prev) =>
+          Array.isArray(prev) ? prev.filter((_, i) => i !== idx) : prev
+      );
+      return localName ?? null;
     }
 
-    if (section === "data") {
-      const [param, idx] = args.pathArr;
+    if (!apiPrefix) return localName ?? null;
 
-      setData((prev) => {
-        const next = { ...prev };
-        const list = Array.isArray(next[param]) ? next[param] : [];
-        next[param] = list.filter((_, i) => i !== idx);
-        if (!next[param].length) delete next[param];
-        return next;
-      });
-
-      try {
-        await del(`/api/data/${encodeURIComponent(param)}/${idx}`);
-        const refreshed = await getJSON<DataRecord>("/api/data");
-        setData(refreshed);
-      } catch {
-        /* ignore */
+    try {
+      if (args.section === "data") {
+        const [type, idx] = args.pathArr;
+        const list = Array.isArray(data[type]) ? data[type] : [];
+        const src = list[idx];
+        const url = withDir(`${apiPrefix}/data/${encodeURIComponent(type)}/${idx}`);
+        const resp = await delJSON<{ success: boolean; deletedName?: string }>(
+            url,
+            { name: src?.name || localName || null }
+        );
+        await refreshAll();
+        return resp?.deletedName || localName || null;
       }
-      return;
-    }
 
-    if (section === "analyses") {
-      const [folder, idx] = args.pathArr;
-
-      setAnalyses((prev) => {
-        const next = { ...prev };
-        const list = Array.isArray(next[folder]) ? next[folder] : [];
-        next[folder] = list.filter((_, i) => i !== idx);
-        if (!next[folder].length) delete next[folder];
-        return next;
-      });
-
-      try {
-        await del(`/api/analyses/${encodeURIComponent(folder)}/${idx}`);
-        const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-        setAnalyses(groupAnalysesByType(refreshed));
-      } catch {
-        /* ignore */
+      if (args.section === "analyses") {
+        const [type, idx] = args.pathArr;
+        const list = Array.isArray(analyses[type]) ? analyses[type] : [];
+        const src = list[idx];
+        const url = withDir(`${apiPrefix}/analyses/${encodeURIComponent(type)}/${idx}`);
+        const resp = await delJSON<{ success: boolean; deletedName?: string }>(
+            url,
+            { name: src?.name || localName || null }
+        );
+        await refreshAll();
+        return resp?.deletedName || localName || null;
       }
+    } catch {
+      await refreshAll();
+      return localName ?? null;
     }
+    return localName ?? null;
   }
 
   /** ----------------------- Save As (duplicate) ----------------------- */
   async function handleSaveAsNode(args: SaveAsArgs) {
     if (typeof args !== "object" || args === null) return;
-
     const { section, pathArr, newName, newDesc, item } = args;
-    if (!newName) return;
+    if (!newName || !apiPrefix) return;
 
     if (section === "data") {
-      const [param, idx] = pathArr;
-
+      const [type, idx] = pathArr;
       setData((prev) => {
         const next = { ...prev };
-        const list = Array.isArray(next[param]) ? next[param] : [];
+        const list = Array.isArray(next[type]) ? next[type] : [];
         const src = list[idx];
         if (!src) return prev;
         const copy = { ...src, name: newName, description: newDesc ?? src.description };
-        next[param] = [...list, copy];
+        next[type] = [...list, copy];
         return next;
       });
 
       try {
         const payload = { ...(item || {}), name: newName, description: newDesc ?? item?.description };
-        await postJSON("/api/data", { type: param, data: payload });
-        const refreshed = await getJSON<DataRecord>("/api/data");
-        setData(refreshed);
-      } catch {
-        /* ignore */
-      }
+        await postJSON(withDir(`${apiPrefix}/data`), { type, data: payload });
+        await refreshAll();
+      } catch {}
       return;
     }
 
     if (section === "analyses") {
-      const [folder, idx] = pathArr;
-
+      const [type, idx] = pathArr;
       setAnalyses((prev) => {
         const next = { ...prev };
-        const list = Array.isArray(next[folder]) ? next[folder] : [];
+        const list = Array.isArray(next[type]) ? next[type] : [];
         const src = list[idx];
         if (!src) return prev;
         const copy = { ...src, name: newName, description: newDesc ?? src.description };
-        next[folder] = [...list, copy];
+        next[type] = [...list, copy];
         return next;
       });
 
       try {
         const payload = { ...(item || {}), name: newName, description: newDesc ?? item?.description };
-        await postJSON("/api/analyses", { type: folder, data: payload });
-        const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-        setAnalyses(groupAnalysesByType(refreshed));
-      } catch {
-        /* ignore */
-      }
+        await postJSON(withDir(`${apiPrefix}/analyses`), { type, data: payload });
+        await refreshAll();
+      } catch {}
       return;
     }
 
@@ -218,7 +279,7 @@ export default function useAppData() {
     if (typeof args !== "object" || args === null) return;
 
     const { section, pathArr, newName } = args;
-    if (!newName) return;
+    if (!newName || !apiPrefix) return;
 
     if (section === "analyses") {
       const [folder, idx] = pathArr;
@@ -230,11 +291,8 @@ export default function useAppData() {
 
       try {
         const copy = { ...src, name: newName };
-
-        await postJSON("/api/analyses", { type: folder, data: copy });
-
-        const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-
+        await postJSON(withDir(`${apiPrefix}/analyses`), { type: folder, data: copy });
+        const refreshed = await getJSON<AnalysesRecord>(withDir(`${apiPrefix}/analyses`));
         const refreshedList = Array.isArray(refreshed[folder]) ? refreshed[folder] : [];
         let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
         if (deleteIndex === -1) {
@@ -242,13 +300,12 @@ export default function useAppData() {
         }
 
         if (deleteIndex !== -1) {
-          await del(`/api/analyses/${encodeURIComponent(folder)}/${deleteIndex}`);
+          await delJSON(withDir(`${apiPrefix}/analyses/${encodeURIComponent(folder)}/${deleteIndex}`));
         }
 
-        const finalState = await getJSON<AnalysesRecord>("/api/analyses");
-        setAnalyses(groupAnalysesByType(finalState));
-      } catch {
-        /* ignore */
+        await refreshAll();
+      } catch (e) {
+        console.error("Rename analyses failed:", e);
       }
       return;
     }
@@ -264,24 +321,20 @@ export default function useAppData() {
       try {
         const copy = { ...src, name: newName };
 
-        await postJSON("/api/data", { type: param, data: copy });
+        await postJSON(withDir(`${apiPrefix}/data`), { type: param, data: copy });
 
-        const refreshed = await getJSON<DataRecord>("/api/data");
-
+        const refreshed = await getJSON<DataRecord>(withDir(`${apiPrefix}/data`));
         const refreshedList = Array.isArray(refreshed[param]) ? refreshed[param] : [];
         let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
-        if (deleteIndex === -1) {
-          deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
-        }
+        if (deleteIndex === -1) deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
 
         if (deleteIndex !== -1) {
-          await del(`/api/data/${encodeURIComponent(param)}/${deleteIndex}`);
+          await delJSON(withDir(`${apiPrefix}/data/${encodeURIComponent(param)}/${deleteIndex}`));
         }
 
-        const finalState = await getJSON<DataRecord>("/api/data");
-        setData(finalState);
-      } catch {
-        /* ignore */
+        await refreshAll();
+      } catch (e) {
+        console.error("Rename data failed:", e);
       }
       return;
     }
@@ -298,27 +351,36 @@ export default function useAppData() {
     }
   }
 
-  /** ----------------------- Wizards & Data Save ----------------------- */
+  /** ----------------------- Wizards and Data Save ----------------------- */
   const handleWizardFinish = async (type: string, valuesObj: any) => {
+    if (!apiPrefix) return;
     const friendlyType = componentMetadata?.[type]?.entityName ?? type;
     try {
-      await postJSON("/api/analyses", { type: friendlyType, data: valuesObj });
-      const refreshed = await getJSON<AnalysesRecord>("/api/analyses");
-      setAnalyses(groupAnalysesByType(refreshed));
-    } catch {
-      /* ignore */
-    }
+      await postJSON(withDir(`${apiPrefix}/analyses`), { type: friendlyType, data: valuesObj });
+      await refreshAll();
+    } catch {}
   };
 
   const handleDataSave = async (category: string, valuesObj: any) => {
+    if (!apiPrefix) return;
     try {
-      await postJSON("/api/data", { type: category, data: valuesObj });
-      const refreshed = await getJSON<DataRecord>("/api/data");
-      setData(refreshed);
-    } catch {
-      /* ignore */
+      if (!valuesObj || !category) throw new Error("Missing category or data");
+      await postJSON(withDir(`${apiPrefix}/data`), { type: category, data: valuesObj });
+      await refreshAll();
+    } catch (error) {
+      console.error("Error saving data:", error);
     }
   };
+
+  function clearAll() {
+    if (pollRef.current) {
+      window.clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    setMaps([]);
+    setData({});
+    setAnalyses({});
+  }
 
   /** ----------------------- Return ----------------------- */
   return {
@@ -333,5 +395,6 @@ export default function useAppData() {
     handleDeleteNode,
     handleWizardFinish,
     handleDataSave,
+    clearAll,
   };
 }

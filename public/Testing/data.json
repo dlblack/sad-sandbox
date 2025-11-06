@@ -6,7 +6,7 @@
       "dataType": "Precipitation",
       "name": "American River Precip",
       "description": "Incremental precip for the American River, 01Jan2000 00:00 - 02Jan2000 24:00.",
-      "filepath": "public/Testing/precip.dss",
+      "filepath": "precip.dss",
       "pathname": "/Sacramento/American River Precip/Precipitation/01Dec1999/1Hour/Manual/"
     },
     {
@@ -15,7 +15,7 @@
       "dataType": "Precipitation",
       "name": "Sacramento River Precip",
       "description": "Incremental precip for the Sacramento River, 01Jan2000 00:00 - 02Jan2000 24:00.",
-      "filepath": "public/Testing/precip.dss",
+      "filepath": "precip.dss",
       "pathname": "/Sacramento/Sacramento River Precip/Precipitation/01Dec1999/1Hour/Manual/"
     },
     {
@@ -24,7 +24,7 @@
       "dataType": "Precipitation",
       "name": "Feather River Precip",
       "description": "Incremental precip for the Feather River, 01Jan2000 00:00 - 02Jan2000 24:00.",
-      "filepath": "public/Testing/precip.dss",
+      "filepath": "precip.dss",
       "pathname": "/Sacramento/Yuba River Precip/Precipitation/01Dec1999/1Hour/Manual/"
     }
   ],
@@ -35,7 +35,7 @@
       "dataType": "Discharge",
       "name": "American River Discharge",
       "description": "Discharge for the American River, 01Jul2000 07:00 - 06Jul2000 06:45.",
-      "filepath": "public/Testing/discharge.dss",
+      "filepath": "discharge.dss",
       "pathname": "/Sacramento/American River/FLOW/01Jul2025/15Minute/USGS/"
     },
     {
@@ -44,7 +44,7 @@
       "dataType": "Flow",
       "name": "Sacramento River Discharge",
       "description": "Discharge for the Sacramento River, 01Jul2000 07:00 - 06Jul2000 06:45.",
-      "filepath": "public/Testing/discharge.dss",
+      "filepath": "discharge.dss",
       "pathname": "/Sacramento/Sacramento River/FLOW/01Jul2025/15Minute/USGS/"
     },
     {
@@ -53,7 +53,7 @@
       "dataType": "Flow",
       "name": "TS DSS",
       "description": "",
-      "filepath": "public/Testing/discharge.dss",
+      "filepath": "discharge.dss",
       "pathname": "/Part A/Part B/Flow/01Dec1999/4HOUR/Part F/"
     },
     {
@@ -88,7 +88,7 @@
       "dataType": "Discharge",
       "name": "Yuba River Discharge",
       "description": "Discharge for the Feather River, 01Jul2000 07:00 - 06Jul2000 06:45.",
-      "filepath": "public/Testing/discharge.dss",
+      "filepath": "discharge.dss",
       "pathname": "/Sacramento/Yuba River/FLOW/01Jul2025/15Minute/USGS/"
     }
   ],
@@ -102,7 +102,7 @@
       "yUnits": "acre-ft",
       "xLabel": "Elevation",
       "xUnits": "ft",
-      "filepath": "public/Testing/elevstor.dss",
+      "filepath": "elevstor.dss",
       "pathname": "///Elev-Stor////"
     },
     {

@@ -1,394 +1,154 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { dockableContentFactory } from "../../utils/dockableContentFactory";
-import {
-    Section,
-    SaveAsArgs,
-    RenameArgs,
-    DeleteArgs,
-    SaveAsObject,
-    RenameObject,
-    DeleteObject,
-    SaveAsPositional,
-    RenamePositional,
-    DeletePositional,
-    SaveAsHandler,
-    RenameHandler,
-    DeleteHandler,
-} from "../../types/treeActions";
-import type { AppMessage } from "../ComponentMessage";
+import React, { useCallback, useRef, useState } from "react";
+import { Box } from "@mantine/core";
+import { DockableFrameProps, ZoneSize } from "./DockTypes";
+import ZoneWest from "./ZoneWest";
+import ZoneCenter from "./ZoneCenter";
+import ZoneEast from "./ZoneEast";
+import ZoneSouth from "./ZoneSouth";
+import VerticalSplitter from "./VerticalSplitter";
+import HorizontalSplitter from "./HorizontalSplitter";
+import "../../styles/css/DockableFrame.css";
 
-/** ----- Layout constants ----- */
-const MIN_WIDTH = 120;
-const MAX_WIDTH_W = 800;
-const MAX_WIDTH_E = 1000;
-const MIN_S_HEIGHT = 120;
-const MAX_S_HEIGHT = 800;
-
-type DockZone = "W" | "E" | "S" | "CENTER" | string;
-const DOCK_ZONES: DockZone[] = ["W", "CENTER", "E", "S"];
-
-function getZoneMaxWidth(zone: DockZone) {
-    if (zone === "W") return MAX_WIDTH_W;
-    if (zone === "E") return MAX_WIDTH_E;
-    return Infinity;
-}
-
-/** ----- Props & helper types ----- */
-export interface DockContainer {
-    id: string;
-    type: string;
-    dockZone: DockZone;
-    dataset?: any;
-    props?: any;
-    width?: number;
-    height?: number;
-}
-
-export interface DockableFrameProps {
-    containers: DockContainer[];
-    setContainers: React.Dispatch<React.SetStateAction<DockContainer[]>>;
-    removeComponent: (id: string, reason?: AppMessage) => void;
-
-    // drag
-    onDragStart?: (id: string, reason?: any) => void;
-
-    // messages
-    messages: any[];
-    messageType?: any;
-    setMessageType?: React.Dispatch<React.SetStateAction<any>>;
-
-    // project tree ops
-    onSaveAsNode: SaveAsHandler;
-    onRenameNode: RenameHandler;
-    onDeleteNode: DeleteHandler;
-
-    // data
-    maps: any;
-    data: any;
-    analyses: any;
-
-    // openers and handlers
-    handleOpenComponent: (type: string, props?: any) => void;
-    onWizardFinish: (type: string, valuesObj: any, id?: string) => Promise<void>;
-    onDataSave: (category: string, valuesObj: any) => Promise<void>;
-
-    // zone contents (optional)
-    centerContent?: React.ReactNode;
-    westContent?: React.ReactNode;
-    eastContent?: React.ReactNode;
-    southContent?: React.ReactNode;
-}
-
-/** ----- Main frame ----- */
-const DockableFrame: React.FC<DockableFrameProps> = ({
-                                                         containers,
-                                                         setContainers,
-                                                         removeComponent,
-                                                         onWizardFinish,
-                                                         onDataSave,
-                                                         messages,
-                                                         onSaveAsNode,
-                                                         onRenameNode,
-                                                         onDeleteNode,
-                                                         handleOpenComponent,
-                                                         maps,
-                                                         data,
-                                                         analyses,
-                                                         centerContent,
-                                                         westContent,
-                                                         eastContent,
-                                                         southContent,
-                                                     }) => {
-    const [draggingPanelId, setDraggingPanelId] = useState<string | null>(null);
-
-    const [zoneWidths, setZoneWidths] = useState<{ W: number; CENTER?: number; E: number }>({
-        W: 240,
-        E: 400,
-    });
-
-    const initialSouthHeight = useMemo(() => {
-        const southItem = containers.find((c) => c.dockZone === "S" && typeof c.height === "number");
-        return southItem ? Math.max(southItem.height!, MIN_S_HEIGHT) : 240;
-    }, [containers]);
-
-    const [southHeight, setSouthHeight] = useState<number>(initialSouthHeight);
-
-    const dragging = useRef<{
-        zone: DockZone | null;
-        startX: number;
-        startWidth: number;
-        startY: number;
-        startHeight: number;
-    }>({ zone: null, startX: 0, startWidth: 0, startY: 0, startHeight: 0 });
-
-    // ---- Adapters for handlers ----
-    const saveAsAdapter = (
-        section: Section,
-        pathArr: (string | number)[],
-        newName: string,
-        newDesc?: string,
-        item?: any
-    ) => {
-        const fn = onSaveAsNode as SaveAsHandler;
-        return (fn as SaveAsPositional).length >= 3
-            ? (fn as SaveAsPositional)(section, pathArr, newName, newDesc, item)
-            : (fn as SaveAsObject)({ section, pathArr, newName, newDesc, item } as SaveAsArgs);
-    };
-
-    const renameAdapter = (section: Section, pathArr: (string | number)[], newName: string) => {
-        const fn = onRenameNode as RenameHandler;
-        return (fn as RenamePositional).length >= 3
-            ? (fn as RenamePositional)(section, pathArr, newName)
-            : (fn as RenameObject)({ section, pathArr, newName } as RenameArgs);
-    };
-
-    const deleteAdapter = (section: Section, pathArr: (string | number)[], name?: string) => {
-        const fn = onDeleteNode as DeleteHandler;
-        return (fn as DeletePositional).length >= 2
-            ? (fn as DeletePositional)(section, pathArr, name)
-            : (fn as DeleteObject)({ section, pathArr, name } as DeleteArgs);
-    };
-
-    // Build container contents
-    const containersWithContent = containers.map((c) => {
-        const dataset = (c as any).dataset || c;
-        const content = dockableContentFactory(c.type, {
-            ...c,
-            dataset,
-            id: c.id,
-            type: c.type,
-            onFinish: onWizardFinish, // Promise<void>
-            onRemove: (reason?: AppMessage) => removeComponent(c.id, reason),
-            onDataSave,
-            messages,
-            onSaveAsNode: saveAsAdapter,
-            onRenameNode: renameAdapter,
-            onDeleteNode: deleteAdapter,
-            handleOpenComponent,
-            maps,
-            data,
-            analyses,
-        });
-
-        return { ...c, dataset, content };
-    });
-
-    // Adjust zone sizes based on current containers
-    useEffect(() => {
-        DOCK_ZONES.forEach((zone) => {
-            if (zone === "CENTER") return;
-            const panelsInZone = containers.filter((c) => c.dockZone === zone);
-            if (!panelsInZone.length) return;
-
-            if (zone === "S") {
-                const maxHeight = Math.max(
-                    ...panelsInZone.map((p) => (typeof p.height === "number" ? p.height : 0)),
-                    MIN_S_HEIGHT
-                );
-                setSouthHeight(Math.min(Math.max(maxHeight + 24, MIN_S_HEIGHT), MAX_S_HEIGHT));
-            } else {
-                const maxWidth = Math.max(
-                    ...panelsInZone.map((p) => (typeof p.width === "number" ? p.width : 0)),
-                    MIN_WIDTH
-                );
-                setZoneWidths((w) => {
-                    const desired = Math.min(Math.max(maxWidth + 24, MIN_WIDTH), getZoneMaxWidth(zone));
-                    return (w as any)[zone] === desired ? w : { ...w, [zone]: desired };
-                });
-            }
-        });
-    }, [containers]);
-
-    // Splitter handlers (W/E)
-    const onVerticalSplitterDown = (zone: "W" | "E") => (e: React.MouseEvent) => {
-        dragging.current = {
-            zone,
-            startX: e.clientX,
-            startWidth: (zoneWidths as any)[zone] || 0,
-            startY: 0,
-            startHeight: 0,
-        };
-        document.body.style.cursor = "col-resize";
-        window.addEventListener("mousemove", onVerticalMouseMove);
-        window.addEventListener("mouseup", onVerticalMouseUp);
-    };
-
-    const onVerticalMouseMove = (e: MouseEvent) => {
-        const { zone, startX, startWidth } = dragging.current;
-        if (!zone || (zone !== "W" && zone !== "E")) return;
-        const dx = e.clientX - startX;
-        const maxWidth = getZoneMaxWidth(zone);
-        let newWidth = startWidth + (zone === "E" ? -dx : dx);
-        newWidth = Math.max(MIN_WIDTH, Math.min(newWidth, maxWidth));
-        setZoneWidths((prev) => ({ ...prev, [zone]: newWidth } as any));
-    };
-
-    const onVerticalMouseUp = () => {
-        dragging.current = { zone: null, startX: 0, startWidth: 0, startY: 0, startHeight: 0 };
-        document.body.style.cursor = "";
-        window.removeEventListener("mousemove", onVerticalMouseMove);
-        window.removeEventListener("mouseup", onVerticalMouseUp);
-    };
-
-    // Splitter handlers (S)
-    const onHorizontalSplitterDown = (e: React.MouseEvent) => {
-        dragging.current = {
-            zone: "S",
-            startY: e.clientY,
-            startHeight: southHeight,
-            startX: 0,
-            startWidth: 0,
-        };
-        document.body.style.cursor = "row-resize";
-        window.addEventListener("mousemove", onHorizontalMouseMove);
-        window.addEventListener("mouseup", onHorizontalMouseUp);
-    };
-
-    const onHorizontalMouseMove = (e: MouseEvent) => {
-        const { startY, startHeight } = dragging.current;
-        if (!startHeight) return;
-        let newHeight = startHeight - (e.clientY - startY);
-        newHeight = Math.max(MIN_S_HEIGHT, Math.min(newHeight, MAX_S_HEIGHT));
-        setSouthHeight(newHeight);
-    };
-
-    const onHorizontalMouseUp = () => {
-        dragging.current = { zone: null, startX: 0, startWidth: 0, startY: 0, startHeight: 0 };
-        document.body.style.cursor = "";
-        window.removeEventListener("mousemove", onHorizontalMouseMove);
-        window.removeEventListener("mouseup", onHorizontalMouseUp);
-    };
-
-    const moveToZone = useCallback(
-        (id: string, newZone: DockZone) => {
-            setContainers((prev) => {
-                const moved = prev.find((c) => c.id === id);
-                if (!moved) return prev;
-
-                const updated = prev.map((c) => (c.id === id ? { ...c, dockZone: newZone } : c));
-
-                if ((newZone === "W" || newZone === "E") && moved.width) {
-                    setZoneWidths((zw) => {
-                        const maxWidth = getZoneMaxWidth(newZone);
-                        const desiredWidth = Math.min(Math.max(moved.width! + 24, MIN_WIDTH), maxWidth);
-                        return !(zw as any)[newZone] || desiredWidth > (zw as any)[newZone] ? { ...zw, [newZone]: desiredWidth } : zw;
-                    });
-                }
-                if (newZone === "S" && moved.height) {
-                    setSouthHeight(() => Math.min(Math.max(moved.height! + 24, MIN_S_HEIGHT), MAX_S_HEIGHT));
-                }
-
-                return updated;
-            });
-        },
-        [setContainers]
-    );
-
-    // Collapse zones to minimum when empty
-    useEffect(() => {
-        DOCK_ZONES.forEach((zone) => {
-            if ((zone === "E" || zone === "W") && !containersWithContent.some((c) => c.dockZone === zone)) {
-                setZoneWidths((prev) => ((prev as any)[zone] !== MIN_WIDTH ? { ...prev, [zone]: MIN_WIDTH } : prev));
-            }
-        });
-        if (!containersWithContent.some((c) => c.dockZone === "S")) {
-            setSouthHeight(MIN_S_HEIGHT);
-        }
-    }, [containersWithContent]);
-
-    function renderZone(zone: DockZone) {
-        const zoneStyle: React.CSSProperties = {};
-        if (zone === "S") {
-            zoneStyle.height = southHeight;
-        } else if (zone === "W" || zone === "E") {
-            zoneStyle.width = (zoneWidths as any)[zone];
-        }
-
-        // If explicit content provided for the zone, use it
-        if (zone === "CENTER" && centerContent) {
-            return (
-                <div key={zone} className="dock-zone dock-zone-center" style={{ ...zoneStyle, minWidth: 0, minHeight: 0 }}>
-                    {centerContent}
-                </div>
-            );
-        }
-        if (zone === "W" && westContent) {
-            return (
-                <div
-                    key="W"
-                    className="dock-zone dock-zone-w"
-                    style={{ width: zoneWidths.W, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}
-                    onDragOver={(e) => draggingPanelId && e.preventDefault()}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        const panelId = e.dataTransfer.getData("application/x-dockable-id");
-                        if (panelId) moveToZone(panelId, zone);
-                        setDraggingPanelId(null);
-                    }}
-                >
-                    {westContent}
-                </div>
-            );
-        }
-        if (zone === "E" && eastContent) {
-            return (
-                <div
-                    key="E"
-                    className="dock-zone dock-zone-e"
-                    style={{ width: zoneWidths.E, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}
-                    onDragOver={(e) => draggingPanelId && e.preventDefault()}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        const panelId = e.dataTransfer.getData("application/x-dockable-id");
-                        if (panelId) moveToZone(panelId, zone);
-                        setDraggingPanelId(null);
-                    }}
-                >
-                    {eastContent}
-                </div>
-            );
-        }
-        if (zone === "S" && southContent) {
-            return (
-                <div
-                    key="S"
-                    className="dock-zone dock-zone-s"
-                    style={{ ...zoneStyle, minWidth: 0, minHeight: 0, display: "flex" }}
-                    onDragOver={(e) => draggingPanelId && e.preventDefault()}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        const panelId = e.dataTransfer.getData("application/x-dockable-id");
-                        if (panelId) moveToZone(panelId, zone);
-                        setDraggingPanelId(null);
-                    }}
-                >
-                    {southContent}
-                </div>
-            );
-        }
-    }
-
-    const renderVerticalSplitter = (zone: "W" | "E") => (
-        <div className="dock-splitter" onMouseDown={onVerticalSplitterDown(zone)} />
-    );
-
-    const renderHorizontalSplitter = () => (
-        <div className="dock-splitter-horizontal" onMouseDown={onHorizontalSplitterDown} />
-    );
-
-    return (
-        <div className="dockable-frame">
-            <div className="dockable-frame-row">
-                {renderZone("W")}
-                {renderVerticalSplitter("W")}
-                {renderZone("CENTER")}
-                {renderVerticalSplitter("E")}
-                {renderZone("E")}
-            </div>
-            {renderHorizontalSplitter()}
-            {renderZone("S")}
-        </div>
-    );
+const DEFAULTS = {
+    W: 360,
+    E: 100,
+    S: 200,
+    MIN_W: 240,
+    MAX_W: 800,
+    MIN_E: 100,
+    MAX_E: 1000,
+    MIN_S: 120,
 };
 
-export default DockableFrame;
+export default function DockableFrame(props: DockableFrameProps) {
+    const {
+        centerContent,
+        westContent,
+        eastContent,
+        southContent,
+        initialWestWidth = DEFAULTS.W,
+        initialEastWidth = DEFAULTS.E,
+        initialSouthHeight = DEFAULTS.S,
+        minWestWidth = DEFAULTS.MIN_W,
+        minEastWidth = DEFAULTS.MIN_E,
+        minSouthHeight = DEFAULTS.MIN_S,
+    } = props;
+
+    const frameRef = useRef<HTMLDivElement | null>(null);
+    const rowRef = useRef<HTMLDivElement | null>(null);
+
+    const [zoneWidths, setZoneWidths] = useState<ZoneSize>({ W: initialWestWidth, E: initialEastWidth });
+    const [southHeight, setSouthHeight] = useState<number>(initialSouthHeight);
+
+    // ---- dragging state -------------------------------------------------
+    const dragRef = useRef<{
+        kind: "vertical" | "horizontal" | null;
+        zone: "W" | "E" | "S" | null;
+        startX: number;
+        startY: number;
+        startWidth: number;
+        startHeight: number;
+    }>({ kind: null, zone: null, startX: 0, startY: 0, startWidth: 0, startHeight: 0 });
+
+    // ---- helpers --------------------------------------------------------
+    const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(v, max));
+
+    const getRowInnerWidth = useCallback(() => {
+        const el = rowRef.current;
+        if (!el) return 0;
+        return el.clientWidth;
+    }, []);
+
+    // ---- vertical splitter handlers (W/E) -------------------------------
+    const onVerticalDown = useCallback(
+        (zone: "W" | "E") => (e: React.MouseEvent) => {
+            dragRef.current = {
+                kind: "vertical",
+                zone,
+                startX: e.clientX,
+                startY: 0,
+                startWidth: zone === "W" ? zoneWidths.W : zoneWidths.E,
+                startHeight: 0,
+            };
+            document.body.style.cursor = "col-resize";
+            window.addEventListener("mousemove", onVerticalMove);
+            window.addEventListener("mouseup", onVerticalUp);
+        },
+        [zoneWidths.W, zoneWidths.E]
+    );
+
+    const onVerticalMove = useCallback((e: MouseEvent) => {
+        const d = dragRef.current;
+        if (d.kind !== "vertical" || (d.zone !== "W" && d.zone !== "E")) return;
+
+        const dx = e.clientX - d.startX;
+        const total = getRowInnerWidth(); // Total width of the container
+
+        const maxWest = total - (zoneWidths.E + 8 + 240);
+        const maxEast = total - (zoneWidths.W + 8 + 320);
+
+        if (d.zone === "W") {
+            const next = clamp(d.startWidth + dx, minWestWidth, Math.max(minWestWidth, Math.min(maxWest, DEFAULTS.MAX_W)));
+            setZoneWidths((prev) => ({ ...prev, W: next }));
+        } else if (d.zone === "E") {
+            const next = clamp(d.startWidth - dx, minEastWidth, Math.max(minEastWidth, Math.min(maxEast, DEFAULTS.MAX_E)));
+            setZoneWidths((prev) => ({ ...prev, E: next }));
+        }
+    }, [getRowInnerWidth, minWestWidth, minEastWidth, zoneWidths.E, zoneWidths.W]);
+
+    const onVerticalUp = useCallback(() => {
+        document.body.style.cursor = "";
+        dragRef.current = { kind: null, zone: null, startX: 0, startY: 0, startWidth: 0, startHeight: 0 };
+        window.removeEventListener("mousemove", onVerticalMove);
+        window.removeEventListener("mouseup", onVerticalUp);
+    }, [onVerticalMove]);
+
+    // ---- horizontal splitter handlers (S) -------------------------------
+    const onHorizontalDown = useCallback((e: React.MouseEvent) => {
+        dragRef.current = {
+            kind: "horizontal",
+            zone: "S",
+            startX: 0,
+            startY: e.clientY,
+            startWidth: 0,
+            startHeight: southHeight,
+        };
+        document.body.style.cursor = "row-resize";
+        window.addEventListener("mousemove", onHorizontalMove);
+        window.addEventListener("mouseup", onHorizontalUp);
+    }, [southHeight]);
+
+    const onHorizontalMove = useCallback((e: MouseEvent) => {
+        const d = dragRef.current;
+        if (d.kind !== "horizontal" || d.zone !== "S") return;
+        const dy = e.clientY - d.startY;
+
+        const frame = frameRef.current;
+        const max = frame ? frame.clientHeight - 140 : d.startHeight; // leave space for row & headers
+        const next = clamp(d.startHeight - dy, minSouthHeight, Math.max(minSouthHeight, max));
+        setSouthHeight(next);
+    }, [minSouthHeight]);
+
+    const onHorizontalUp = useCallback(() => {
+        document.body.style.cursor = "";
+        dragRef.current = { kind: null, zone: null, startX: 0, startWidth: 0, startY: 0, startHeight: 0 };
+        window.removeEventListener("mousemove", onHorizontalMove);
+        window.removeEventListener("mouseup", onHorizontalUp);
+    }, [onHorizontalMove]);
+
+    // ---- render ---------------------------------------------------------
+    return (
+        <Box ref={frameRef} className="dockable-frame">
+            <Box ref={rowRef} className="dockable-frame-row">
+                <ZoneWest width={zoneWidths.W}>{westContent}</ZoneWest>
+                <VerticalSplitter aria-label="Resize west" onMouseDown={onVerticalDown("W")} />
+                <ZoneCenter>{centerContent}</ZoneCenter>
+                <VerticalSplitter aria-label="Resize east" onMouseDown={onVerticalDown("E")} />
+                <ZoneEast width={zoneWidths.E}>{eastContent}</ZoneEast>
+            </Box>
+
+            <HorizontalSplitter aria-label="Resize south" onMouseDown={onHorizontalDown} />
+            <ZoneSouth height={southHeight}>{southContent}</ZoneSouth>
+        </Box>
+    );
+}

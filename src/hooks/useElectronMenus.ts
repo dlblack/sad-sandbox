@@ -1,33 +1,34 @@
 import { useEffect, useRef } from "react";
+import { invokeFileMenu } from "../utils/fileMenuBus";
 
-type ElectronUnsubscribe = () => void;
+type Unsub = () => void;
 
 type ElectronAPI = {
-    onMenu: (channel: string, handler: (payload: unknown) => void) => ElectronUnsubscribe | void;
+    onMenu?: (channel: string, handler: (payload: unknown) => void) => Unsub | void;
 };
 
-type WithElectronAPI = Window & { electronAPI?: ElectronAPI };
+type WithElectron = Window & { electronAPI?: ElectronAPI };
 
-export default function useElectronMenus(
-    addComponent: (type: string, props?: Record<string, unknown>) => void
-): void {
-    const addRef = useRef(addComponent);
+type OpenComponent = (type: string, props?: Record<string, unknown>) => void;
 
-    useEffect(() => {
-        addRef.current = addComponent;
-    }, [addComponent]);
+export default function useElectronMenus(openComponent: OpenComponent): void {
+    const openRef = useRef(openComponent);
+    useEffect(() => { openRef.current = openComponent; }, [openComponent]);
 
     useEffect(() => {
-        const api = (window as WithElectronAPI).electronAPI;
+        const api = (window as unknown as WithElectron).electronAPI;
         if (!api?.onMenu) return;
 
-        const offs: Array<ElectronUnsubscribe | void> = [];
+        const offs: Array<Unsub | void> = [];
 
         // File
         offs.push(
             api.onMenu("menu-file", (action) => {
-                if (action === "create-new") {
-                    // TODO: implement
+                switch (action) {
+                    case "create-new": invokeFileMenu("openNew"); break;
+                    case "open":       invokeFileMenu("openOpen"); break;
+                    case "close":      invokeFileMenu("closeProject"); break;
+                    case "save":       invokeFileMenu("saveProject"); break;
                 }
             })
         );
@@ -36,24 +37,7 @@ export default function useElectronMenus(
         offs.push(
             api.onMenu("menu-maps", (action) => {
                 if (action === "open-map-window") {
-                    addRef.current?.("ComponentMap");
-                }
-            })
-        );
-
-        // Data
-        offs.push(
-            api.onMenu("menu-data", (action) => {
-                if (action === "manual-data-entry") {
-                    addRef.current?.("ManualDataEntryEditor");
-                } else if (action === "import-usgs" || action === "usgs") {
-                    // TODO: open USGS flow
-                } else if (action === "import-dss" || action === "hec-dss") {
-                    // TODO: open HEC-DSS flow
-                } else if (action === "edit-data") {
-                    // TODO: open editor
-                } else if (action === "data-utilities") {
-                    // TODO: open utilities
+                    openRef.current("ComponentMap");
                 }
             })
         );
@@ -62,7 +46,7 @@ export default function useElectronMenus(
         offs.push(
             api.onMenu("menu-analysis", (type) => {
                 if (typeof type === "string" && type) {
-                    addRef.current?.(type);
+                    openRef.current(type);
                 }
             })
         );
@@ -71,7 +55,7 @@ export default function useElectronMenus(
         offs.push(
             api.onMenu("menu-tools", (type) => {
                 if (typeof type === "string" && type) {
-                    addRef.current?.(type);
+                    openRef.current(type);
                 }
             })
         );

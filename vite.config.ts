@@ -9,7 +9,19 @@ export default defineConfig({
             {
                 entry: 'src-electron/main.ts',
                 onstart({ startup }) { void startup(); },
-                vite: { build: { outDir: 'dist-electron', minify: false } },
+                vite: {
+                    build: {
+                        outDir: 'dist-electron',
+                        minify: false,
+                        target: 'node18',
+                        rollupOptions: {
+                            output: {
+                                format: 'cjs',
+                                entryFileNames: 'main.js',
+                            },
+                        },
+                    },
+                },
             },
             {
                 entry: 'src-electron/preload.ts',
@@ -21,8 +33,8 @@ export default defineConfig({
                         target: 'node18',
                         rollupOptions: {
                             output: {
-                                format: 'cjs',                // <<< CommonJS
-                                entryFileNames: 'preload.js', // <<< name it preload.js
+                                format: 'cjs',
+                                entryFileNames: 'preload.js',
                             },
                         },
                     },
@@ -30,8 +42,6 @@ export default defineConfig({
             },
         ]),
     ],
-    server: {
-        proxy: { '/api': 'http://localhost:5001' },
-    },
+    server: { proxy: { '/api': 'http://localhost:5001' } },
     build: { outDir: 'dist' },
 });

@@ -2,14 +2,37 @@
 
 export const INTERFACE_TEXT = {
   // --------------------------------------
+  // HomePage
+  // --------------------------------------
+  HomePage_Title: "HEC-Neptune",
+  HomePage_CreateNewProject: "Create New Project",
+  HomePage_CreateProject_Name_L: "Project Name",
+  HomePage_CreateProject_Name_P: "Enter project name",
+  HomePage_CreateProject_Directory_L: "Directory",
+  HomePage_CreateProject_Directory_P: "Select project directory",
+  HomePage_CreateProject_UnitSystem_L: "Default Unit System",
+  HomePage_CreateProject_UnitSystem_US: "U.S. Customary",
+  HomePage_CreateProject_UnitSystem_SI: "SI (Metric)",
+  HomePage_CreateProject_ButtonCreate: "Create Project",
+  HomePage_OpenExistingProject: "Open Existing Project",
+  HomePage_ButtonBrowseForProject: "Browse for Project",
+  HomePage_RecentProjects_L: "Recent Projects",
+  HomePage_NoRecentProjects: "No recent projects.",
+
+  // --------------------------------------
   // Navbar
   // --------------------------------------
   Navbar_File: "File",
   Navbar_File_New: "New... ",
+  Navbar_File_New_L: "Create New Project",
+  Navbar_File_New_ProjectName: "Project Name",
+  Navbar_File_New_ProjectName_D: "Enter project name",
+  Navbar_File_New_DirectoryLocation: "Directory Location",
+  Navbar_File_New_DirectoryLocation_D: "C:/Projects/MyProject",
+  Navbar_File_New_UnitSystem: "Default Unit System",
   Navbar_File_Open: "Open...",
   Navbar_File_Close: "Close ",
   Navbar_File_Save: "Save... ",
-  Navbar_File_Print: "Print... ",
   Navbar_Maps: "Maps",
   Navbar_Maps_Open: "Open Map Window",
   Navbar_Data: "Data",
@@ -458,11 +481,3 @@ export function getInterfaceText(key: InterfaceKey | string, args: unknown[] = [
   });
   return out;
 }
-
-/** Optional back-compat helper with `.interface(...)` API */
-export const TextInterfaceStore = {
-  interface(key: InterfaceKey | string, args?: unknown[] | unknown): string {
-    const arr = Array.isArray(args) ? args : args == null ? [] : [args];
-    return getInterfaceText(key, arr);
-  },
-};
