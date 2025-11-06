@@ -82,6 +82,7 @@ function getNodeBadgeOrIcon(
     }
     if (isLeaf && section === "analysis") {
         const b17Label = TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard");
+        const copLabel = TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard");
         const ftcLabel = TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard");
         const pffLabel = TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard");
 
@@ -101,6 +102,25 @@ function getNodeBadgeOrIcon(
                     }}
                 >
                     B17
+                </Paper>
+            );
+        }
+        if (parentLabel === copLabel) {
+            return (
+                <Paper
+                    shadow="none"
+                    withBorder={false}
+                    p={0}
+                    radius="xs"
+                    style={{
+                        fontSize: 10,
+                        paddingInline: 6,
+                        paddingBlock: 2,
+                        background: "#7fcddb",
+                        color: "white",
+                    }}
+                >
+                    COP
                 </Paper>
             );
         }

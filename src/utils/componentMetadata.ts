@@ -100,6 +100,9 @@ export const componentMetadata: Record<string, ComponentMeta> = {
   Bulletin17AnalysisWizard: wizard(
       TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard")
   ),
+  CopulaAnalysisWizard: wizard(
+      TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard")
+  ),
   FloodTypeClassAnalysisWizard: wizard(
       TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard")
   ),
@@ -141,9 +144,6 @@ export const componentMetadata: Record<string, ComponentMeta> = {
   ),
   QuantileMappingWizard: wizard(
       TextStore.interface("ComponentMetadata_Wizard_QuantileMappingWizard")
-  ),
-  CopulaAnalysisWizard: wizard(
-      TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard")
   ),
 
   // Demo Plots

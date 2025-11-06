@@ -15,8 +15,8 @@ import ManualDataEntryEditor from "../app_components/data/ManualDataEntryEditor/
 
 // Analysis wizards
 import Bulletin17AnalysisWizard from "../app_components/analysis/bulletin17/Bulletin17AnalysisWizard";
-import FloodTypeClassAnalysisWizard
-  from "../app_components/analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
+import CopulaAnalysisWizard from "../app_components/analysis/copula/CopulaAnalysisWizard";
+import FloodTypeClassAnalysisWizard from "../app_components/analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
 import PeakFlowFreqWizard from "../app_components/analysis/peak_flow/PeakFlowFreqWizard";
 import GeneralFreqAnalysisWizard from "../app_components/analysis/GeneralFreqAnalysisWizard";
 import VolumeFreqAnalysisWizard from "../app_components/analysis/VolumeFreqAnalysisWizard";
@@ -30,7 +30,6 @@ import RecordExtensionAnalysisWizard from "../app_components/analysis/RecordExte
 import PeaksOverThresholdAnalysisWizard from "../app_components/analysis/PeaksOverThresholdAnalysisWizard";
 import LinearRegressionWizard from "../app_components/analysis/LinearRegressionWizard";
 import QuantileMappingWizard from "../app_components/analysis/QuantileMappingWizard";
-import CopulaAnalysisWizard from "../app_components/analysis/CopulaAnalysisWizard";
 
 /** ---------- Types that match ComponentProject’s object-style API ---------- */
 export type Section = "maps" | "data" | "analyses";
@@ -206,6 +205,9 @@ export const dockableContentFactory = (
     case "Bulletin17AnalysisWizard":
       return <Bulletin17AnalysisWizard {...props} />;
 
+    case "CopulaAnalysisWizard":
+      return <CopulaAnalysisWizard {...props} />;
+
     case "FloodTypeClassAnalysisWizard":
       return <FloodTypeClassAnalysisWizard {...props} />;
 
@@ -255,9 +257,6 @@ export const dockableContentFactory = (
 
     case "QuantileMappingWizard":
       return <QuantileMappingWizard {...props} />;
-
-    case "CopulaAnalysisWizard":
-      return <CopulaAnalysisWizard {...props} />;
 
       /** ---------- UNKNOWN ---------- */
     default:

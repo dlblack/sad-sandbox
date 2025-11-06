@@ -173,6 +173,9 @@ function Navbar({ addComponent }: NavbarProps) {
                 <Menu.Item onClick={() => openComponent("Bulletin17AnalysisWizard")}>
                   {TextStore.interface("Navbar_Analysis_Bulletin17")}
                 </Menu.Item>
+                <Menu.Item onClick={() => openComponent("CopulaAnalysisWizard")}>
+                  {TextStore.interface("Navbar_Analysis_Copula")}
+                </Menu.Item>
                 <Menu.Item onClick={() => openComponent("FloodTypeClassAnalysisWizard")}>
                   {TextStore.interface("Navbar_Analysis_FloodTypeClass")}
                 </Menu.Item>
