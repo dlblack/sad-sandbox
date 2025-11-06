@@ -1,6 +1,7 @@
 import React from "react";
 import type { WizardStep, WizardCtx } from "../../components/WizardRunner";
 import { TextStore } from "../../../../utils/TextStore";
+import {List, Stack, Text} from "@mantine/core";
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 
@@ -31,7 +32,7 @@ export default function makeLookbackStep(): WizardStep {
                 alignItems: "center",
                 columnGap: 12,
                 maxWidth: 760,
-                marginBottom: 6,
+                marginBottom: 6
             };
             const rightLabel: React.CSSProperties = { justifySelf: "end", paddingRight: 4, textAlign: "right" };
             const rightInput: React.CSSProperties = { width: "20ch", justifySelf: "end" };
@@ -124,9 +125,7 @@ export default function makeLookbackStep(): WizardStep {
                                     />
                                     <span>{L("FloodTypeClass_Wizard_StepLookback_Lookback_Ceiling")}</span>
                                 </label>
-                                <div style={rightLabel}>
-                                    {L("FloodTypeClass_Wizard_StepLookback_Lookback_DrainageArea")}
-                                </div>
+                                <div style={rightLabel}>{L("FloodTypeClass_Wizard_StepLookback_Lookback_DrainageArea")}</div>
                                 <input
                                     type="number"
                                     min="0"
@@ -175,9 +174,7 @@ export default function makeLookbackStep(): WizardStep {
                                     />
                                     <span>{L("FloodTypeClass_Wizard_StepLookback_Lookback_Ceiling")}</span>
                                 </label>
-                                <div style={rightLabel}>
-                                    {L("FloodTypeClass_Wizard_StepLookback_Lookback_DrainageArea")}
-                                </div>
+                                <div style={rightLabel}>{L("FloodTypeClass_Wizard_StepLookback_Lookback_DrainageArea")}</div>
                                 <input
                                     type="number"
                                     min="0"
@@ -192,6 +189,45 @@ export default function makeLookbackStep(): WizardStep {
                     </div>
                 </div>
             );
-        },
+        }
     };
+}
+
+export function LookbackSummary({ bag }: { bag: Record<string, unknown> }) {
+    const none = <em>{TextStore.interface("Wizard_Summary_None")}</em>;
+    const v = bag as any;
+    return (
+        <Stack gap="xs">
+            <Text fw={600}>{L("FloodTypeClass_Wizard_StepLookback")}</Text>
+            <List>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepLookback_Flow_Label")}</strong>{" "}
+                        {v.flowLookbackMode || "custom"}{" "}
+                        {v.flowLookbackMode === "da"
+                            ? `(DA ${v.flowDrainageArea || none})`
+                            : `(Days ${v.flowLookbackDays || none})`}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepLookback_SWELabel")}</strong>{" "}
+                        {v.sweLookbackMode || "custom"}{" "}
+                        {v.sweLookbackMode === "da"
+                            ? `(DA ${v.sweDrainageArea || none})`
+                            : `(Days ${v.sweLookbackDays || none})`}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepLookback_PrecipLabel")}</strong>{" "}
+                        {v.precipLookbackMode || "custom"}{" "}
+                        {v.precipLookbackMode === "da"
+                            ? `(DA ${v.precipDrainageArea || none})`
+                            : `(Days ${v.precipLookbackDays || none})`}
+                    </Text>
+                </List.Item>
+            </List>
+        </Stack>
+    );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import type { WizardStep, WizardCtx } from "../../components/WizardRunner";
 import { TextStore } from "../../../../utils/TextStore";
+import {List, Stack, Text} from "@mantine/core";
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 const rowStyle: React.CSSProperties = {
@@ -9,7 +10,7 @@ const rowStyle: React.CSSProperties = {
     alignItems: "center",
     columnGap: 12,
     maxWidth: 760,
-    marginBottom: 6,
+    marginBottom: 6
 };
 
 export default function makeThresholdsStep(): WizardStep {
@@ -84,6 +85,41 @@ export default function makeThresholdsStep(): WizardStep {
                     </div>
                 </div>
             );
-        },
+        }
     };
+}
+
+export function ThresholdsSummary({ bag }: { bag: Record<string, unknown> }) {
+    const none = <em>{TextStore.interface("Wizard_Summary_None")}</em>;
+    return (
+        <Stack gap="xs">
+            <Text fw={600}>{L("FloodTypeClass_Wizard_StepThresholds")}</Text>
+            <List>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_Precip")}</strong>{" "}
+                        {(bag as any).thrPrecipAccumIn || none}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_SWE")}</strong>{" "}
+                        {(bag as any).thrSWEDepletionIn || none}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_SnowmeltFrac")}</strong>{" "}
+                        {(bag as any).thrSnowmeltFrac || none}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_RainFrac")}</strong>{" "}
+                        {(bag as any).thrRainFrac || none}
+                    </Text>
+                </List.Item>
+            </List>
+        </Stack>
+    );
 }

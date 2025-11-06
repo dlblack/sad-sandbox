@@ -3,9 +3,10 @@ import type { WizardStep, WizardCtx } from "../../components/WizardRunner";
 import {
     FlowTimeSeriesComboBox,
     PrecipTimeSeriesComboBox,
-    SweTimeSeriesComboBox,
+    SweTimeSeriesComboBox
 } from "../../components/inputs/TimeSeriesComboBoxes";
 import { TextStore } from "../../../../utils/TextStore";
+import {List, Stack, Text} from "@mantine/core";
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 
@@ -39,9 +40,7 @@ export default function makeDataSourcesStep(): WizardStep {
                         onChange={(val: string) => set({ flowTimeSeries: val })}
                     />
 
-                    <label htmlFor="ft_precip">
-                        {L("FloodTypeClass_Wizard_StepDataSources_PrecipTS")}
-                    </label>
+                    <label htmlFor="ft_precip">{L("FloodTypeClass_Wizard_StepDataSources_PrecipTS")}</label>
                     <PrecipTimeSeriesComboBox
                         id="ft_precip"
                         style={inputNarrow}
@@ -50,9 +49,7 @@ export default function makeDataSourcesStep(): WizardStep {
                         onChange={(val: string) => set({ precipTimeSeries: val })}
                     />
 
-                    <label htmlFor="ft_swe">
-                        {L("FloodTypeClass_Wizard_StepDataSources_SweTS")}
-                    </label>
+                    <label htmlFor="ft_swe">{L("FloodTypeClass_Wizard_StepDataSources_SweTS")}</label>
                     <SweTimeSeriesComboBox
                         id="ft_swe"
                         style={inputNarrow}
@@ -62,6 +59,35 @@ export default function makeDataSourcesStep(): WizardStep {
                     />
                 </div>
             );
-        },
+        }
     };
+}
+
+export function DataSourcesSummary({ bag }: { bag: Record<string, unknown> }) {
+    const none = <em>{TextStore.interface("Wizard_Summary_None")}</em>;
+    return (
+        <Stack gap="xs">
+            <Text fw={600}>{L("FloodTypeClass_Wizard_StepDataSources")}</Text>
+            <List>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{TextStore.interface("FloodTypeClass_Wizard_StepFlowData_TimeSeries")}</strong>{" "}
+                        {(bag as any).flowTimeSeries || none}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepDataSources_PrecipTS")}</strong>{" "}
+                        {(bag as any).precipTimeSeries || none}
+                    </Text>
+                </List.Item>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepDataSources_SweTS")}</strong>{" "}
+                        {(bag as any).sweTimeSeries || none}
+                    </Text>
+                </List.Item>
+            </List>
+        </Stack>
+    );
 }

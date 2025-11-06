@@ -2,19 +2,19 @@ import React from "react";
 import WizardRunner, {
   WizardBag,
   WizardCtx,
-  WizardStep,
+  WizardStep
 } from "../components/WizardRunner";
-import makeFlowDataSourceStep from "./steps/FlowDataSourceStep";
-import makeFloodTypeStep from "./steps/FloodTypeStep";
-import makeDataSourcesStep from "./steps/DataSourcesStep";
-import makeLookbackStep from "./steps/LookbackStep";
-import makeThresholdsStep from "./steps/ThresholdsStep";
+import makeFlowDataSourceStep, { FlowDataSourceSummary } from "./steps/FlowDataSourceStep";
+import makeFloodTypeStep, { FloodTypeSummary } from "./steps/FloodTypeStep";
+import makeDataSourcesStep, { DataSourcesSummary } from "./steps/DataSourcesStep";
+import makeLookbackStep, { LookbackSummary } from "./steps/LookbackStep";
+import makeThresholdsStep, { ThresholdsSummary } from "./steps/ThresholdsStep";
 import makeReviewInputsStep from "./steps/ReviewInputsStep";
-import makeResultsStep from "./steps/ResultsStep";
 import {
   makeWizardGeneralInfoStep,
-  GeneralInfoSummary,
+  GeneralInfoSummary
 } from "../components/steps/WizardGeneralInfo";
+import makeResultsStep from "./steps/ResultsStep";
 
 type FloodTypeResult = {
   name?: string;
@@ -50,8 +50,13 @@ export default function FloodTypeClassAnalysisWizard(
         description?: string;
         selectedDataset?: string;
       }) => <GeneralInfoSummary {...p} showDataset={false} />,
+      FlowDataSourceSummary,
+      FloodTypeSummary,
+      DataSourcesSummary,
+      LookbackSummary,
+      ThresholdsSummary
     }),
-    makeResultsStep(),
+    makeResultsStep()
   ];
 
   const validateNext = (_ctx: WizardCtx, _stepIndex: number) => true;
@@ -64,15 +69,15 @@ export default function FloodTypeClassAnalysisWizard(
       selectedDataset: "",
       thresholds: {
         precipAccumIn: Number(b.thrPrecipAccumIn ?? 0),
-        sweAccumIn: Number(b.thrSweAccumIn ?? 0),
+        sweAccumIn: Number(b.thrSweDepletionIn ?? b.thrSWEDepletionIn ?? 0),
         snowmeltFrac: Number(b.thrSnowmeltFrac ?? 0),
-        rainFrac: Number(b.thrRainFrac ?? 0),
+        rainFrac: Number(b.thrRainFrac ?? 0)
       },
       lookbackDays:
           b.lookbackDays === "" || b.lookbackDays == null
               ? null
               : Number(b.lookbackDays),
-      results: null,
+      results: null
     };
   };
 

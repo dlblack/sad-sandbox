@@ -1,6 +1,7 @@
 import React from "react";
 import type { WizardStep, WizardCtx } from "../../components/WizardRunner";
 import { TextStore } from "../../../../utils/TextStore";
+import {List, Stack, Text} from "@mantine/core";
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 
@@ -10,7 +11,7 @@ const PRESETS = [
     "FloodTypeClass_Wizard_StepFloodTypeClass_MountainousWestPugetSound",
     "FloodTypeClass_Wizard_StepFloodTypeClass_MountainousWestUpperColoradoRiver",
     "FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsRedRiver",
-    "FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsIowaRiver",
+    "FloodTypeClass_Wizard_StepFloodTypeClass_CentralPlainsIowaRiver"
 ];
 
 export default function makeFloodTypeStep(): WizardStep {
@@ -46,6 +47,23 @@ export default function makeFloodTypeStep(): WizardStep {
                     })}
                 </div>
             );
-        },
+        }
     };
+}
+
+export function FloodTypeSummary({ bag }: { bag: Record<string, unknown> }) {
+    const none = <em>{TextStore.interface("Wizard_Summary_None")}</em>;
+    return (
+        <Stack gap="xs">
+            <Text fw={600}>{L("FloodTypeClass_Wizard_StepFloodTypeClass")}</Text>
+            <List>
+                <List.Item>
+                    <Text size="sm">
+                        <strong>{L("FloodTypeClass_Wizard_StepFloodTypeClass")}</strong>{" "}
+                        {(bag as any).floodTypePreset || none}
+                    </Text>
+                </List.Item>
+            </List>
+        </Stack>
+    );
 }

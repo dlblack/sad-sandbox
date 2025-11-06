@@ -1,77 +1,47 @@
 import React from "react";
 import type { WizardStep, WizardCtx } from "../../components/WizardRunner";
 import { TextStore } from "../../../../utils/TextStore";
+import { Stack, Title } from "@mantine/core";
 
 const L = (k: string) => TextStore.interface?.(k) ?? "";
 
 export default function makeReviewInputsStep({
                                                  GeneralInfoSummary,
+                                                 FlowDataSourceSummary,
+                                                 FloodTypeSummary,
+                                                 DataSourcesSummary,
+                                                 LookbackSummary,
+                                                 ThresholdsSummary
                                              }: {
     GeneralInfoSummary: React.ComponentType<{
         name?: string;
         description?: string;
         selectedDataset?: string;
     }>;
+    FlowDataSourceSummary: React.ComponentType<{ bag: Record<string, unknown> }>;
+    FloodTypeSummary: React.ComponentType<{ bag: Record<string, unknown> }>;
+    DataSourcesSummary: React.ComponentType<{ bag: Record<string, unknown> }>;
+    LookbackSummary: React.ComponentType<{ bag: Record<string, unknown> }>;
+    ThresholdsSummary: React.ComponentType<{ bag: Record<string, unknown> }>;
 }): WizardStep {
     return {
         label: L("FloodTypeClass_Wizard_StepReview"),
         render: ({ name, description, selectedDataset, bag }: WizardCtx) => (
-            <div style={{ display: "grid", gap: 12, padding: 8 }}>
-                <h6 style={{ marginBottom: 12 }}>{L("Wizard_Summary_Title")}</h6>
+            <Stack gap="md" p={8}>
+                <Title order={6}>{L("Wizard_Summary_Title")}</Title>
 
-                <GeneralInfoSummary name={name} description={description} selectedDataset={selectedDataset} />
+                <GeneralInfoSummary
+                    name={name}
+                    description={description}
+                    selectedDataset={selectedDataset}
+                />
 
-                <ul style={{ listStyle: "none", paddingLeft: 0, fontSize: 12 }}>
-                    <li>
-                        <strong>{L("Wizard_Summary_Dataset")}</strong>
-                        {(bag as any).flowTimeSeries as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepFlowData_StartDate")}</strong>
-                        {(bag as any).classStartDate as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepFlowData_StartTime")}</strong>
-                        {(bag as any).classStartTime as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepFlowData_EndDate")}</strong>
-                        {(bag as any).classEndDate as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepFlowData_EndTime")}</strong>
-                        {(bag as any).classEndTime as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepFloodTypeClass")}</strong>
-                        {(bag as any).floodTypePreset as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepDataSources_PrecipTS")}</strong>{" "}
-                        {(bag as any).precipTimeSeries as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepDataSources_SweTS")}</strong>
-                        {(bag as any).sweTimeSeries as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepLookback_PrecipLabel")}</strong>{" "}
-                        {(bag as any).thrPrecipAccumIn as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepLookback_SWELabel")}</strong>{" "}
-                        {(bag as any).thrSWEDepletionIn as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_SnowmeltFrac")}</strong>{" "}
-                        {(bag as any).thrSnowmeltFrac as string}
-                    </li>
-                    <li>
-                        <strong>{L("FloodTypeClass_Wizard_StepThresholds_RainFrac")}</strong>{" "}
-                        {(bag as any).thrRainFrac as string}
-                    </li>
-                </ul>
-            </div>
-        ),
+                <FlowDataSourceSummary bag={bag as any} />
+                <FloodTypeSummary bag={bag as any} />
+                <DataSourcesSummary bag={bag as any} />
+                <LookbackSummary bag={bag as any} />
+                <ThresholdsSummary bag={bag as any} />
+            </Stack>
+        )
     };
 }
