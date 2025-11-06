@@ -126,6 +126,11 @@ function createWindow(): void {
           click: () => win.webContents.send("menu-analysis", "Bulletin17AnalysisWizard"),
         },
         {
+          id: "analysis-cop",
+          label: TextStore.interface("Navbar_Analysis_Copula"),
+          click: () => win.webContents.send("menu-analysis", "CopulaAnalysisWizard"),
+        },
+        {
           id: "analysis-ftc",
           label: TextStore.interface("Navbar_Analysis_FloodTypeClass"),
           click: () => win.webContents.send("menu-analysis", "FloodTypeClassAnalysisWizard"),
@@ -239,6 +244,7 @@ function createWindow(): void {
       "data-edit",
       "data-utils",
       "analysis-b17",
+      "analysis-cop",
       "analysis-ftc",
       "analysis-peak",
       "tools-project",
@@ -252,7 +258,7 @@ function createWindow(): void {
     if (!m) return;
     for (const id of idsToFlip) {
       const item = m.getMenuItemById(id);
-      if (item) item.enabled = !!enabled;
+      if (item) item.enabled = enabled;
     }
   }
 

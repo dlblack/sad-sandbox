@@ -22,35 +22,51 @@ export type WizardCtx<B extends WizardBag = WizardBag> = {
   datasetList: DatasetItem[];
   bag: B;
   setBag: React.Dispatch<React.SetStateAction<B>>;
-  type?: string;
-  id?: string;
   data: Record<string, unknown>;
+  analyses: Record<string, unknown>;
+  type: string;
+  id?: string;
 };
 
 export type WizardStep<B extends WizardBag = WizardBag> = {
   label: string;
   render: (ctx: WizardCtx<B>) => React.ReactNode;
-  validate?: (ctx: WizardCtx<B>) => boolean;
 };
 
-export type WizardRunnerProps<B extends WizardBag = WizardBag, R = unknown> = {
-  type?: string;
+type Props<B extends WizardBag = WizardBag, R = unknown> = {
   id?: string;
+  type?: string;
   data?: Record<string, unknown>;
-  analyses?: Record<string, { name?: string }[]>;
+  analyses?: Record<string, unknown>;
   defaultDatasetKey?: string;
   steps: WizardStep<B>[];
   buildResult: (ctx: WizardCtx<B>) => R;
-  validateNext?: (ctx: WizardCtx<B>, stepNumber: number) => boolean;
-  onFinish?: (type: string | undefined, result: R, id?: string) => void;
+  validateNext?: (ctx: WizardCtx<B>, stepIndex: number) => boolean;
+  onFinish?: (type: string, result: R, id?: string) => void;
   onRemove?: (id?: string) => void;
+  disableDataset?: boolean;
 };
 
+type ComponentLike = {
+  id?: string;
+  key?: string;
+  name?: string;
+  type?: string;
+};
+
+function toTypeKey(x: unknown): string {
+  if (typeof x === "string") return x;
+  if (x && typeof x === "object") {
+    const o = x as ComponentLike;
+    return o.id ?? o.key ?? o.name ?? o.type ?? "";
+  }
+  return "";
+}
+
 export default function WizardRunner<B extends WizardBag = WizardBag, R = unknown>(
-    props: WizardRunnerProps<B, R>
+    props: Props<B, R>
 ) {
   const {
-    type,
     id,
     data = {},
     analyses = {},
@@ -60,9 +76,14 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
     validateNext,
     onFinish,
     onRemove,
+    disableDataset = false,
   } = props;
 
-  const datasetList = (data?.[defaultDatasetKey] as DatasetItem[] | undefined) ?? [];
+  const rawType = props.type ?? componentMetadata.currentType;
+  const typeKey = toTypeKey(rawType);
+
+  const datasetList =
+      (data?.[defaultDatasetKey] as DatasetItem[] | undefined) ?? [];
   const [step, setStep] = useState<number>(1);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -70,64 +91,63 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
   const [bag, setBag] = useState<B>({} as B);
 
   useEffect(() => {
-    if (datasetList.length > 0 && !selectedDataset) {
+    if (!disableDataset && datasetList.length > 0 && !selectedDataset) {
       setSelectedDataset(datasetList[0].name);
     }
-  }, [datasetList, selectedDataset]);
+  }, [datasetList, selectedDataset, disableDataset]);
 
   useEffect(() => {
-    if (datasetList.length > 0 && selectedDataset) {
+    if (!disableDataset && datasetList.length > 0 && selectedDataset) {
       const found = datasetList.find((d) => d.name === selectedDataset);
       setDescription((prev) => (prev ? prev : found?.description || ""));
     }
-  }, [selectedDataset, datasetList]);
+  }, [selectedDataset, datasetList, disableDataset]);
 
-  const displayType = (componentMetadata as any)?.[type as any]?.entityName ?? type;
-  const existingNames = useMemo(() => {
-    const arr = ((analyses && (analyses as any)[displayType as any]) || []) as { name?: string }[];
-    return arr.map((a) => (a.name || "").trim().toLowerCase());
-  }, [analyses, displayType]);
-
-  const nameTrimmed = name.trim().toLowerCase();
-  const isDuplicateName = nameTrimmed.length > 0 && existingNames.includes(nameTrimmed);
-
-  const ctx: WizardCtx<B> = {
-    step,
-    setStep,
-    name,
-    setName,
-    description,
-    setDescription,
-    selectedDataset,
-    setSelectedDataset,
-    datasetList,
-    bag,
-    setBag,
-    type,
-    id,
-    data,
-  };
-
-  const currentIndex = step > 0 ? step - 1 : 0;
+  const currentIndex = Math.max(0, Math.min(step - 1, steps.length - 1));
   const current = steps[currentIndex];
-  const perStepInvalid = typeof current?.validate === "function" && !current.validate(ctx);
 
-  const disableNext =
-      (step === 1 && (isDuplicateName || !nameTrimmed)) ||
-      perStepInvalid ||
-      (typeof validateNext === "function" && !validateNext(ctx, step));
+  const ctx: WizardCtx<B> = useMemo(
+      () => ({
+        step,
+        setStep,
+        name,
+        setName,
+        description,
+        setDescription,
+        selectedDataset,
+        setSelectedDataset,
+        datasetList,
+        bag,
+        setBag,
+        data,
+        analyses,
+        type: typeKey,
+        id,
+      }),
+      [
+        step,
+        name,
+        description,
+        selectedDataset,
+        datasetList,
+        bag,
+        data,
+        analyses,
+        typeKey,
+        id,
+      ]
+  );
 
-  function handleFinish(e?: React.FormEvent) {
-    if (e && typeof (e as any).preventDefault === "function") {
-      (e as any).preventDefault();
-    }
+  const disableNext = useMemo(() => {
+    if (!validateNext) return false;
+    return !validateNext(ctx, currentIndex);
+  }, [ctx, currentIndex, validateNext]);
 
+  function handleFinish() {
     const result = buildResult(ctx);
-
     if (typeof onFinish === "function") {
-      onFinish(type, result, id);
+      onFinish(typeKey, result, id);
     }
-
     if (typeof onRemove === "function") {
       onRemove(id);
     }
@@ -149,13 +169,10 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
             <Stepper.Completed>{null}</Stepper.Completed>
           </Stepper>
 
-          <ScrollArea className="wizardBody">
-            {current?.render(ctx)}
-          </ScrollArea>
+          <ScrollArea className="wizardBody">{current?.render(ctx)}</ScrollArea>
 
-          <Divider />
-
-          <Group className="wizardFooter" justify="space-between">
+          <Group justify="space-between">
+            <Divider className="wizardDivider" />
             <WizardNavigation
                 step={step}
                 setStep={setStep}

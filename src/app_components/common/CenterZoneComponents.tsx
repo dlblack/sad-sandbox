@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import PeakFlowFreqWizard from "../analysis/peak_flow/PeakFlowFreqWizard";
 import Bulletin17AnalysisWizard from "../analysis/bulletin17/Bulletin17AnalysisWizard";
+import CopulaAnalysisWizard from "../analysis/copula/CopulaAnalysisWizard";
 import FloodTypeClassAnalysisWizard from "../analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
+import PeakFlowFreqWizard from "../analysis/peak_flow/PeakFlowFreqWizard";
 import ManualDataEntryEditor from "../data/ManualDataEntryEditor/ManualDataEntryEditor";
 import DemoPlots from "../plots/DemoPlots";
 import DemoPlotsRecharts from "../plots/DemoPlotsRecharts";
@@ -17,6 +18,11 @@ const REGISTRY: Registry = {
         title: () => TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard"),
         typeClass: "tab--wizard",
         Component: Bulletin17AnalysisWizard,
+    },
+    CopulaAnalysisWizard: {
+        title: () => TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard"),
+        typeClass: "tab--wizard",
+        Component: CopulaAnalysisWizard,
     },
     FloodTypeClassAnalysisWizard: {
         title: () => TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard"),

@@ -12,10 +12,15 @@ type Ctx = {
   setSelectedDataset: (v: string) => void;
 };
 
-export function makeWizardGeneralInfoStep() {
-  const LABEL = TextStore.interface?.("Wizard_GeneralInfo");
+type GeneralInfoOptions = {
+    includeDataset?: boolean;
+};
 
-  return {
+export function makeWizardGeneralInfoStep(options?: GeneralInfoOptions) {
+    const includeDataset = options?.includeDataset !== false;
+    const LABEL = TextStore.interface?.("Wizard_GeneralInfo");
+
+return {
     key: "generalinfo",
     label: LABEL,
     render: (ctx: Ctx) => (
@@ -48,7 +53,7 @@ export function makeWizardGeneralInfoStep() {
           />
         </div>
 
-        {Array.isArray(ctx.datasetList) && ctx.datasetList.length > 0 && (
+        {includeDataset && Array.isArray(ctx.datasetList) && ctx.datasetList.length > 0 && (
           <>
             <label htmlFor="wizdataset" className="wizard-grid-label">
               {TextStore.interface?.("Wizard_Dataset")}
@@ -76,10 +81,12 @@ export function GeneralInfoSummary({
                                      name,
                                      description,
                                      selectedDataset,
+                                     showDataset = true,
                                    }: {
   name?: string;
   description?: string;
   selectedDataset?: string;
+  showDataset?: boolean;
 }) {
   return (
     <Stack gap="xs">
@@ -93,10 +100,12 @@ export function GeneralInfoSummary({
           <strong>{TextStore.interface("Wizard_Summary_Description")}</strong>{" "}
           {description || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
         </Text>
+      {showDataset && (
         <Text size="sm">
           <strong>{TextStore.interface("Wizard_Summary_Dataset")}</strong>{" "}
-          {selectedDataset || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
+            {selectedDataset || <em>{TextStore.interface("Wizard_Summary_None")}</em>}
         </Text>
+        )}
       </Stack>
     </Stack>
   );

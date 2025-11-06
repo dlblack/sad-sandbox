@@ -44,6 +44,7 @@ export const INTERFACE_TEXT = {
   Navbar_Data_DataUtilities: "Data Utilities",
   Navbar_Analysis: "Analysis",
   Navbar_Analysis_Bulletin17: "New Bulletin 17 Analysis",
+  Navbar_Analysis_Copula: "New Copula Analysis",
   Navbar_Analysis_FloodTypeClass: "New Flood Type Classification Analysis",
   Navbar_Analysis_PeakFlowFrequency: "New Peak Flow Frequency",
   Navbar_Analysis_GeneralFrequencyAnalysis: "New General Frequency Analysis",
@@ -135,6 +136,7 @@ export const INTERFACE_TEXT = {
   ComponentMetadata_ComponentPlotStyle: "Plot Styles",
   ComponentMetadata_ManualDataEntryEditor: "Manual Data Entry",
   ComponentMetadata_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
+  ComponentMetadata_Wizard_CopulaAnalysisWizard: "Copula Analysis",
   ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard: "Flood Type Classification Analysis",
   ComponentMetadata_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",
   ComponentMetadata_Wizard_GeneralFreqAnalysisWizard: "General Frequency Analysis",
@@ -149,7 +151,6 @@ export const INTERFACE_TEXT = {
   ComponentMetadata_Wizard_PeaksOverThresholdAnalysisWizard: "Peaks Over Threshold",
   ComponentMetadata_Wizard_LinearRegressionWizard: "Linear Regression",
   ComponentMetadata_Wizard_QuantileMappingWizard: "Quantile Mapping",
-  ComponentMetadata_Wizard_CopulaAnalysisWizard: "Copula Analysis",
 
   // --------------------------------------
   // DataIntervalComboBox
@@ -371,6 +372,23 @@ export const INTERFACE_TEXT = {
   Bulletin17_Wizard_Prob_Label: "Probability",
   Bulletin17_Wizard_Prob_Field: "Probability",
   Bulletin17_Wizard_Step_Summary: "Complete",
+
+  // --------------------------------------
+  // CopulaWizard
+  // --------------------------------------
+  Copula_Wizard_StepScenarios: "Scenarios",
+  Copula_Wizard_StepScenarios_Label: "Enter names for bivariate scenarios and select the datasets.",
+  Copula_Wizard_StepMarginalDist: "Marginal Distributions",
+  Copula_Wizard_StepContProb: "Contour Probabilities",
+  Copula_Wizard_StepContProb_Label: "Enter or edit the contour probabilities in the table.",
+  Copula_Wizard_StepContProb_DispCumulativeProb: "Display as cumulative probabilities.",
+  Copula_Wizard_StepContProb_HeaderAEP: "Annual Exceedance Probabilities",
+  Copula_Wizard_StepContProb_HeaderCum: "Cumulative Probabilities",
+  Copula_Wizard_StepCopulaSelection: "Copula Selection",
+  Copula_Wizard_StepDesignEvents: "Design Events",
+  Copula_Wizard_StepCondSims: "Conditional Simulations",
+  Copula_Wizard_Step_Summary: "Complete",
+
 
   // --------------------------------------
   // FloodTypeClassWizard
