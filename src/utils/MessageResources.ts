@@ -3,6 +3,10 @@
  * Use placeholders {0}, {1}, ... for simple string interpolation.
  */
 export const TEXT_MESSAGES = {
+  // --------------------------------------
+  // HomePage
+  // --------------------------------------
+
   10001: "Opened {0} {1}.",
   10002: "Created {0} \"{1}\".",
   10003: "Something went wrong.",

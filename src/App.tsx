@@ -12,6 +12,7 @@ import SouthZoneComponents from "./app_components/common/SouthZoneComponents";
 import WestZoneComponents, { westTitle } from "./app_components/common/WestZoneComponents";
 import { componentMetadata } from "./utils/componentMetadata";
 import { CenterTab } from "./types/app";
+import GlobalFileModals from "./app_components/GlobalFileModals";
 
 function App() {
   const {
@@ -39,12 +40,18 @@ function App() {
     logCenterOpened,
     logCenterClosed,
     logCenterAlreadyOpen,
-  } = useDockableContainers({ handleWizardFinish, handleDeleteNode });
+  } = useDockableContainers({
+    handleWizardFinish,
+    handleDeleteNode: async (section, pathArr, name) => {
+      const resolved = await handleDeleteNode({ section, pathArr } as any);
+      return resolved ?? name ?? null;
+    },
+  });
 
   const [tabs, setTabs] = useState<CenterTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  function addTab(payload: { kind: string; props?: unknown }) {
+  const addTab = (payload: { kind: string; props?: unknown }) => {
     const { kind, props } = payload;
     const propsObj = (props && typeof props === "object" ? props : {}) as Record<string, unknown>;
 
@@ -64,9 +71,9 @@ function App() {
     setTabs((prev) => [...prev, { id, kind, title, props: propsObj }]);
     setActiveId(id);
     logCenterOpened(kind, title);
-  }
+  };
 
-  function closeTab(id: string) {
+  const closeTab = (id: string) => {
     const closing = tabs.find((t) => t.id === id);
     if (closing) logCenterClosed(closing.kind, closing.title);
 
@@ -77,14 +84,13 @@ function App() {
       const next = [...prev.slice(0, idx), ...prev.slice(idx + 1)];
 
       if (activeId === id) {
-        // previous neighbor without using index arithmetic
         const prevNeighbor = next.slice(0, idx).pop();
         const neighbor = prevNeighbor ?? next[idx] ?? null;
         setActiveId(neighbor ? neighbor.id : null);
       }
       return next;
     });
-  }
+  };
 
   useEffect(() => {
     const off = wizardBus.onOpen(addTab);
@@ -103,14 +109,14 @@ function App() {
     }
   }, [tabs, activeId]);
 
-  function isCenterTab(type: string) {
+  const isCenterTab = (type: string) => {
     const meta = (componentMetadata as any)[type] || {};
     if (typeof meta.centerTab === "boolean") return meta.centerTab;
 
     const cat = String(meta.category || "").toLowerCase();
     if (cat.includes("wizard") || cat.includes("editor")) return true;
     return /wizard|editor/i.test(type);
-  }
+  };
 
   const openComponent = (type: string, props: Record<string, unknown> = {}) => {
     if (isCenterTab(type)) {
@@ -176,54 +182,12 @@ function App() {
     removeComponent(id);
   };
 
-  const centerContent = (
-      <CenterZoneComponents
-          tabs={tabs}
-          activeId={activeId}
-          setActiveId={setActiveId}
-          closeTab={closeTab}
-          data={data}
-          analyses={analyses}
-          onDataSave={handleDataSave}
-          onFinish={wizardFinishWithMessages}
-      />
-  );
-
-  const westContent = (
-      <WestZoneComponents
-          tabs={westTabs}
-          activeId={activeWestId}
-          setActiveId={setActiveWestId}
-          closeTab={closeWestTab}
-          maps={maps}
-          data={data}
-          analyses={analyses}
-          handleOpenComponent={openComponent}
-          onSaveAsNode={handleSaveAsNode as any}
-          onRenameNode={handleRenameNode as any}
-          onDeleteNode={deleteNodeWithMessages}
-      />
-  );
-
-  const southContent = (
-      <SouthZoneComponents
-          messages={messages}
-          onRemove={() => removeComponent("ComponentMessage")}
-      />
-  );
-
-  const eastContent = (
-      <EastZoneComponents
-          tabs={eastTabs}
-          activeId={activeEastId}
-          setActiveId={setActiveEastId}
-          closeTab={closeEastTab}
-      />
-  );
-
   return (
       <div className="app-container" style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
         {!isElectron() && <Navbar addComponent={openComponent} />}
+
+        <GlobalFileModals />
+
         <div style={{ flex: 1, minHeight: 0 }}>
           <DockableFrame
               containers={containers}
@@ -242,10 +206,35 @@ function App() {
               handleOpenComponent={openComponent}
               onWizardFinish={wizardFinishWithMessages}
               onDataSave={handleDataSave}
-              centerContent={centerContent}
-              westContent={westContent}
-              eastContent={eastContent}
-              southContent={southContent}
+              centerContent={
+                <CenterZoneComponents
+                    tabs={tabs}
+                    activeId={activeId}
+                    setActiveId={setActiveId}
+                    closeTab={closeTab}
+                    data={data}
+                    analyses={analyses}
+                    onDataSave={handleDataSave}
+                    onFinish={wizardFinishWithMessages}
+                />
+              }
+              westContent={
+                <WestZoneComponents
+                    tabs={westTabs}
+                    activeId={activeWestId}
+                    setActiveId={setActiveWestId}
+                    closeTab={closeWestTab}
+                    maps={maps}
+                    data={data}
+                    analyses={analyses}
+                    handleOpenComponent={openComponent}
+                    onSaveAsNode={handleSaveAsNode as any}
+                    onRenameNode={handleRenameNode as any}
+                    onDeleteNode={deleteNodeWithMessages}
+                />
+              }
+              southContent={<SouthZoneComponents messages={messages} onRemove={() => removeComponent("ComponentMessage")} />}
+              eastContent={<EastZoneComponents tabs={eastTabs} activeId={activeEastId} setActiveId={setActiveEastId} closeTab={closeEastTab} />}
           />
         </div>
       </div>

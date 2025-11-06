@@ -5,6 +5,7 @@
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
+    "predev": "node -e \"const fs=require('fs'); fs.rmSync('dist',{recursive:true,force:true}); fs.rmSync('dist-electron',{recursive:true,force:true});\"",
     "check-deps": "npm-check",
     "dev": "vite",
     "build": "vite build",
@@ -39,6 +40,7 @@
     "@types/leaflet": "^1.9.20",
     "@types/node": "^24.7.0",
     "@types/plotly.js-dist-min": "^2.3.4",
+    "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",
     "@types/react-resizable": "^3.0.8",
     "@vitejs/plugin-react": "^4.6.0",

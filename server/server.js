@@ -5,7 +5,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
-import crypto from "crypto";
+
+const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,331 +17,287 @@ const PORT = 5001;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Build classpath for Java execution
+// --- Project Directory Configuration ---
+const PROJECTS_ROOT = path.join(__dirname, "..", "public", "Projects");
+
+// Resolve per-project files; if absDir is provided, use it as an absolute folder
+function getProjectPathsArgAware(projectName, absDir) {
+    const projectDir = absDir ? path.resolve(absDir) : path.join(PROJECTS_ROOT, projectName);
+    return {
+        projectDir,
+        analysesFile: path.join(projectDir, "analysis.json"),
+        dataFile: path.join(projectDir, "data.json"),
+    };
+}
+
+// --- Read/Write Helper Functions ---
+function readJson(filePath, defaultValue = {}) {
+    try {
+        return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    } catch (e) {
+        console.error(`Error reading JSON from ${filePath}:`, e);
+        return defaultValue;
+    }
+}
+
+function writeJson(filePath, data) {
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    } catch (e) {
+        console.error(`Error writing JSON to ${filePath}:`, e);
+    }
+}
+
+// Classpath helper for DSS Java reader/writer jars
 function getClassPath() {
-    const jars = fs.readdirSync(path.join(__dirname, "jar"))
-        .filter(f => f.endsWith('.jar'))
-        .map(f => path.join("jar", f));
-    return ['.', ...jars].join(';');
+    const jarsDir = path.join(__dirname, "jar");
+    const jars = fs.existsSync(jarsDir)
+      ? fs.readdirSync(jarsDir).filter(f => f.endsWith(".jar")).map(f => path.join("jar", f))
+      : [];
+    return ["." , ...jars].join(";");
 }
 
-// === Analyses ===
-const analysesFile = path.join(__dirname, "..", "public", "Testing", "analysis.json");
+// --- API Routes ---
+const recentPath = path.join(__dirname, "..", "public", "recentProjects.json");
 
-function readAnalyses() {
-    if (!fs.existsSync(analysesFile)) {
-        fs.writeFileSync(analysesFile, JSON.stringify({}, null, 2));
-        return {};
-    }
+function readRecent() {
     try {
-        const content = fs.readFileSync(analysesFile, "utf-8");
-        return JSON.parse(content);
-    } catch (err) {
-        console.error(`Error reading or parsing analysis.json: ${err}`);
-        return {};
+        if (!fs.existsSync(recentPath)) fs.writeFileSync(recentPath, "[]");
+        const raw = fs.readFileSync(recentPath, "utf8");
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+    } catch {
+        return [];
     }
 }
 
-function writeAnalyses(data) {
-    try {
-        fs.writeFileSync(analysesFile, JSON.stringify(data, null, 2));
-    } catch (err) {
-        console.error(`Error writing analysis.json: ${err}`);
-    }
+function writeRecent(list) {
+    const safe = Array.isArray(list) ? list.slice(0, 5) : [];
+    fs.writeFileSync(recentPath, JSON.stringify(safe, null, 2));
 }
 
-app.get("/api/analyses", (req, res) => {
-    res.json(readAnalyses());
+function bumpRecent(list, item) {
+    const filtered = list.filter(
+      p => !(p.projectName === item.projectName && p.directory === item.directory)
+    );
+    filtered.unshift(item);
+    return filtered.slice(0, 5);
+}
+
+app.get("/api/recentProjects", (_req, res) => {
+    res.json(readRecent());
 });
 
-app.post("/api/analyses", (req, res) => {
-    const { type, data } = req.body;
-    if (!type || !data) {
-        res.status(400).json({ error: "Invalid payload" });
-        return;
-    }
-    let analyses = readAnalyses();
-    if (!analyses[type]) analyses[type] = [];
-    analyses[type].push(data);
-    analyses[type] = analyses[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    writeAnalyses(analyses);
-    res.json({ success: true });
+app.post("/api/recentProjects", (req, res) => {
+    const { projectName, directory } = req.body || {};
+    if (!projectName || !directory) return res.status(400).json({ error: "Missing fields" });
+    const next = bumpRecent(readRecent(), { projectName, directory });
+    writeRecent(next);
+    res.json(next);
 });
 
-// === Data ===
-const dataFile = path.join(__dirname, "..", "public", "Testing", "data.json");
-
-function readData() {
-    if (!fs.existsSync(dataFile)) {
-        fs.writeFileSync(dataFile, JSON.stringify({}, null, 2));
-        return {};
-    }
-    try {
-        const content = fs.readFileSync(dataFile, "utf-8");
-        return JSON.parse(content);
-    } catch (err) {
-        return {};
-    }
-}
-
-function writeData(data) {
-    try {
-        fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-    } catch (err) {
-        console.error(`Error writing data.json: ${err}`);
-    }
-}
-
-app.get("/api/data", (req, res) => {
-    res.json(readData());
+// List all projects under the default root
+app.get("/api/projects", (req, res) => {
+    const projects = fs.readdirSync(PROJECTS_ROOT).filter(file =>
+      fs.statSync(path.join(PROJECTS_ROOT, file)).isDirectory()
+    );
+    res.json({ projects });
 });
 
-app.post("/api/data", (req, res) => {
-    const { type, data } = req.body;
+// Open an existing project by file path (absolute .neptune file)
+app.post("/api/open-project", (req, res) => {
+    const { projectFilePath } = req.body;
+    if (!projectFilePath) return res.status(400).json({ error: "Missing projectFilePath" });
+    if (!/\.neptune$/i.test(projectFilePath)) return res.status(400).json({ error: "Only .neptune files are allowed" });
 
-    if (!type || !data) {
-        return res.status(400).json({ error: "Invalid payload" });
+    try {
+        const raw = fs.readFileSync(projectFilePath, "utf-8");
+        const meta = JSON.parse(raw);
+        if (!meta || typeof meta.projectName !== "string" || typeof meta.directory !== "string") {
+            return res.status(400).json({ error: "Invalid project file" });
+        }
+        res.json({ projectName: meta.projectName, directory: meta.directory });
+    } catch {
+        res.status(500).json({ error: "Failed to read project file" });
+    }
+});
+
+// Fetch project metadata
+app.get("/api/:project/metadata", (req, res) => {
+    const { project } = req.params;
+    const absDir = req.query.dir;
+    const { projectDir } = getProjectPathsArgAware(project, absDir);
+    const projectJsonFile = path.format({ dir: projectDir, base: `${project}.neptune` });
+    if (!fs.existsSync(projectJsonFile)) {
+        return res.status(404).json({ error: "Project metadata not found" });
+    }
+    res.json(readJson(projectJsonFile, {}));
+});
+
+// Create a new project at a chosen directory
+app.post("/api/projects", (req, res) => {
+    const { projectName, directory, unitSystem } = req.body;
+
+    if (!projectName || !directory || /[\\/:*?"<>|]/.test(projectName)) {
+        return res.status(400).json({ error: "Invalid project name or directory" });
     }
 
-    // === TimeSeries DSS ===
-    if (
-        data.structureType === "TimeSeries" &&
-        data.dataFormat === "DSS" &&
-        Array.isArray(data.values) &&
-        Array.isArray(data.times) &&
-        data.pathname &&
-        data.filepath
-    ) {
-        const dssInput = {
-            pathname: data.pathname,
-            startDateTime: data.startDateTime,
-            interval: data.interval,
-            values: data.values,
-            times: data.times,
-        };
+    const projectDir = path.join(directory, projectName);
+    const analysesFile = path.join(projectDir, "analysis.json");
+    const dataFile = path.join(projectDir, "data.json");
+    const projectJsonFile = path.format({ dir: projectDir, base: `${projectName}.neptune` });
 
-        const tmpDir = path.join(__dirname, "tmp");
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-
-        const uniqueId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
-        const tmpInputPath = path.join(tmpDir, `tmp_dss_input-${uniqueId}.json`);
-        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput));
-
-        const dssFilePath = path.resolve(__dirname, "..", data.filepath);
-        const classpath = getClassPath();
-        const javaPath = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe"; // Adjust if needed
-
-        const javaProc = spawn(javaPath, [
-            "-cp", classpath,
-            "DssWriter",
-            tmpInputPath,
-            dssFilePath
-        ], { cwd: __dirname });
-
-        let responded = false;
-        function cleanupTmpFile() {
-            try { fs.unlinkSync(tmpInputPath); } catch (e) {}
-        }
-
-        javaProc.stdout.on('data', (data) => {
-            console.log(`Java STDOUT: ${data}`);
-        });
-        javaProc.stderr.on('data', (data) => {
-            console.error(`Java STDERR: ${data}`);
-        });
-
-        javaProc.on("exit", (code) => {
-            console.log("Java exited with code:", code);
-            cleanupTmpFile();
-            if (!responded) {
-                responded = true;
-                // Only write minimal to JSON
-                let allData = readData();
-                if (!allData[type]) allData[type] = [];
-                const minimal = {
-                    structureType: data.structureType,
-                    dataFormat: data.dataFormat,
-                    dataType: data.dataType,
-                    name: data.name,
-                    description: data.description,
-                    filepath: data.filepath,
-                    pathname: data.pathname
-                };
-                allData[type].push(minimal);
-                allData[type] = allData[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                writeData(allData);
-
-                if (code === 0) res.json({ success: true });
-                else res.status(500).json({ error: "Failed to write DSS" });
-            }
-        });
-
-        javaProc.on("error", (err) => {
-            console.error("Java process error:", err);
-            cleanupTmpFile();
-            if (!responded) {
-                responded = true;
-                res.status(500).json({ error: "Java process error" });
-            }
-        });
-
-        setTimeout(() => {
-            if (!responded) {
-                responded = true;
-                cleanupTmpFile();
-                res.status(500).json({ error: "Java process timeout" });
-                javaProc.kill();
-            }
-        }, 10000);
-        return;
+    if (fs.existsSync(projectDir)) {
+        return res.status(409).json({ error: "Project already exists" });
     }
 
-    // === PairedData DSS ===
-    if (
-        data.structureType === "PairedData" &&
-        data.dataFormat === "DSS" &&
-        (
-            (Array.isArray(data.xValues) && Array.isArray(data.yValues))
-            || Array.isArray(data.rows)
-        ) &&
-        data.pathname &&
-        data.filepath
-    ) {
-        let xValues, yValues;
-        if (Array.isArray(data.xValues) && Array.isArray(data.yValues)) {
-            xValues = data.xValues;
-            yValues = data.yValues;
-        } else if (Array.isArray(data.rows)) {
-            const validRows = data.rows.filter(row =>
-                row.x !== "" && row.y !== "" && !isNaN(Number(row.x)) && !isNaN(Number(row.y))
-            );
-            xValues = validRows.map(row => Number(row.x));
-            yValues = validRows.map(row => Number(row.y));
-        } else {
-            return res.status(400).json({ error: "No paired values" });
-        }
+    fs.mkdirSync(projectDir, { recursive: true });
 
-        const dssInput = {
-            pathname: data.pathname,
-            xLabel: data.xLabel,
-            yLabel: data.yLabel || data.parameter || data.dataType,
-            xUnits: data.xUnits,
-            yUnits: data.yUnits || data.units,
-            xValues,
-            yValues,
-        };
+    const projectMetadata = {
+        projectName,
+        directory: projectDir,
+        unitSystem: unitSystem || "US",
+        created_at: new Date().toISOString(),
+        last_modified: new Date().toISOString(),
+    };
+    writeJson(projectJsonFile, projectMetadata);
+    writeJson(analysesFile, {});
+    writeJson(dataFile, {});
 
-        const tmpDir = path.join(__dirname, "tmp");
-        if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+    const next = bumpRecent(readRecent(), { projectName, directory: projectDir });
+    writeRecent(next);
 
-        const uniqueId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
-        const tmpInputPath = path.join(tmpDir, `tmp_paired_dss_input-${uniqueId}.json`);
-        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput));
+    // return the absolute directory so the client can persist it
+    res.json({ success: true, projectName, directory: projectDir });
+});
 
-        const dssFilePath = path.resolve(__dirname, "..", data.filepath);
-        const classpath = getClassPath();
-        const javaPath = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe"; // Adjust if needed
-
-        const javaProc = spawn(javaPath, [
-            "-cp", classpath,
-            "DssPairedWriter", // <-- Java class for PairedData
-            tmpInputPath,
-            dssFilePath
-        ], { cwd: __dirname });
-
-        let responded = false;
-        function cleanupTmpFile() {
-            try { fs.unlinkSync(tmpInputPath); } catch (e) {}
-        }
-
-        javaProc.stdout.on('data', (data) => {
-            console.log(`Java STDOUT: ${data}`);
-        });
-        javaProc.stderr.on('data', (data) => {
-            console.error(`Java STDERR: ${data}`);
-        });
-
-        javaProc.on("exit", (code) => {
-            console.log("Java exited with code:", code);
-            cleanupTmpFile();
-            if (!responded) {
-                responded = true;
-                // Only write minimal to JSON (NO rows, xValues, yValues)
-                let allData = readData();
-                if (!allData[type]) allData[type] = [];
-                const minimal = {
-                    structureType: data.structureType,
-                    dataFormat: data.dataFormat,
-                    dataType: data.dataType,
-                    name: data.name,
-                    description: data.description,
-                    yLabel: data.yLabel,
-                    yUnits: data.yUnits,
-                    xLabel: data.xLabel,
-                    xUnits: data.xUnits,
-                    filepath: data.filepath,
-                    pathname: data.pathname
-                };
-                allData[type].push(minimal);
-                allData[type] = allData[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                writeData(allData);
-
-                if (code === 0) res.json({ success: true });
-                else res.status(500).json({ error: "Failed to write DSS PairedData" });
-            }
-        });
-
-        javaProc.on("error", (err) => {
-            console.error("Java process error:", err);
-            cleanupTmpFile();
-            if (!responded) {
-                responded = true;
-                res.status(500).json({ error: "Java process error" });
-            }
-        });
-
-        setTimeout(() => {
-            if (!responded) {
-                responded = true;
-                cleanupTmpFile();
-                res.status(500).json({ error: "Java process timeout" });
-                javaProc.kill();
-            }
-        }, 10000);
-        return;
+// Fetch analyses for a specific project
+app.get("/api/:project/analyses", (req, res) => {
+    const { project } = req.params;
+    const absDir = req.query.dir;
+    if (!absDir) {
+        log("GET analyses missing dir", { project });
+        return res.status(400).json({ error: "Missing dir query param" });
     }
+    const { analysesFile } = getProjectPathsArgAware(project, absDir);
+    log("GET analyses", { project, absDir, analysesFile, exists: fs.existsSync(analysesFile) });
+    res.json(readJson(analysesFile, {}));
+});
 
-    // === All others (JSON or PairedData/JSON etc.) ===
-    let allData = readData();
-    if (!allData[type]) allData[type] = [];
-    allData[type].push(data);
-    allData[type] = allData[type].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    writeData(allData);
+// Fetch data for a specific project
+app.get("/api/:project/data", (req, res) => {
+    const { project } = req.params;
+    const absDir = req.query.dir;
+    if (!absDir) {
+        log("GET data missing dir", { project });
+        return res.status(400).json({ error: "Missing dir query param" });
+    }
+    const { dataFile } = getProjectPathsArgAware(project, absDir);
+    log("GET data", { project, absDir, dataFile, exists: fs.existsSync(dataFile) });
+    res.json(readJson(dataFile, {}));
+});
+
+// POST /api/:project/:bucket  (append without re-sorting; keep indices stable)
+app.post("/api/:project/:bucket", (req, res) => {
+    const { type, data } = req.body || {};
+    const { project, bucket } = req.params;
+    const absDir = req.query.dir;
+
+    if (!absDir) return res.status(400).json({ error: "Missing dir query param" });
+    if (bucket !== "analyses" && bucket !== "data") {
+        return res.status(404).json({ error: "Unknown bucket" });
+    }
+    if (!type || !data) return res.status(400).json({ error: "Invalid payload" });
+
+    const { analysesFile, dataFile } = getProjectPathsArgAware(project, absDir);
+    const targetFile = bucket === "analyses" ? analysesFile : dataFile;
+
+    const store = readJson(targetFile, {});
+    if (!store[type]) store[type] = [];
+    store[type].push(data);
+    writeJson(targetFile, store);
 
     res.json({ success: true });
 });
 
-// --- READ DSS ---
-app.get("/api/read-dss", (req, res) => {
-    const { file, path: pathname } = req.query;
+// DELETE /api/:project/:bucket/:type/:index
+app.delete("/api/:project/:bucket/:type/:index", (req, res) => {
+    const { project, bucket, type, index } = req.params;
+    const absDir = req.query.dir;
+    const { analysesFile, dataFile } = getProjectPathsArgAware(project, absDir || "");
+
+    if (!absDir) {
+        log("DELETE missing dir", { project, bucket, type, index });
+        return res.status(400).json({ error: "Missing dir query param" });
+    }
+    if (bucket !== "analyses" && bucket !== "data") {
+        log("DELETE unknown bucket", { project, bucket, type, index });
+        return res.status(404).json({ error: "Unknown bucket" });
+    }
+
+    const targetFile = bucket === "analyses" ? analysesFile : dataFile;
+    const store = readJson(targetFile, {});
+    const list = Array.isArray(store[type]) ? store[type] : null;
+
+    log("DELETE start", {
+        project, bucket, type, index,
+        absDir, targetFile, fileExists: fs.existsSync(targetFile),
+        listLen: list ? list.length : null
+    });
+
+    if (!list) {
+        log("DELETE folder not found", { type, keys: Object.keys(store) });
+        return res.status(404).json({ error: "Folder not found" });
+    }
+
+    const i = Number(index);
+    if (!Number.isInteger(i) || i < 0 || i >= list.length) {
+        log("DELETE index out of range", { i, listLen: list.length });
+        return res.status(404).json({ error: "Index out of range" });
+    }
+
+    const target = list[i];
+    log("DELETE candidate", { i, name: target?.name, snapshot: JSON.stringify(target).slice(0, 200) });
+
+    const [deleted] = list.splice(i, 1);
+    if (list.length === 0) delete store[type];
+    writeJson(targetFile, store);
+
+    log("DELETE done", {
+        i, remaining: list.length, deletedName: deleted?.name, wrote: targetFile
+    });
+
+    res.json({ success: true, deletedName: deleted?.name || "Unknown" });
+});
+
+// Read DSS for a specific project
+// GET /api/:project/read-dss?file=<path>&path=<pathname>&dir=<absProjectDir>
+app.get("/api/:project/read-dss", (req, res) => {
+    const { file, path: pathname, dir } = req.query;
 
     if (!file || !pathname) {
         return res.status(400).json({ error: "Missing DSS file or pathname" });
     }
 
-    const dssFile = path.resolve(__dirname, "..", file);
+    const fileStr = String(file);
+    const dssFile = path.isAbsolute(fileStr)
+      ? fileStr
+      : dir
+        ? path.resolve(String(dir), fileStr)
+        : path.resolve(__dirname, "..", fileStr);
+
     const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
     const classPath = getClassPath();
     const readerClass = "DssReader";
 
     const child = spawn(
-        javaBin,
-        ["-cp", classPath, readerClass, dssFile, pathname],  // pass both file and pathname!
-        { cwd: __dirname }
+      javaBin,
+      ["-cp", classPath, readerClass, dssFile, String(pathname)],
+      { cwd: __dirname }
     );
 
     let output = "";
-    child.stdout.on("data", (data) => (output += data.toString()));
+    child.stdout.on("data", (data) => { output += data.toString(); });
     child.stderr.on("data", (data) => console.error("Java STDERR:", data.toString()));
 
     child.on("close", (code) => {
@@ -351,72 +308,18 @@ app.get("/api/read-dss", (req, res) => {
 
         try {
             const parsed = JSON.parse(jsonMatch[0]);
-            console.log("DEBUG: API sending DSS data:", parsed);  // <-- Add this
             const x = parsed.x || parsed.times || [];
             const y = parsed.y || parsed.values || [];
             const yLabel = parsed.yLabel || "";
             const yUnits = parsed.yUnits || "";
             res.json({ x, y, yLabel, yUnits });
-        } catch (err) {
+        } catch {
             res.status(500).json({ error: "Invalid DSS JSON" });
         }
     });
 });
 
-// --- PATCH/DELETE: Data ---
-app.patch("/api/data/:category/:index", (req, res) => {
-    const { category, index } = req.params;
-    const { name } = req.body;
-    let allData = readData();
-    if (!allData[category] || !allData[category][index]) {
-        return res.status(404).json({ error: "Not found" });
-    }
-    allData[category][index].name = name;
-    writeData(allData);
-    res.json({ success: true });
-});
-app.delete("/api/data/:category/:index", (req, res) => {
-    const { category, index } = req.params;
-    let allData = readData();
-    if (!allData[category] || !allData[category][index]) {
-        return res.status(404).json({ error: "Not found" });
-    }
-    allData[category].splice(index, 1);
-    if (allData[category].length === 0) {
-        delete allData[category];
-    }
-    writeData(allData);
-    res.json({ success: true });
-});
-
-// --- PATCH/DELETE: Analyses ---
-app.patch("/api/analyses/:folder/:index", (req, res) => {
-    const { folder, index } = req.params;
-    const { name } = req.body;
-    let analyses = readAnalyses();
-    if (!analyses[folder] || !analyses[folder][index]) {
-        return res.status(404).json({ error: "Not found" });
-    }
-    analyses[folder][index].name = name;
-    writeAnalyses(analyses);
-    res.json({ success: true });
-});
-app.delete("/api/analyses/:folder/:index", (req, res) => {
-    const { folder, index } = req.params;
-    let analyses = readAnalyses();
-    if (!analyses[folder] || !analyses[folder][index]) {
-        return res.status(404).json({ error: "Not found" });
-    }
-    analyses[folder].splice(index, 1);
-    if (analyses[folder].length === 0) {
-        delete analyses[folder];
-    }
-    writeAnalyses(analyses);
-    res.json({ success: true });
-});
-
-// Start server
+// Start the server
 app.listen(PORT, () => {
-    console.log(`API server running at http://localhost:${PORT}/api/analyses`);
-    console.log(`API server running at http://localhost:${PORT}/api/data`);
+    console.log(`API server running at http://localhost:${PORT}`);
 });

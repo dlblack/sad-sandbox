@@ -12,6 +12,7 @@ import { getParamCategory } from "../../../utils/paramUtils";
 import { toJulianDay } from "../../../utils/timeUtils";
 import { TextStore } from "../../../utils/TextStore";
 import { Card, Stack, TextInput, Textarea, ScrollArea, Table, Text, Title, Code } from "@mantine/core";
+import { useProject } from "../../../context/ProjectContext";
 
 /** ---------- Types ---------- */
 type StructureType = "TimeSeries" | "PairedData";
@@ -42,7 +43,7 @@ function formatDssDate(dateStr?: string): string {
 }
 
 /** Default DSS file path logic */
-function getDefaultFilepath(parameter?: string): string {
+function getDefaultFilepath(projectName: string, parameter?: string): string {
   if (!parameter) return "";
   const key = parameter.trim().toLowerCase();
   const exceptions: Record<string, string> = {
@@ -54,12 +55,15 @@ function getDefaultFilepath(parameter?: string): string {
     "stage-disch": "stagedisch",
     "freq-flow": "freqflow",
   };
-  if (exceptions[key]) return `public/Testing/${exceptions[key]}.dss`;
+  if (exceptions[key]) return `public/${projectName}/${exceptions[key]}.dss`;
   const filename = key.replace(/\s+/g, "").replace(/[^a-z0-9]/g, "");
-  return `public/Testing/${filename}.dss`;
+  return `public/${projectName}/${filename}.dss`;
 }
 
 export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps) {
+  const { apiPrefix } = useProject();  // Get the current project name dynamically from context
+  const projectName = apiPrefix?.split("/")[2] || "default"; // Extract project name from the API prefix
+
   const [step, setStep] = useState<number>(1);
 
   // Metadata
@@ -353,7 +357,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
                 <>
                   <div className="my-2 font-s">
                     {TextStore.interface("ManualDataEntryEditor_SummaryFilepath")}
-                    {getDefaultFilepath(pairedCurveType)}
+                    {getDefaultFilepath(pairedCurveType, projectName)}
                   </div>
                   <div className="my-2 font-s">
                     {TextStore.interface("ManualDataEntryEditor_SummaryPathname")}
@@ -393,7 +397,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
     const createdText = (_category: string, itemName: string) =>
         TextStore.message(10002, [
           TextStore.interface("ComponentMetadata_ManualDataEntryEditor"),
-          itemName
+          itemName,
         ]);
 
     function closeWithCreatedMessage(text: string) {
@@ -413,7 +417,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
       const values = dataRowsFiltered.map(r => Number(r.value));
       const dateTimes = dataRowsFiltered.map(r => r.dateTime);
       const paramCategory = getParamCategory(tsParameter);
-      const filepath = getDefaultFilepath(tsParameter);
+      const filepath = getDefaultFilepath(tsParameter, projectName);
 
       let payload: any = {
         structureType,
@@ -466,10 +470,10 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
         xUnits: pairedXUnits,
         yLabel: pairedYLabel,
         yUnits: pairedYUnits,
-        filepath: getDefaultFilepath(pairedCurveType),
+        filepath: getDefaultFilepath(pairedCurveType, projectName),
         pathname,
         xValues,
-        yValues
+        yValues,
       };
 
       await props.onDataSave(pairedCurveType, payload, props.id);

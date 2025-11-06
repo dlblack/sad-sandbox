@@ -1,34 +1,31 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 
-type MenuCallback = (...args: unknown[]) => void;
-
-/**
- * Subscribe to a menu channel from the main process.
- * Returns an unsubscribe function that removes listeners for that channel.
- */
-function onMenu(channel: string, callback: MenuCallback): () => void {
-  try {
-    ipcRenderer.removeAllListeners(channel);
-  } catch {
-    // ignore
-  }
-
-  ipcRenderer.on(channel, (_event: IpcRendererEvent, ...args: unknown[]) => {
-    callback(...args);
-  });
-
-  return () => {
-    try {
-      ipcRenderer.removeAllListeners(channel);
-    } catch {
-      // ignore
-    }
-  };
+function onMenu(channel: string, handler: (payload: unknown) => void) {
+  const listener = (_evt: IpcRendererEvent, payload: unknown) => handler(payload);
+  ipcRenderer.on(channel, listener);
+  return () => ipcRenderer.off(channel, listener);
 }
 
-const api = { onMenu };
+function readTextFile(filePath: string): Promise<string> {
+  return ipcRenderer.invoke("file:readText", filePath);
+}
 
-contextBridge.exposeInMainWorld("electronAPI", api);
+function setProjectMenuState(projectOpen: boolean): void {
+  ipcRenderer.send("menu:project-state", projectOpen);
+}
 
-// Optional: export the API type for use in your renderer typing
-export type PreloadAPI = typeof api;
+// Optional helpers you already typed in global.d.ts
+function openFolderDialog(): Promise<string | null> {
+  return ipcRenderer.invoke("dialog:openFolder");
+}
+function openFileDialog(): Promise<string | null> {
+  return ipcRenderer.invoke("dialog:openFile");
+}
+
+contextBridge.exposeInMainWorld("electronAPI", {
+  onMenu,
+  readTextFile,
+  setProjectMenuState,
+  openFolderDialog,
+  openFileDialog,
+});

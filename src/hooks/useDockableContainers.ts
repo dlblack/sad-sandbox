@@ -19,13 +19,14 @@ function getDefaultDockZone(type: string): DockZone {
 }
 
 export type WizardFinishFn = (type: string, valuesObj: any, id?: string) => Promise<void>;
+export type DeleteNodeFn = (section: any, pathArr: any[], name?: string) => Promise<string | null>;
 
 export default function useDockableContainers({
                                                 handleWizardFinish,
                                                 handleDeleteNode,
                                               }: {
   handleWizardFinish?: WizardFinishFn;
-  handleDeleteNode?: (section: any, pathArr: any[], name?: string) => void | Promise<void>;
+  handleDeleteNode?: DeleteNodeFn;
 }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [messageType, setMessageType] = useState("info");
@@ -86,11 +87,24 @@ export default function useDockableContainers({
   };
 
   const deleteNodeWithMessages = useCallback(
-      (section: any, pathArr: any[], name?: string) => {
-        setMessages((prev) => [...prev, makeMessage(10020, [name || "Unknown"], "danger")]);
+      async (arg1: any, arg2?: any[], arg3?: string) => {
+        const { section, pathArr, name } =
+            arg1 && typeof arg1 === "object" && "section" in arg1 && "pathArr" in arg1
+                ? { section: arg1.section, pathArr: arg1.pathArr as any[], name: (arg1 as any).name as string | undefined }
+                : { section: arg1, pathArr: arg2 as any[], name: arg3 as string | undefined };
+
+        let finalName = name || null;
+
         if (handleDeleteNode) {
-          handleDeleteNode(section, pathArr, name);
+          try {
+            const resolved = await handleDeleteNode(section, pathArr, name);
+            if (typeof resolved === "string" && resolved.length) finalName = resolved;
+          } catch {
+            // ignore
+          }
         }
+
+        setMessages((prev) => [...prev, makeMessage(10020, [finalName || "Unknown"], "danger")]);
       },
       [handleDeleteNode]
   );

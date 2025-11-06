@@ -2,8 +2,10 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import { UISizingProvider } from "./uiSizing";
-import App from "./App";
-import AppProviders from "./ui/AppProviders";
+import { MantineProvider } from "@mantine/core";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import ProjectShell from "./pages/ProjectShell";
+import HomePage from "./pages/HomePage";
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -13,17 +15,17 @@ import "material-icons/iconfont/material-icons.css";
 import "./styles/css/index.css";
 import "./styles/tokens.css";
 
-const container = document.getElementById("root");
-if (!container) {
-    throw new Error("Root element not found");
-}
+const router = createBrowserRouter([
+    { path: "/", element: <HomePage /> },
+    { path: "/project/:projectName/*", element: <ProjectShell /> },
+]);
 
-createRoot(container).render(
+createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-        <AppProviders>
+        <MantineProvider defaultColorScheme="auto">
             <UISizingProvider>
-                <App />
+                <RouterProvider router={router} />
             </UISizingProvider>
-        </AppProviders>
+        </MantineProvider>
     </React.StrictMode>
 );
