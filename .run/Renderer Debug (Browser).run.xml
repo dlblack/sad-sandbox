@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Renderer Debug (Browser)" type="JavascriptDebugType" uri="http://localhost:5173">
-    <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Vite Dev" run_configuration_type="js.build_tools.npm" />
-    </method>
-  </configuration>
-</component>

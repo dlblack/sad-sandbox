@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Web Dev" type="CompoundRunConfigurationType">
-    <toRun name="Renderer Debug (Browser)" type="JavascriptDebugType" />
-    <toRun name="API Server" type="NodeJSConfigurationType" />
-    <method v="2" />
-  </configuration>
-</component>

@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="App Debug" type="CompoundRunConfigurationType">
-    <toRun name="Main Debug (Electron)" type="ChromiumRemoteDebugType" />
-    <toRun name="Render Debug (Electron)" type="ChromiumRemoteDebugType" />
-    <toRun name="API Server" type="NodeJSConfigurationType" />
-    <method v="2" />
-  </configuration>
-</component>
