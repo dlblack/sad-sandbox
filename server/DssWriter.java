@@ -82,7 +82,7 @@ public class DssWriter {
         // --- Generate DSS "times" array (minutes since 31Dec1899 24:00) ---
         SimpleDateFormat baseSdf = new SimpleDateFormat("ddMMMyyyy HH:mm");
         baseSdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        long dssBase = baseSdf.parse("31Dec1899 24:00").getTime();
+        long dssBase = baseSdf.parse("31Dec1899 00:00").getTime();
         System.out.println("JAVA DEBUG: DSS base time = " + dssBase + " (" + new Date(dssBase) + ")");
 
         int[] times = new int[values.length];

@@ -58,12 +58,3 @@ body { font-size: var(--font-size-md) !important; }
 
 /* Ensure Material Icons scale with the UI */
 .material-icons { font-size: var(--icon-md) !important; }
-
-/* Defaults for common controls */
-button, input, select, textarea{
-    font: inherit;
-    height: var(--control-h-md);
-    padding: 0 var(--control-pad-x);
-    border-radius: var(--control-radius);
-    line-height: 1.1;
-}

@@ -55,9 +55,9 @@ function getDefaultFilepath(projectName: string, parameter?: string): string {
     "stage-disch": "stagedisch",
     "freq-flow": "freqflow",
   };
-  if (exceptions[key]) return `public/${projectName}/${exceptions[key]}.dss`;
+  if (exceptions[key]) return `${exceptions[key]}.dss`;
   const filename = key.replace(/\s+/g, "").replace(/[^a-z0-9]/g, "");
-  return `public/${projectName}/${filename}.dss`;
+  return `${filename}.dss`;
 }
 
 export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps) {
@@ -417,31 +417,42 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
       const values = dataRowsFiltered.map(r => Number(r.value));
       const dateTimes = dataRowsFiltered.map(r => r.dateTime);
       const paramCategory = getParamCategory(tsParameter);
-      const filepath = getDefaultFilepath(tsParameter, projectName);
+      const filepath = getDefaultFilepath(projectName, tsParameter);
 
-      let payload: any = {
-        structureType,
-        dataFormat,
-        dataType: tsParameter,
-        name,
-        description: desc,
-        parameter: tsParameter,
-        units: tsUnits,
-        interval: tsInterval,
-        startDateTime: dateTimes[0] || "",
-        endDateTime: dateTimes.at(-1) || "",
-        values,
-      };
+      const startDateTime = dateTimes.length ? dateTimes[0] : "";
+      const endDateTime = dateTimes.reduce((_, v) => v, "");
+
+      let payload: any;
 
       if (dataFormat === "DSS") {
         payload = {
-          ...payload,
+          structureType,
+          dataFormat,
+          dataType: tsParameter,
+          name,
+          description: desc,
           filepath,
           pathname,
-          times: dateTimes.map((dtStr) => toJulianDay(new Date(dtStr))),
+          startDateTime,
+          interval: tsInterval,
+          values,
+          times: dateTimes.map(dtStr => toJulianDay(new Date(dtStr))),
         };
       } else {
-        payload = { ...payload, times: dateTimes };
+        payload = {
+          structureType,
+          dataFormat,
+          dataType: tsParameter,
+          name,
+          description: desc,
+          parameter: tsParameter,
+          units: tsUnits,
+          interval: tsInterval,
+          startDateTime,
+          endDateTime,
+          values,
+          times: dateTimes,
+        };
       }
 
       await props.onDataSave(paramCategory, payload, props.id);

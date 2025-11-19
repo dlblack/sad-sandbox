@@ -267,6 +267,30 @@ export const INTERFACE_TEXT = {
   SaveAsDialog_ButtonOk: "OK",
 
   // --------------------------------------
+  // TableFillOptionsDialog
+  // --------------------------------------
+  TableContext_Cut: "Cut",
+  TableContext_Copy: "Copy",
+  TableContext_Paste: "Paste",
+  TableContext_Clear: "Clear",
+  TableContext_Fill: "Fill...",
+  TableContext_SelectAll: "Select All",
+  TableContext_DeleteRows: "Delete Row(s)",
+
+  // --------------------------------------
+  // TableFillOptionsDialog
+  // --------------------------------------
+  TableFillOptions_Title: "Table Fill Options",
+  TableFillOptions_Linear: "Linear Fill",
+  TableFillOptions_Repeat: "Repeat Fill",
+  TableFillOptions_RepeatToEnd: "Repeat to End",
+  TableFillOptions_AddConstant: "Add Constant",
+  TableFillOptions_MultiplyConstant: "Multiply Constant",
+  TableFillOptions_Constant: "Constant",
+  TableFillOptions_Cancel_Button: "Cancel",
+  TableFillOptions_OK_Button: "OK",
+
+  // --------------------------------------
   // StructureSelector
   // --------------------------------------
   StructureSelector_Label: "Data Structure:",
@@ -303,6 +327,9 @@ export const INTERFACE_TEXT = {
   ManualDataEntryEditor_Units: "Units",
   ManualDataEntryEditor_Type: "Type",
   ManualDataEntryEditor_DateTimeAutoFilled: "Date/times auto-filled from interval and range. Enter or paste values for each date/time.",
+  ManualDataEntryEditor_ClearValues_Button: "Clear Values",
+  ManualDataEntryEditor_AddConstant_Button: "Add Constant",
+  ManualDataEntryEditor_MultiplyConstant_Button: "Multiply Constant",
   ManualDataEntryEditor_DateTime: "Date/Times",
   ManualDataEntryEditor_Value: "Value",
   ManualDataEntryEditor_DateTimeManual: "Enter date/time and values manually.",

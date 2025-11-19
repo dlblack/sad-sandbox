@@ -180,7 +180,6 @@ app.get("/api/:project/analyses", (req, res) => {
         return res.status(400).json({ error: "Missing dir query param" });
     }
     const { analysesFile } = getProjectPathsArgAware(project, absDir);
-    log("GET analyses", { project, absDir, analysesFile, exists: fs.existsSync(analysesFile) });
     res.json(readJson(analysesFile, {}));
 });
 
@@ -193,29 +192,123 @@ app.get("/api/:project/data", (req, res) => {
         return res.status(400).json({ error: "Missing dir query param" });
     }
     const { dataFile } = getProjectPathsArgAware(project, absDir);
-    log("GET data", { project, absDir, dataFile, exists: fs.existsSync(dataFile) });
     res.json(readJson(dataFile, {}));
 });
 
 // POST /api/:project/:bucket  (append without re-sorting; keep indices stable)
 app.post("/api/:project/:bucket", (req, res) => {
-    const { type, data } = req.body || {};
-    const { project, bucket } = req.params;
+    const body = req.body || {};
+    const type = body.type;
+    const data = body.data;
+    const params = req.params;
+    const project = params.project;
+    const bucket = params.bucket;
     const absDir = req.query.dir;
 
-    if (!absDir) return res.status(400).json({ error: "Missing dir query param" });
+    if (!absDir) {
+        return res.status(400).json({ error: "Missing dir query param" });
+    }
     if (bucket !== "analyses" && bucket !== "data") {
         return res.status(404).json({ error: "Unknown bucket" });
     }
-    if (!type || !data) return res.status(400).json({ error: "Invalid payload" });
+    if (!type || !data) {
+        return res.status(400).json({ error: "Invalid payload" });
+    }
 
-    const { analysesFile, dataFile } = getProjectPathsArgAware(project, absDir);
-    const targetFile = bucket === "analyses" ? analysesFile : dataFile;
+    const paths = getProjectPathsArgAware(project, absDir);
+    const analysesFile = paths.analysesFile;
+    const dataFile = paths.dataFile;
 
-    const store = readJson(targetFile, {});
-    if (!store[type]) store[type] = [];
-    store[type].push(data);
-    writeJson(targetFile, store);
+    if (bucket === "analyses") {
+        const store = readJson(analysesFile, {});
+        if (!store[type]) store[type] = [];
+        store[type].push(data);
+        writeJson(analysesFile, store);
+        return res.json({ success: true });
+    }
+
+    const store = readJson(dataFile, {});
+
+    if (data.dataFormat === "DSS" && data.structureType === "TimeSeries") {
+        const startDateTime = data.startDateTime;
+        const interval = data.interval;
+        const values = data.values;
+        const times = data.times;
+
+        const metaForJson = {};
+        Object.keys(data).forEach((key) => {
+            if (
+              key !== "startDateTime" &&
+              key !== "interval" &&
+              key !== "values" &&
+              key !== "times"
+            ) {
+                metaForJson[key] = data[key];
+            }
+        });
+
+        const filepath = metaForJson.filepath;
+        const pathname = metaForJson.pathname;
+
+        if (!filepath || !pathname || !startDateTime || !interval || !values || !times) {
+            return res.status(400).json({ error: "Missing DSS fields" });
+        }
+
+        if (!store[type]) store[type] = [];
+        store[type].push(metaForJson);
+        writeJson(dataFile, store);
+
+        const dssInput = {
+            pathname: pathname,
+            startDateTime: startDateTime,
+            interval: interval,
+            values: values,
+            times: times
+        };
+
+        const tmpInputPath = path.join(__dirname, "tmp_dss_input.json");
+        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput, null, 2), "utf-8");
+
+        const baseDir = path.resolve(String(absDir));
+        const dssFilePath = path.isAbsolute(filepath)
+          ? filepath
+          : path.resolve(baseDir, filepath);
+        const dssDir = path.dirname(dssFilePath);
+        if (!fs.existsSync(dssDir)) {
+            fs.mkdirSync(dssDir, { recursive: true });
+        }
+
+        console.log("DSS debug input file", tmpInputPath);
+        console.log("DSS debug output dssFilePath", dssFilePath);
+        console.log("DSS debug payload", JSON.stringify(dssInput));
+
+        const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
+        const classPath = getClassPath();
+
+        const child = spawn(
+          javaBin,
+          ["-cp", classPath, "DssWriter", tmpInputPath, dssFilePath],
+          { cwd: __dirname }
+        );
+
+        child.stdout.on("data", (d) => console.log("JAVA", d.toString()));
+        child.stderr.on("data", (d) => console.error("JAVA ERR", d.toString()));
+
+        child.on("close", (code) => {
+            console.log("DSS debug exit code", code);
+            if (code !== 0) {
+                return res.status(500).json({ error: "Failed to write DSS file" });
+            }
+            return res.json({ success: true });
+        });
+
+        return;
+    }
+
+    const storeData = store;
+    if (!storeData[type]) storeData[type] = [];
+    storeData[type].push(data);
+    writeJson(dataFile, storeData);
 
     res.json({ success: true });
 });
