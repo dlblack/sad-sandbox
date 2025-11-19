@@ -90,8 +90,34 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
 .manual-entry-table{width:300px;min-width:0;table-layout:fixed;font-size:.8em;background:#222;border-collapse:collapse;color:#eee}
 .manual-entry-th,.manual-entry-input{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .manual-entry-th{width:140px;padding:.2rem .3rem;text-align:center;font-weight:700;background:#111;color:#fff;font-size:1em}
+
+.manual-entry-th, .manual-entry-td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 700;
+    background: #111;
+}
+
+.manual-entry-th {
+    width: 150px;
+}
+
 .manual-entry-table th,.manual-entry-table td{border:1px solid #444}
-.manual-entry-input{font-size:.9em;height:22px;padding:2px 4px;width:130px;background:transparent;color:#eee;box-shadow:none;border:none}
+.manual-entry-input.selected {
+    background-color: #444;
+    border: 1px solid var(--mantine-color-blue-filled);
+}
+
+.manual-entry-cell {
+    padding: 0;
+    width: 130px;
+    cursor: pointer;
+}
+.manual-entry-cell.selected {
+    background-color: #444; /* Highlight selected cells with a different color */
+}
 .manual-entry-input[type=number]::-webkit-outer-spin-button,
 .manual-entry-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
@@ -161,3 +187,15 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     min-height: 0;
 }
 
+/* =========================================================
+   Table Right Click Menu
+   ========================================================= */
+.table-right-click-menu {
+    position: fixed;
+    z-index: 1000;
+    width: auto;
+    min-width: 140px;
+    max-width: 260px;
+    overflow: hidden;
+    color: var(--mantine-color-text);
+}

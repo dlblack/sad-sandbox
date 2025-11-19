@@ -18,7 +18,7 @@ export function toJulianDay(date: Date): number {
 
 /** Format a JS Date as `01Jan2000 08:00` (local time). */
 export function formatDateTime(dt: Date): string {
-  if (!(dt instanceof Date) || Number.isNaN(dt.getTime())) return "";
+  if (Number.isNaN(dt.getTime())) return "";
   const pad = (n: number) => n.toString().padStart(2, "0");
   const day = pad(dt.getDate());
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const;
