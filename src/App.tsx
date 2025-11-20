@@ -2,15 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import isElectron from "./utils/isElectron";
 import Navbar from "./app_components/Navbar";
 import DockableFrame from "./app_components/dockable/DockableFrame";
-import useAppData from "./hooks/useAppData";
+import {useAppData} from "./hooks/useAppData";
 import useDockableContainers from "./hooks/useDockableContainers";
 import useElectronMenus from "./hooks/useElectronMenus";
 import { openWizard, wizardBus } from "./utils/wizardBus";
-import CenterZoneComponents, { centerTitle } from "./app_components/common/CenterZoneComponents";
-import EastZoneComponents, { eastTitle } from "./app_components/common/EastZoneComponents";
+import CenterZoneComponents from "./app_components/common/CenterZoneComponents";
+import EastZoneComponents from "./app_components/common/EastZoneComponents";
 import SouthZoneComponents from "./app_components/common/SouthZoneComponents";
-import WestZoneComponents, { westTitle } from "./app_components/common/WestZoneComponents";
-import { componentMetadata } from "./utils/componentMetadata";
+import WestZoneComponents from "./app_components/common/WestZoneComponents";
+import { COMPONENT_REGISTRY, getComponentRegistryEntry ,getComponentLabel } from "./registry/componentRegistry";
 import { CenterTab } from "./types/app";
 import GlobalFileModals from "./app_components/GlobalFileModals";
 
@@ -51,27 +51,54 @@ function App() {
   const [tabs, setTabs] = useState<CenterTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const addTab = (payload: { kind: string; props?: unknown }) => {
-    const { kind, props } = payload;
-    const propsObj = (props && typeof props === "object" ? props : {}) as Record<string, unknown>;
+  const tabsRef = React.useRef<CenterTab[]>([]);
+  useEffect(() => {
+    tabsRef.current = tabs;
+  }, [tabs]);
 
-    const title =
-        (typeof centerTitle === "function" && centerTitle(kind, propsObj)) ||
-        (componentMetadata as any)[kind]?.entityName ||
-        kind;
+  const addTab = React.useCallback(
+      (payload: { kind: string; props?: unknown }) => {
+        const { kind, props } = payload;
+        const propsObj =
+            props && typeof props === "object"
+                ? (props as Record<string, unknown>)
+                : ({} as Record<string, unknown>);
 
-    const existing = tabs.find((t) => t.kind === kind);
-    if (existing) {
-      setActiveId(existing.id);
-      logCenterAlreadyOpen(kind, existing.title);
-      return;
-    }
+        const entry = getComponentRegistryEntry(kind);
+        const isSingleton = entry?.singleton === true;
 
-    const id = `wiz_${Math.random().toString(36).slice(2, 9)}`;
-    setTabs((prev) => [...prev, { id, kind, title, props: propsObj }]);
-    setActiveId(id);
-    logCenterOpened(kind, title);
-  };
+        const currentTabs = tabsRef.current;
+
+        if (isSingleton) {
+          const existing = currentTabs.find(t => t.kind === kind);
+          if (existing) {
+            setActiveId(existing.id);
+            logCenterAlreadyOpen(kind, existing.title);
+            return;
+          }
+        }
+
+        const title = getComponentLabel(kind, propsObj) || kind;
+        const id = isSingleton
+            ? kind
+            : `wiz_${Math.random().toString(36).slice(2, 9)}`;
+
+        const newTab: CenterTab = { id, kind, title, props: propsObj };
+
+        setTabs([...currentTabs, newTab]);
+        setActiveId(id);
+        logCenterOpened(kind, title);
+      },
+      [logCenterAlreadyOpen, logCenterOpened]
+  );
+
+  useEffect(() => {
+    const off = wizardBus.onOpen(addTab);
+    return () => {
+      off();
+    };
+  }, [addTab]);
+
 
   const closeTab = (id: string) => {
     const closing = tabs.find((t) => t.id === id);
@@ -93,13 +120,6 @@ function App() {
   };
 
   useEffect(() => {
-    const off = wizardBus.onOpen(addTab);
-    return () => {
-      off();
-    };
-  }, []);
-
-  useEffect(() => {
     if (!tabs.length) {
       if (activeId !== null) setActiveId(null);
       return;
@@ -110,11 +130,16 @@ function App() {
   }, [tabs, activeId]);
 
   const isCenterTab = (type: string) => {
-    const meta = (componentMetadata as any)[type] || {};
-    if (typeof meta.centerTab === "boolean") return meta.centerTab;
+    const regEntry = (COMPONENT_REGISTRY as any)[type];
+    if (regEntry) {
+      if (typeof regEntry.centerTab === "boolean") {}
+      return regEntry.centerTab;
+    }
+    const cat = String(regEntry.category || "").toLowerCase();
+    if (typeof cat.includes("wizard") || cat.includes("editor") || cat === "data editor") {
+      return true;
+    }
 
-    const cat = String(meta.category || "").toLowerCase();
-    if (cat.includes("wizard") || cat.includes("editor")) return true;
     return /wizard|editor/i.test(type);
   };
 
@@ -134,7 +159,7 @@ function App() {
         .map((c: any) => ({
           id: c.id,
           kind: c.type,
-          title: westTitle(c.type, c),
+          title: getComponentLabel(c.type, c || c.type),
           props: { ...(c.props || {}), dataset: c.dataset },
         }));
   }, [containers]);
@@ -161,7 +186,7 @@ function App() {
         .map((c: any) => ({
           id: c.id,
           kind: c.type,
-          title: eastTitle(c.type, c),
+          title: getComponentLabel(c.type, c || c.type),
           props: { ...(c.props || {}), dataset: c.dataset },
         }));
   }, [containers]);
@@ -182,8 +207,39 @@ function App() {
     removeComponent(id);
   };
 
+  const southTabs = useMemo<CenterTab[]>(() => {
+    return containers
+        .filter((c: any) => c.dockZone === "S")
+        .map((c: any) => ({
+          id: c.id,
+          kind: c.type,
+          title: getComponentLabel(c.type, c) || c.type,
+          props: {
+            ...(c.props || {}),
+            messages,
+            onRemove: () => removeComponent(c.id),
+          },
+        }));
+  }, [containers, messages]);
+
+  const [activeSouthId, setActiveSouthId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (southTabs.length === 0) {
+      if (activeSouthId !== null) setActiveSouthId(null);
+      return;
+    }
+    if (!southTabs.some((t) => t.id === activeSouthId)) {
+      setActiveSouthId(southTabs[0].id);
+    }
+  }, [southTabs, activeSouthId]);
+
+  const closeSouthTab = (id: string) => {
+    removeComponent(id);
+  };
+
   return (
-      <div className="app-container" style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <div className="app-container">
         {!isElectron() && <Navbar addComponent={openComponent} />}
 
         <GlobalFileModals />
@@ -233,8 +289,22 @@ function App() {
                     onDeleteNode={deleteNodeWithMessages}
                 />
               }
-              southContent={<SouthZoneComponents messages={messages} onRemove={() => removeComponent("ComponentMessage")} />}
-              eastContent={<EastZoneComponents tabs={eastTabs} activeId={activeEastId} setActiveId={setActiveEastId} closeTab={closeEastTab} />}
+              southContent={
+                <SouthZoneComponents
+                    tabs={southTabs}
+                    activeId={activeSouthId}
+                    setActiveId={setActiveSouthId}
+                    closeTab={closeSouthTab}
+                />
+              }
+              eastContent={
+                <EastZoneComponents
+                    tabs={eastTabs}
+                    activeId={activeEastId}
+                    setActiveId={setActiveEastId}
+                    closeTab={closeEastTab}
+                />
+              }
           />
         </div>
       </div>

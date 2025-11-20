@@ -19,8 +19,3 @@
     margin-right: 0.25rem;
     vertical-align: middle;
 }
-
-/* Hover */
-.tree-label.pointer:hover {
-    background: rgba(255, 255, 255, 0.08);
-}

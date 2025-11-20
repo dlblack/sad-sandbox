@@ -22,11 +22,3 @@ export function closeProjectSession(): void {
         window.electronAPI?.setProjectMenuState?.(false);
     } catch {}
 }
-
-export function isProjectOpen(): boolean {
-    try {
-        return !!localStorage.getItem("lastProject");
-    } catch {
-        return false;
-    }
-}

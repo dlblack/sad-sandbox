@@ -1,5 +1,9 @@
 import { useCallback, useState } from "react";
-import { componentMetadata, DEFAULT_COMPONENT_SIZE } from "../utils/componentMetadata";
+import {
+  getComponentRegistryEntry,
+  getComponentLabel,
+  DEFAULT_COMPONENT_SIZE,
+} from "../registry/componentRegistry";
 import { makeMessage } from "../utils/messageUtils";
 
 type DockZone = "W" | "E" | "S" | "CENTER" | string;
@@ -18,8 +22,17 @@ function getDefaultDockZone(type: string): DockZone {
   }
 }
 
-export type WizardFinishFn = (type: string, valuesObj: any, id?: string) => Promise<void>;
-export type DeleteNodeFn = (section: any, pathArr: any[], name?: string) => Promise<string | null>;
+export type WizardFinishFn = (
+    type: string,
+    valuesObj: any,
+    id?: string
+) => Promise<void>;
+
+export type DeleteNodeFn = (
+    section: any,
+    pathArr: any[],
+    name?: string
+) => Promise<string | null>;
 
 export default function useDockableContainers({
                                                 handleWizardFinish,
@@ -33,54 +46,107 @@ export default function useDockableContainers({
 
   const [containers, setContainers] = useState<any[]>(() => {
     return ["ComponentProject", "ComponentMessage"].map((type) => {
-      const meta = (componentMetadata as any)[type] || {};
+      const entry = getComponentRegistryEntry(type);
+      const width =
+          entry && typeof entry.width === "number" && entry.width > 0
+              ? entry.width
+              : DEFAULT_COMPONENT_SIZE.width;
+      const height =
+          entry && typeof entry.height === "number" && entry.height > 0
+              ? entry.height
+              : DEFAULT_COMPONENT_SIZE.height;
+
+      const name = getComponentLabel(type);
+
       return {
         id: type,
         type,
-        title: meta.entityName || type,
+        title: name,
         dockZone: getDefaultDockZone(type),
-        width: meta.width || DEFAULT_COMPONENT_SIZE.width,
-        height: meta.height || DEFAULT_COMPONENT_SIZE.height,
-        ...meta,
+        width,
+        height,
+        ...(entry || {}),
       };
     });
   });
 
-  const addComponent = useCallback((type: string, optionalProps: Record<string, any> = {}) => {
-    const meta = (componentMetadata as any)[type] || DEFAULT_COMPONENT_SIZE;
-    const resolvedWidth =
-        typeof meta.width === "number" && meta.width > 0 ? meta.width : DEFAULT_COMPONENT_SIZE.width || 320;
-    const resolvedHeight =
-        typeof meta.height === "number" && meta.height > 0 ? meta.height : DEFAULT_COMPONENT_SIZE.height || 240;
+  const addComponent = useCallback(
+      (type: string, optionalProps: Record<string, any> = {}) => {
+        const entry = getComponentRegistryEntry(type);
+        const isSingleton = entry?.singleton === true;
 
-    const newComponentId =
-        type === "ComponentProject" || type === "ComponentMessage" ? type : `${type}-${crypto.randomUUID()}`;
+        const width =
+            entry && typeof entry.width === "number" && entry.width > 0
+                ? entry.width
+                : DEFAULT_COMPONENT_SIZE.width;
+        const height =
+            entry && typeof entry.height === "number" && entry.height > 0
+                ? entry.height
+                : DEFAULT_COMPONENT_SIZE.height;
 
-    setContainers((prev) => {
-      const cleaned = prev.filter((c: any) => c.type !== type);
-      return [
-        ...cleaned,
-        {
-          id: newComponentId,
-          type,
-          title: meta.entityName || type,
-          dockZone: optionalProps.dockZone || getDefaultDockZone(type),
-          width: resolvedWidth,
-          height: resolvedHeight,
-          ...meta,
-          ...optionalProps,
-        },
-      ];
-    });
+        const name = getComponentLabel(type, optionalProps);
+        const category = String(entry?.componentType || "").trim();
 
-    const category = (meta.category || "").trim();
-    setMessages((prevMsgs) => [...prevMsgs, makeMessage(10001, [meta.entityName || type, category], "info")]);
-  }, []);
+        let alreadyOpen = false;
 
-  const wizardFinishWithMessages: WizardFinishFn = async (type, valuesObj, id) => {
-    const meta = (componentMetadata as any)[type] || {};
-    const name = valuesObj?.name || "";
-    setMessages((prev) => [...prev, makeMessage(10002, [meta.entityName || type, name], "success")]);
+        setContainers((prev) => {
+          if (isSingleton) {
+            const existing = prev.find((c: any) => c.type === type);
+            if (existing) {
+              alreadyOpen = true;
+              return prev;
+            }
+          }
+
+          const newComponentId =
+              isSingleton ||
+              type === "ComponentProject" ||
+              type === "ComponentMessage"
+                  ? type
+                  : `${type}-${crypto.randomUUID()}`;
+
+          const cleaned = isSingleton ? prev.filter((c: any) => c.type !== type) : prev;
+
+          return [
+            ...cleaned,
+            {
+              id: newComponentId,
+              type,
+              title: name,
+              dockZone: optionalProps.dockZone || getDefaultDockZone(type),
+              width,
+              height,
+              ...(entry || {}),
+              ...optionalProps,
+            },
+          ];
+        });
+
+        setMessages((prevMsgs) => [
+          ...prevMsgs,
+          alreadyOpen
+              ? makeMessage(10010, [name], "warning")
+              : makeMessage(10001, [name, category], "info"),
+        ]);
+      },
+      []
+  );
+
+  const wizardFinishWithMessages: WizardFinishFn = async (
+      type,
+      valuesObj,
+      id
+  ) => {
+    const entry = getComponentRegistryEntry(type);
+    const name = valuesObj?.name || getComponentLabel(type);
+    const labelForMsg = name || getComponentLabel(type);
+    const category = String(entry?.componentType || "").trim();
+
+    setMessages((prev) => [
+      ...prev,
+      makeMessage(10002, [labelForMsg, category], "success"),
+    ]);
+
     if (handleWizardFinish) {
       await handleWizardFinish(type, valuesObj, id);
     }
@@ -90,46 +156,64 @@ export default function useDockableContainers({
       async (arg1: any, arg2?: any[], arg3?: string) => {
         const { section, pathArr, name } =
             arg1 && typeof arg1 === "object" && "section" in arg1 && "pathArr" in arg1
-                ? { section: arg1.section, pathArr: arg1.pathArr as any[], name: (arg1 as any).name as string | undefined }
-                : { section: arg1, pathArr: arg2 as any[], name: arg3 as string | undefined };
+                ? {
+                  section: arg1.section,
+                  pathArr: arg1.pathArr as any[],
+                  name: (arg1 as any).name as string | undefined,
+                }
+                : {
+                  section: arg1,
+                  pathArr: arg2 as any[],
+                  name: arg3 as string | undefined,
+                };
 
         let finalName = name || null;
 
         if (handleDeleteNode) {
           try {
             const resolved = await handleDeleteNode(section, pathArr, name);
-            if (typeof resolved === "string" && resolved.length) finalName = resolved;
+            if (typeof resolved === "string" && resolved.length) {
+              finalName = resolved;
+            }
           } catch {
             // ignore
           }
         }
 
-        setMessages((prev) => [...prev, makeMessage(10020, [finalName || "Unknown"], "danger")]);
+        setMessages((prev) => [
+          ...prev,
+          makeMessage(10020, [finalName || "Unknown"], "danger"),
+        ]);
       },
       [handleDeleteNode]
   );
 
-  const removeComponent = (id: string, reason?: { code?: number; args?: any[]; type?: any }) => {
+  const removeComponent = (
+      id: string,
+      reason?: { code?: number; args?: any[]; type?: any }
+  ) => {
     const removed = containers.find((c: any) => c.id === id);
     if (!removed) return;
 
-    const meta = (componentMetadata as any)[removed.type] || {};
-    const removedInfo = {
-      name: meta.entityName || removed.type,
-      category: (meta.category || "").trim(),
-    };
+    const entry = getComponentRegistryEntry(removed.type);
+    const name = getComponentLabel(removed.type);
+    const category = String(entry?.componentType || "").trim();
 
     setContainers((prev) => prev.filter((c: any) => c.id !== id));
 
     if (reason && (reason.code || reason.args || reason.type)) {
       setMessages((prevMsgs) => [
         ...prevMsgs,
-        makeMessage(reason.code ?? 10002, reason.args ?? [], reason.type ?? "success"),
+        makeMessage(
+            reason.code ?? 10002,
+            reason.args ?? [],
+            reason.type ?? "success"
+        ),
       ]);
     } else {
       setMessages((prevMsgs) => [
         ...prevMsgs,
-        makeMessage(10030, [removedInfo.name, removedInfo.category], "info"),
+        makeMessage(10030, [name, category], "info"),
       ]);
     }
   };
@@ -143,7 +227,11 @@ export default function useDockableContainers({
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newX = moveEvent.clientX - startX;
       const newY = moveEvent.clientY - startY;
-      setContainers((prev) => prev.map((c: any) => (c.id === id ? { ...c, x: newX, y: newY } : c)));
+      setContainers((prev) =>
+          prev.map((c: any) =>
+              c.id === id ? { ...c, x: newX, y: newY } : c
+          )
+      );
     };
 
     const onMouseUp = () => {
@@ -156,12 +244,17 @@ export default function useDockableContainers({
   };
 
   const logCenterOpened = (type: string, title: string) => {
-    const cat = ((componentMetadata as any)[type]?.category || "").trim() || "Component";
-    setMessages((prev) => [...prev, makeMessage(10001, [title, cat], "info")]);
+    const entry = getComponentRegistryEntry(type);
+    const cat = String(entry?.componentType || "").trim() || "Component";
+    setMessages((prev) => [
+      ...prev,
+      makeMessage(10001, [title, cat], "info"),
+    ]);
   };
 
   const logCenterClosed = (type: string, title: string) => {
-    const cat = ((componentMetadata as any)[type]?.category || "").trim() || "Component";
+    const entry = getComponentRegistryEntry(type);
+    const cat = String(entry?.componentType || "").trim() || "Component";
     setMessages((prevMsgs) => {
       const msg = makeMessage(10030, [title, cat], "info");
       const last = prevMsgs[prevMsgs.length - 1];
@@ -170,8 +263,11 @@ export default function useDockableContainers({
     });
   };
 
-  const logCenterAlreadyOpen = (type: string, title: string) => {
-    setMessages((prev) => [...prev, makeMessage(10010, [title], "warning")]);
+  const logCenterAlreadyOpen = (_type: string, title: string) => {
+    setMessages((prev) => [
+      ...prev,
+      makeMessage(10010, [title], "warning"),
+    ]);
   };
 
   return {

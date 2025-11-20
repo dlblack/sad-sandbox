@@ -9,23 +9,21 @@ export interface CenterTab {
     props?: Record<string, unknown>;
 }
 
-export interface RegistryEntry {
-    title: ((props?: unknown) => string) | string;
-    typeClass: string;
+export type ComponentCategory =
+    | "panel"
+    | "wizard"
+    | "data editor"
+    | "demo"
+
+export type RegistryEntry = {
+    label: string | ((props?: any) => string);
+    menuGroup: string;
     Component: React.ComponentType<any>;
-}
+    centerTab: boolean;
+    componentType: ComponentCategory;
+    width?: number;
+    height?: number;
+    singleton?: boolean;
+};
+
 export type Registry = Record<string, RegistryEntry>;
-
-export interface DockContainer {
-    id: Id;
-    type: string;
-    dockZone: "W" | "E" | "S" | "CENTER";
-    dataset?: unknown;
-    props?: Record<string, unknown>;
-}
-
-export interface AppMessage {
-    id: Id;
-    level: "info" | "warn" | "error";
-    text: string;
-}

@@ -1,77 +1,7 @@
 import React, { useMemo } from "react";
-import Bulletin17AnalysisWizard from "../analysis/bulletin17/Bulletin17AnalysisWizard";
-import CopulaAnalysisWizard from "../analysis/copula/CopulaAnalysisWizard";
-import FloodTypeClassAnalysisWizard from "../analysis/flood_type_classification/FloodTypeClassAnalysisWizard";
-import PeakFlowFreqWizard from "../analysis/peak_flow/PeakFlowFreqWizard";
-import ManualDataEntryEditor from "../data/ManualDataEntryEditor/ManualDataEntryEditor";
-import DemoPlots from "../plots/DemoPlots";
-import DemoPlotsRecharts from "../plots/DemoPlotsRecharts";
-import TimeSeriesPlot from "../plots/TimeSeriesPlot";
-import PairedDataPlot from "../plots/PairedDataPlot";
-import ComponentMap from "../ComponentMap";
+import { COMPONENT_REGISTRY } from "../../registry/componentRegistry";
 import ZoneTabs from "./ZoneTabs";
-import { CenterTab, Registry } from "../../types/app";
-import { TextStore } from "../../utils/TextStore";
-
-const REGISTRY: Registry = {
-    Bulletin17AnalysisWizard: {
-        title: () => TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard"),
-        typeClass: "tab--wizard",
-        Component: Bulletin17AnalysisWizard,
-    },
-    CopulaAnalysisWizard: {
-        title: () => TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard"),
-        typeClass: "tab--wizard",
-        Component: CopulaAnalysisWizard,
-    },
-    FloodTypeClassAnalysisWizard: {
-        title: () => TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard"),
-        typeClass: "tab--wizard",
-        Component: FloodTypeClassAnalysisWizard,
-    },
-    PeakFlowFreqWizard: {
-        title: () => TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard"),
-        typeClass: "tab--wizard",
-        Component: PeakFlowFreqWizard,
-    },
-    ManualDataEntryEditor: {
-        title: () => TextStore.interface("ComponentMetadata_ManualDataEntryEditor"),
-        typeClass: "tab--editor",
-        Component: ManualDataEntryEditor,
-    },
-    DemoPlots: {
-        title: () => "Demo Plots (Plotly)",
-        typeClass: "tab--plot",
-        Component: DemoPlots,
-    },
-    DemoPlotsRecharts: {
-        title: () => "Demo Plots (Recharts)",
-        typeClass: "tab--plot",
-        Component: DemoPlotsRecharts,
-    },
-    TimeSeriesPlot: {
-        title: () => "Time Series Plot",
-        typeClass: "tab--plot",
-        Component: TimeSeriesPlot,
-    },
-    PairedDataPlot: {
-        title: () => "Paired Data Plot",
-        typeClass: "tab--plot",
-        Component: PairedDataPlot,
-    },
-    ComponentMap: {
-        title: () => TextStore.interface("ComponentMetadata_ComponentMap"),
-        typeClass: "tab--panel",
-        Component: ComponentMap,
-    },
-};
-
-export function centerTitle(kind: string, props?: unknown): string {
-    const reg = REGISTRY[kind];
-    if (!reg) return kind;
-    const t = reg.title;
-    return typeof t === "function" ? t(props) : t || kind;
-}
+import { CenterTab } from "../../types/app";
 
 interface CenterZoneProps {
     tabs: CenterTab[];
@@ -100,15 +30,15 @@ export default function CenterZoneComponents({
     );
 
     return (
-        <div className="wizard-workspace" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div className="wizard-workspace">
             <ZoneTabs
                 tabs={tabs}
                 activeId={activeId}
                 setActiveId={setActiveId}
                 closeTab={closeTab}
-                registry={REGISTRY}
+                registry={COMPONENT_REGISTRY}
             />
-            <div className="wizard-tab-body" style={{ flex: 1, minHeight: 0 }}>
+            <div className="wizard-tab-body">
                 {activeTab ? (
                     <ActivePane
                         tab={activeTab}
@@ -139,8 +69,11 @@ function ActivePane({
     onDataSave: (category: string, valuesObj: unknown) => Promise<void>;
     onFinish: (type: string, valuesObj: unknown, id?: string) => Promise<void>;
 }) {
-    const reg = REGISTRY[tab.kind];
-    if (!reg) return null;
+    const reg = COMPONENT_REGISTRY[tab.kind];
+    if (!reg) {
+        return null;
+    }
+
     const Cmp = reg.Component;
     const onRemove = () => closeTab(tab.id);
     const extraProps = (tab.props ?? {}) as Record<string, unknown>;

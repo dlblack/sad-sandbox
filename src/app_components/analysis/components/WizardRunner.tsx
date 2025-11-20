@@ -1,7 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { Card, Stepper, Stack, ScrollArea, Divider, Group } from "@mantine/core";
 import WizardNavigation from "../../common/WizardNavigation";
-import { componentMetadata } from "../../../utils/componentMetadata";
 
 type DatasetItem = {
   name: string;
@@ -79,7 +78,7 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
     disableDataset = false,
   } = props;
 
-  const rawType = props.type ?? componentMetadata.currentType;
+  const rawType = props.type ?? "";
   const typeKey = toTypeKey(rawType);
 
   const datasetList =

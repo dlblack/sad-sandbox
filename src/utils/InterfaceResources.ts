@@ -129,28 +129,28 @@ export const INTERFACE_TEXT = {
   ComponentPlotStyle_Button_SaveRule: "Save Rule",
 
   // --------------------------------------
-  // componentMetadata
+  // componentRegistry
   // --------------------------------------
-  ComponentMetadata_ComponentProject: "Project",
-  ComponentMetadata_ComponentInterfaceOptions: "Interface Options",
-  ComponentMetadata_ComponentPlotStyle: "Plot Styles",
-  ComponentMetadata_ManualDataEntryEditor: "Manual Data Entry",
-  ComponentMetadata_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
-  ComponentMetadata_Wizard_CopulaAnalysisWizard: "Copula Analysis",
-  ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard: "Flood Type Classification Analysis",
-  ComponentMetadata_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",
-  ComponentMetadata_Wizard_GeneralFreqAnalysisWizard: "General Frequency Analysis",
-  ComponentMetadata_Wizard_VolumeFrequencyAnalysisWizard: "Volume Frequency Analysis",
-  ComponentMetadata_Wizard_CoincidentFreqAnalysisWizard: "Coincident Frequency Analysis",
-  ComponentMetadata_Wizard_CurveCombinationAnalysisWizard: "Curve Combination Analysis",
-  ComponentMetadata_Wizard_BalancedHydrographAnalysisWizard: "Balanced Hydrograph Analysis",
-  ComponentMetadata_Wizard_DistributionFittingAnalysisWizard: "Distribution Fitting Analysis",
-  ComponentMetadata_Wizard_MixedPopulationAnalysisWizard: "Mixed Population Analysis",
-  ComponentMetadata_Wizard_CorrelationAnalysisWizard: "Correlation Analysis Wizard",
-  ComponentMetadata_Wizard_RecordExtensionAnalysisWizard: "Record Extension Analysis",
-  ComponentMetadata_Wizard_PeaksOverThresholdAnalysisWizard: "Peaks Over Threshold",
-  ComponentMetadata_Wizard_LinearRegressionWizard: "Linear Regression",
-  ComponentMetadata_Wizard_QuantileMappingWizard: "Quantile Mapping",
+  ComponentRegistry_ComponentProject: "Project",
+  ComponentRegistry_ComponentInterfaceOptions: "Interface Options",
+  ComponentRegistry_ComponentPlotStyle: "Plot Styles",
+  ComponentRegistry_ManualDataEntryEditor: "Manual Data Entry",
+  ComponentRegistry_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
+  ComponentRegistry_Wizard_CopulaAnalysisWizard: "Copula Analysis",
+  ComponentRegistry_Wizard_FloodTypeClassAnalysisWizard: "Flood Type Classification Analysis",
+  ComponentRegistry_Wizard_PeakFlowFreqWizard: "Peak Flow Frequency",
+  ComponentRegistry_Wizard_GeneralFreqAnalysisWizard: "General Frequency Analysis",
+  ComponentRegistry_Wizard_VolumeFrequencyAnalysisWizard: "Volume Frequency Analysis",
+  ComponentRegistry_Wizard_CoincidentFreqAnalysisWizard: "Coincident Frequency Analysis",
+  ComponentRegistry_Wizard_CurveCombinationAnalysisWizard: "Curve Combination Analysis",
+  ComponentRegistry_Wizard_BalancedHydrographAnalysisWizard: "Balanced Hydrograph Analysis",
+  ComponentRegistry_Wizard_DistributionFittingAnalysisWizard: "Distribution Fitting Analysis",
+  ComponentRegistry_Wizard_MixedPopulationAnalysisWizard: "Mixed Population Analysis",
+  ComponentRegistry_Wizard_CorrelationAnalysisWizard: "Correlation Analysis Wizard",
+  ComponentRegistry_Wizard_RecordExtensionAnalysisWizard: "Record Extension Analysis",
+  ComponentRegistry_Wizard_PeaksOverThresholdAnalysisWizard: "Peaks Over Threshold",
+  ComponentRegistry_Wizard_LinearRegressionWizard: "Linear Regression",
+  ComponentRegistry_Wizard_QuantileMappingWizard: "Quantile Mapping",
 
   // --------------------------------------
   // DataIntervalComboBox
@@ -495,7 +495,7 @@ export const INTERFACE_TEXT = {
   // --------------------------------------
   // ----Maps
   // --------------------------------------
-  ComponentMetadata_ComponentMap: "Map",
+  ComponentRegistry_ComponentMap: "Map",
 
   // --------------------------------------
   // PairedDataPlot
