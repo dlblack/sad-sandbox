@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useProject } from "../context/ProjectContext";
-import {getComponentLabel, getComponentRegistryEntry} from "../registry/componentRegistry";
-import {logSilentError} from "../utils/logSilentError";
+import { getComponentLabel, getComponentRegistryEntry } from "../registry/componentRegistry";
+import { logSilentError } from "../utils/logSilentError";
 
 /** ----------------------- Types ----------------------- */
 type MapsSection = "maps";
@@ -98,7 +98,7 @@ function withDir(url: string): string {
 }
 
 export function useAppData() {
-  const {apiPrefix} = useProject();
+  const { apiPrefix } = useProject() as any;
   const [maps, setMaps] = useState<any[]>([]);
   const [data, setData] = useState<DataRecord>({});
   const [analyses, setAnalyses] = useState<AnalysesRecord>({});
@@ -196,7 +196,9 @@ export function useAppData() {
         const [type, idx] = args.pathArr;
         const list = Array.isArray(data[type]) ? data[type] : [];
         const src = list[idx];
-        const url = withDir(`${apiPrefix}/data/${encodeURIComponent(type)}/${idx}`);
+        const url = withDir(
+            `${apiPrefix}/data/${encodeURIComponent(type)}/${idx}`
+        );
         const resp = await delJSON<{ success: boolean; deletedName?: string }>(
             url,
             {name: src?.name || localName || null}
@@ -209,7 +211,9 @@ export function useAppData() {
         const [type, idx] = args.pathArr;
         const list = Array.isArray(analyses[type]) ? analyses[type] : [];
         const src = list[idx];
-        const url = withDir(`${apiPrefix}/analyses/${encodeURIComponent(type)}/${idx}`);
+        const url = withDir(
+            `${apiPrefix}/analyses/${encodeURIComponent(type)}/${idx}`
+        );
         const resp = await delJSON<{ success: boolean; deletedName?: string }>(
             url,
             {name: src?.name || localName || null}
@@ -262,7 +266,7 @@ export function useAppData() {
         await postJSON(withDir(endpoint), { type, data: payload });
         await refreshAll();
       } catch (err) {
-        logSilentError(err, "handleSaveAsNode")
+        logSilentError(err, "handleSaveAsNode");
       }
       return;
     }
@@ -299,17 +303,32 @@ export function useAppData() {
       const signature = JSON.stringify(src);
 
       try {
-        const copy = {...src, name: newName};
-        await postJSON(withDir(`${apiPrefix}/analyses`), {type: folder, data: copy});
-        const refreshed = await getJSON<AnalysesRecord>(withDir(`${apiPrefix}/analyses`));
-        const refreshedList = Array.isArray(refreshed[folder]) ? refreshed[folder] : [];
-        let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
+        const copy = { ...src, name: newName };
+        await postJSON(withDir(`${apiPrefix}/analyses`), {
+          type: folder,
+          data: copy,
+        });
+        const refreshed = await getJSON<AnalysesRecord>(
+            withDir(`${apiPrefix}/analyses`)
+        );
+        const refreshedList = Array.isArray(refreshed[folder])
+            ? refreshed[folder]
+            : [];
+        let deleteIndex = refreshedList.findIndex(
+            (it) => JSON.stringify(it) === signature
+        );
         if (deleteIndex === -1) {
-          deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
+          deleteIndex = refreshedList.findIndex(
+              (it) => it.name === src.name
+          );
         }
 
         if (deleteIndex !== -1) {
-          await delJSON(withDir(`${apiPrefix}/analyses/${encodeURIComponent(folder)}/${deleteIndex}`));
+          await delJSON(
+              withDir(
+                  `${apiPrefix}/analyses/${encodeURIComponent(folder)}/${deleteIndex}`
+              )
+          );
         }
 
         await refreshAll();
@@ -330,15 +349,32 @@ export function useAppData() {
       try {
         const copy = {...src, name: newName};
 
-        await postJSON(withDir(`${apiPrefix}/data`), {type: param, data: copy});
+        await postJSON(withDir(`${apiPrefix}/data`), {
+          type: param,
+          data: copy,
+        });
 
-        const refreshed = await getJSON<DataRecord>(withDir(`${apiPrefix}/data`));
-        const refreshedList = Array.isArray(refreshed[param]) ? refreshed[param] : [];
-        let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
-        if (deleteIndex === -1) deleteIndex = refreshedList.findIndex((it) => it.name === src.name);
+        const refreshed = await getJSON<DataRecord>(
+            withDir(`${apiPrefix}/data`)
+        );
+        const refreshedList = Array.isArray(refreshed[param])
+            ? refreshed[param]
+            : [];
+        let deleteIndex = refreshedList.findIndex(
+            (it) => JSON.stringify(it) === signature
+        );
+        if (deleteIndex === -1) {
+          deleteIndex = refreshedList.findIndex(
+              (it) => it.name === src.name
+          );
+        }
 
         if (deleteIndex !== -1) {
-          await delJSON(withDir(`${apiPrefix}/data/${encodeURIComponent(param)}/${deleteIndex}`));
+          await delJSON(
+              withDir(
+                  `${apiPrefix}/data/${encodeURIComponent(param)}/${deleteIndex}`
+              )
+          );
         }
 
         await refreshAll();
@@ -389,8 +425,37 @@ export function useAppData() {
       throw new Error("Missing category or data");
     }
 
+    const payload: any = { ...valuesObj };
+
+    const isDssPaired =
+        payload.dataFormat === "DSS" &&
+        payload.structureType === "PairedData";
+
+    if (isDssPaired) {
+      const existingList = Array.isArray((data as any)[category])
+          ? (data as any)[category]
+          : [];
+
+      const existing = existingList.find(
+          (it: any) =>
+              it &&
+              it.dataFormat === "DSS" &&
+              it.structureType === "PairedData" &&
+              typeof it.filepath === "string" &&
+              it.filepath.length > 0
+      );
+
+      // Always inherit the existing DSS filepath if one exists for this category
+      if (existing) {
+        payload.filepath = existing.filepath;
+      }
+    }
+
     try {
-      await postJSON(withDir(`${apiPrefix}/data`), {type: category, data: valuesObj});
+      await postJSON(withDir(`${apiPrefix}/data`), {
+        type: category,
+        data: payload,
+      });
       await refreshAll();
     } catch (error) {
       console.error("Error saving data:", error);

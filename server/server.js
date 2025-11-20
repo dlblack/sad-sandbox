@@ -305,6 +305,89 @@ app.post("/api/:project/:bucket", (req, res) => {
         return;
     }
 
+    if (data.dataFormat === "DSS" && data.structureType === "PairedData") {
+        const xValues = data.xValues;
+        const yValues = data.yValues;
+
+        const metaForJson = {};
+        Object.keys(data).forEach((key) => {
+            if (key !== "xValues" && key !== "yValues") {
+                metaForJson[key] = data[key];
+            }
+        });
+
+        const filepath = metaForJson.filepath;
+        const pathname = metaForJson.pathname;
+        const xLabel = metaForJson.xLabel || "";
+        const yLabel = metaForJson.parameter || metaForJson.yLabel || "";
+        const xUnits = metaForJson.xUnits || "";
+        const yUnits = metaForJson.yUnits || "";
+
+        if (
+          !filepath ||
+          !pathname ||
+          !Array.isArray(xValues) ||
+          !Array.isArray(yValues) ||
+          xValues.length === 0 ||
+          yValues.length === 0 ||
+          xValues.length !== yValues.length
+        ) {
+            return res.status(400).json({ error: "Missing or invalid DSS paired fields" });
+        }
+
+        if (!store[type]) store[type] = [];
+        store[type].push(metaForJson);
+        writeJson(dataFile, store);
+
+        const dssInput = {
+            pathname,
+            xValues,
+            yValues,
+            xLabel,
+            yLabel,
+            xUnits,
+            yUnits
+        };
+
+        const tmpInputPath = path.join(__dirname, "tmp_dss_paired_input.json");
+        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput, null, 2), "utf-8");
+
+        const baseDir = path.resolve(String(absDir));
+        const dssFilePath = path.isAbsolute(filepath)
+          ? filepath
+          : path.resolve(baseDir, filepath);
+        const dssDir = path.dirname(dssFilePath);
+        if (!fs.existsSync(dssDir)) {
+            fs.mkdirSync(dssDir, { recursive: true });
+        }
+
+        console.log("DSS paired debug input file", tmpInputPath);
+        console.log("DSS paired debug output dssFilePath", dssFilePath);
+        console.log("DSS paired debug payload", JSON.stringify(dssInput));
+
+        const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
+        const classPath = getClassPath();
+
+        const child = spawn(
+          javaBin,
+          ["-cp", classPath, "DssPairedWriter", tmpInputPath, dssFilePath],
+          { cwd: __dirname }
+        );
+
+        child.stdout.on("data", (d) => console.log("JAVA PAIRED", d.toString()));
+        child.stderr.on("data", (d) => console.error("JAVA PAIRED ERR", d.toString()));
+
+        child.on("close", (code) => {
+            console.log("DSS paired debug exit code", code);
+            if (code !== 0) {
+                return res.status(500).json({ error: "Failed to write DSS paired file" });
+            }
+            return res.json({ success: true });
+        });
+
+        return;
+    }
+
     const storeData = store;
     if (!storeData[type]) storeData[type] = [];
     storeData[type].push(data);
@@ -396,7 +479,7 @@ app.get("/api/:project/read-dss", (req, res) => {
     child.on("close", (code) => {
         if (code !== 0) return res.status(500).json({ error: "Failed to read DSS" });
 
-        const jsonMatch = output.match(/\{[\s\S]*\}/);
+        const jsonMatch = output.match(/\{[\s\S]*}/);
         if (!jsonMatch) return res.status(500).json({ error: "Invalid DSS JSON" });
 
         try {

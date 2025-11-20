@@ -5,6 +5,7 @@ import { TextStore } from "../../utils/TextStore";
 import type { Datum } from "plotly.js";
 import { buildPairedCategoryXAxis, isFlowFrequency, prettyProbLabel } from "./axisHelpers";
 import { styleForPeakFlowFreq } from "./styleHelpers";
+import { useProject } from "../../context/ProjectContext";
 
 type DSSJson = {
   x?: Array<number | string>;
@@ -38,9 +39,15 @@ interface PairedDataset {
 const isMultiPaired = (d: any) =>
     d && typeof d.filepath === "string" && Array.isArray(d.pathname) && d.pathname.length > 0;
 
-async function readPaired(file?: string, path?: string): Promise<DSSJson> {
-  const url = `/api/read-dss?file=${encodeURIComponent(file || "")}&path=${encodeURIComponent(path || "")}`;
+async function readPaired(apiPrefix: string, file?: string, path?: string): Promise<DSSJson> {
+  const dir = localStorage.getItem("lastProjectDir") || "";
+  const url = `${apiPrefix}/read-dss?file=${encodeURIComponent(file || "")}` +
+      `&path=${encodeURIComponent(path || "")}` +
+      (dir ? `&dir=${encodeURIComponent(dir)}` : "");
   const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error("Failed to read DSS");
+  }
   return res.json();
 }
 
@@ -68,11 +75,13 @@ function normalizePairedData(json: DSSJson, dataset: PairedDataset) {
 }
 
 export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | any }) {
+  const { apiPrefix } = useProject();
   const [loading, setLoading] = useState(true);
   const [singleData, setSingleData] = useState<ReturnType<typeof normalizePairedData> | null>(null);
   const [multiLoaded, setMultiLoaded] = useState<Array<DSSJson>>([]);
 
   const isMulti = isMultiPaired(dataset);
+  const prefix = apiPrefix || "/api/unknown";
 
   useEffect(() => {
     let cancelled = false;
@@ -81,7 +90,7 @@ export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | a
       try {
         let json: DSSJson;
         if (dataset.dataFormat === "DSS" && typeof dataset.pathname === "string") {
-          json = await readPaired(dataset.filepath, dataset.pathname);
+          json = await readPaired(prefix, dataset.filepath, dataset.pathname);
         } else if (Array.isArray(dataset.rows)) {
           json = {
             x: dataset.rows.map((r: any) => Number(r.x)),
@@ -95,11 +104,17 @@ export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | a
           json = { x: [], y: [] };
         }
         const normalized = normalizePairedData(json, dataset);
-        if (!cancelled) setSingleData(normalized);
+        if (!cancelled) {
+          setSingleData(normalized);
+        }
       } catch {
-        if (!cancelled) setSingleData(null);
+        if (!cancelled) {
+          setSingleData(null);
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
@@ -108,30 +123,36 @@ export default function PairedDataPlot({ dataset }: { dataset: PairedDataset | a
       try {
         const paths = Array.isArray(dataset.pathname) ? dataset.pathname : [];
         const items = await Promise.all(
-            paths.map((p: string) => readPaired(dataset.filepath, p).catch(() => null))
+            paths.map((p: string) => readPaired(prefix, dataset.filepath, p).catch(() => null)),
         );
         const safe = items.filter(Boolean) as DSSJson[];
-        if (!cancelled) setMultiLoaded(safe);
+        if (!cancelled) {
+          setMultiLoaded(safe);
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     if (isMulti) {
       setSingleData(null);
       setMultiLoaded([]);
-      loadMulti();
+      void loadMulti();
     } else {
       setMultiLoaded([]);
-      loadSingle();
+      void loadSingle();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [isMulti, dataset]);
+  }, [isMulti, dataset, prefix]);
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return <Loader />;
+  }
 
   const parameter = dataset.parameter || "Discharge";
 
