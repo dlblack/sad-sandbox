@@ -1,34 +1,13 @@
 import React, { useMemo } from "react";
-import { TextStore } from "../../utils/TextStore";
-import ComponentInterfaceOptions from "../ComponentInterfaceOptions";
-import ComponentPlotStyle from "../ComponentPlotStyle";
 import ZoneTabs from "./ZoneTabs";
 import { Registry } from "../../types/app";
+import { COMPONENT_REGISTRY } from "../../registry/componentRegistry";
 
 export interface EastTab {
     id: string;
     kind: string;
     title: string;
     props?: any;
-}
-const REGISTRY: Registry = {
-    ComponentInterfaceOptions: {
-        title: () => TextStore.interface("ComponentMetadata_ComponentInterfaceOptions"),
-        typeClass: "tab--panel",
-        Component: ComponentInterfaceOptions,
-    },
-    ComponentPlotStyle: {
-        title: () => TextStore.interface("ComponentMetadata_ComponentPlotStyle"),
-        typeClass: "tab--panel",
-        Component: ComponentPlotStyle,
-    },
-};
-
-export function eastTitle(kind: string, props?: any): string {
-    const reg = REGISTRY[kind];
-    if (!reg) return kind;
-    const t = reg.title;
-    return typeof t === "function" ? t(props) : t || kind;
 }
 
 interface EastZoneProps {
@@ -50,15 +29,15 @@ export default function EastZoneComponents({
     );
 
     return (
-        <div className="wizard-workspace" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <div className="wizard-workspace">
             <ZoneTabs
                 tabs={tabs}
                 activeId={activeId}
                 setActiveId={setActiveId}
                 closeTab={closeTab}
-                registry={REGISTRY}
+                registry={COMPONENT_REGISTRY as Registry}
             />
-            <div className="wizard-tab-body" style={{ flex: 1, minHeight: 0 }}>
+            <div className="wizard-tab-body">
                 {activeTab ? <ActivePane tab={activeTab} /> : null}
             </div>
         </div>
@@ -66,8 +45,11 @@ export default function EastZoneComponents({
 }
 
 function ActivePane({ tab }: { tab: EastTab }) {
-    const reg = REGISTRY[tab.kind];
-    if (!reg) return null;
+    const reg = (COMPONENT_REGISTRY as Registry)[tab.kind];
+    if (!reg) {
+        return null;
+    }
+
     const Cmp = reg.Component;
     return <Cmp {...tab.props} />;
 }

@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import React, { useRef, useCallback } from "react";
 import isElectron from "../utils/isElectron";
 
 export default function useFolderPicker(onPicked: (dir: string) => void) {

@@ -1,28 +1,14 @@
 import React from "react";
 import { CloseButton, Tabs } from "@mantine/core";
 import { TextStore } from "../../utils/TextStore";
-
-export interface CenterTab {
-    id: string;
-    kind: string;
-    title: string;
-    props?: any;
-}
-
-type TitleGetter = ((props?: any) => string) | string;
-
-interface RegistryEntry {
-    title: TitleGetter;
-    typeClass: string;
-    Component: React.ComponentType<any>;
-}
+import { CenterTab, Registry } from "../../types/app";
 
 interface ZoneTabsProps {
     tabs: CenterTab[];
     activeId: string | null;
     setActiveId: React.Dispatch<React.SetStateAction<string | null>>;
     closeTab: (id: string) => void;
-    registry: Record<string, RegistryEntry>;
+    registry: Registry;
 }
 
 export default function ZoneTabs({
@@ -33,53 +19,44 @@ export default function ZoneTabs({
                                      registry,
                                  }: ZoneTabsProps) {
     return (
-        <>
-            <Tabs
-                value={activeId}
-                onChange={(v) => v && setActiveId(v)}
-                keepMounted={false}
-                variant="outline"
-                radius="sm"
-            >
-                <Tabs.List>
-                    {tabs.map((t) => {
-                        const typeClass = registry?.[t.kind]?.typeClass || "";
-                        const isActive = t.id === activeId;
-                        return (
-                            <Tabs.Tab
-                                key={t.id}
-                                value={t.id}
-                                className={typeClass}
-                                rightSection={
-                                    <CloseButton
-                                        component="div"
-                                        size="xs"
-                                        aria-label="Close tab"
-                                        title={TextStore.interface("CANCEL")}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            closeTab(t.id);
-                                        }}
-                                    />
-                                }
-                            >
-                                <span className="tab-label">{t.title}</span>
-                                {isActive ? <span className="tab-active-accent" /> : null}
-                            </Tabs.Tab>
-                        );
-                    })}
-                </Tabs.List>
-            </Tabs>
+        <Tabs
+            value={activeId}
+            onChange={(v) => v && setActiveId(v)}
+            keepMounted={false}
+            variant="outline"
+            radius="sm"
+        >
+            <Tabs.List>
+                {tabs.map((t) => {
+                    const entry = registry[t.kind];
+                    const categoryClass = entry?.componentType || "";
+                    const isActive = t.id === activeId;
 
-            <style>{`
-        .mantine-Tabs-tab{display:inline-flex;align-items:center;gap:8px}
-        .tab-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22ch}
-        .tab-active-accent{position:absolute;left:8px;right:8px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:#3a82f7}
-        .tab--editor .tab-active-accent{background:#f7c23a}
-        .tab--plot .tab-active-accent{background:#8bc34a}
-        .tab--panel .tab-active-accent{background:#9c27b0}
-      `}</style>
-        </>
+                    return (
+                        <Tabs.Tab
+                            key={t.id}
+                            value={t.id}
+                            className={categoryClass}
+                            rightSection={
+                                <CloseButton
+                                    component="div"
+                                    size="xs"
+                                    aria-label="Close tab"
+                                    title={TextStore.interface("CANCEL")}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        closeTab(t.id);
+                                    }}
+                                />
+                            }
+                        >
+                            <span className="tab-label">{t.title}</span>
+                            {isActive ? <span className="tab-active-accent" /> : null}
+                        </Tabs.Tab>
+                    );
+                })}
+            </Tabs.List>
+        </Tabs>
     );
 }

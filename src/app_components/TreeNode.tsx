@@ -81,10 +81,10 @@ function getNodeBadgeOrIcon(
         );
     }
     if (isLeaf && section === "analysis") {
-        const b17Label = TextStore.interface("ComponentMetadata_Wizard_Bulletin17AnalysisWizard");
-        const copLabel = TextStore.interface("ComponentMetadata_Wizard_CopulaAnalysisWizard");
-        const ftcLabel = TextStore.interface("ComponentMetadata_Wizard_FloodTypeClassAnalysisWizard");
-        const pffLabel = TextStore.interface("ComponentMetadata_Wizard_PeakFlowFreqWizard");
+        const b17Label = TextStore.interface("ComponentRegistry_Wizard_Bulletin17AnalysisWizard");
+        const copLabel = TextStore.interface("ComponentRegistry_Wizard_CopulaAnalysisWizard");
+        const ftcLabel = TextStore.interface("ComponentRegistry_Wizard_FloodTypeClassAnalysisWizard");
+        const pffLabel = TextStore.interface("ComponentRegistry_Wizard_PeakFlowFreqWizard");
 
         if (parentLabel === b17Label) {
             return (

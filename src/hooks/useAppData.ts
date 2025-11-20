@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useProject } from "../context/ProjectContext";
-import { componentMetadata } from "../utils/componentMetadata";
+import {getComponentLabel, getComponentRegistryEntry} from "../registry/componentRegistry";
+import {logSilentError} from "../utils/logSilentError";
 
 /** ----------------------- Types ----------------------- */
 type MapsSection = "maps";
@@ -96,9 +97,8 @@ function withDir(url: string): string {
       : url;
 }
 
-/** ----------------------- Hook ----------------------- */
-export default function useAppData() {
-  const { apiPrefix } = useProject();
+export function useAppData() {
+  const {apiPrefix} = useProject();
   const [maps, setMaps] = useState<any[]>([]);
   const [data, setData] = useState<DataRecord>({});
   const [analyses, setAnalyses] = useState<AnalysesRecord>({});
@@ -131,7 +131,10 @@ export default function useAppData() {
   );
 
   const refreshAll = useCallback(async () => {
-    if (!apiPrefix) return;
+    if (!apiPrefix) {
+      return;
+    }
+
     try {
       const aUrl = withDir(`${apiPrefix}/analyses`);
       const dUrl = withDir(`${apiPrefix}/data`);
@@ -141,15 +144,18 @@ export default function useAppData() {
       ]);
       setAnalyses(groupAnalysesByType(a));
       setData(d);
-    } catch {
-      // ignore
+    } catch (err) {
+      logSilentError(err);
     }
   }, [apiPrefix]);
 
   useEffect(() => {
-    if (!apiPrefix) return;
+    if (!apiPrefix) {
+      return;
+    }
+
     mountedRef.current = true;
-    refreshAll();
+    void refreshAll();
     return () => {
       mountedRef.current = false;
     };
@@ -160,7 +166,9 @@ export default function useAppData() {
     if (!apiPrefix) return;
     if (pollRef.current) window.clearInterval(pollRef.current);
     pollRef.current = window.setInterval(() => {
-      if (mountedRef.current) refreshAll();
+      if (mountedRef.current) {
+        void refreshAll();
+      }
     }, 1500) as unknown as number;
     return () => {
       if (pollRef.current) window.clearInterval(pollRef.current);
@@ -191,7 +199,7 @@ export default function useAppData() {
         const url = withDir(`${apiPrefix}/data/${encodeURIComponent(type)}/${idx}`);
         const resp = await delJSON<{ success: boolean; deletedName?: string }>(
             url,
-            { name: src?.name || localName || null }
+            {name: src?.name || localName || null}
         );
         await refreshAll();
         return resp?.deletedName || localName || null;
@@ -204,7 +212,7 @@ export default function useAppData() {
         const url = withDir(`${apiPrefix}/analyses/${encodeURIComponent(type)}/${idx}`);
         const resp = await delJSON<{ success: boolean; deletedName?: string }>(
             url,
-            { name: src?.name || localName || null }
+            {name: src?.name || localName || null}
         );
         await refreshAll();
         return resp?.deletedName || localName || null;
@@ -222,53 +230,54 @@ export default function useAppData() {
     const { section, pathArr, newName, newDesc, item } = args;
     if (!newName || !apiPrefix) return;
 
-    if (section === "data") {
+    if (section === "data" || section === "analyses") {
       const [type, idx] = pathArr;
-      setData((prev) => {
+
+      const setFn = section === "data" ? setData : setAnalyses;
+      const endpoint =
+          section === "data"
+              ? `${apiPrefix}/data`
+              : `${apiPrefix}/analyses`;
+
+      setFn(prev => {
         const next = { ...prev };
         const list = Array.isArray(next[type]) ? next[type] : [];
         const src = list[idx];
         if (!src) return prev;
-        const copy = { ...src, name: newName, description: newDesc ?? src.description };
+        const copy = {
+          ...src,
+          name: newName,
+          description: newDesc ?? src.description,
+        };
         next[type] = [...list, copy];
         return next;
       });
 
       try {
-        const payload = { ...(item || {}), name: newName, description: newDesc ?? item?.description };
-        await postJSON(withDir(`${apiPrefix}/data`), { type, data: payload });
+        const payload = {
+          ...(item || {}),
+          name: newName,
+          description: newDesc ?? item?.description,
+        };
+        await postJSON(withDir(endpoint), { type, data: payload });
         await refreshAll();
-      } catch {}
-      return;
-    }
-
-    if (section === "analyses") {
-      const [type, idx] = pathArr;
-      setAnalyses((prev) => {
-        const next = { ...prev };
-        const list = Array.isArray(next[type]) ? next[type] : [];
-        const src = list[idx];
-        if (!src) return prev;
-        const copy = { ...src, name: newName, description: newDesc ?? src.description };
-        next[type] = [...list, copy];
-        return next;
-      });
-
-      try {
-        const payload = { ...(item || {}), name: newName, description: newDesc ?? item?.description };
-        await postJSON(withDir(`${apiPrefix}/analyses`), { type, data: payload });
-        await refreshAll();
-      } catch {}
+      } catch (err) {
+        logSilentError(err, "handleSaveAsNode")
+      }
       return;
     }
 
     if (section === "maps") {
       const [idx] = pathArr;
-      setMaps((prev) => {
+      setMaps(prev => {
         const list = Array.isArray(prev) ? prev : [];
         const src = list[idx];
         if (!src) return prev;
-        const copy = { ...src, name: newName, description: newDesc ?? src.description };
+        const copy = {
+          ...src,
+          name: newName,
+          description: newDesc ?? src.description,
+        };
         return [...list, copy];
       });
     }
@@ -278,7 +287,7 @@ export default function useAppData() {
   async function handleRenameNode(args: RenameArgs) {
     if (typeof args !== "object" || args === null) return;
 
-    const { section, pathArr, newName } = args;
+    const {section, pathArr, newName} = args;
     if (!newName || !apiPrefix) return;
 
     if (section === "analyses") {
@@ -290,8 +299,8 @@ export default function useAppData() {
       const signature = JSON.stringify(src);
 
       try {
-        const copy = { ...src, name: newName };
-        await postJSON(withDir(`${apiPrefix}/analyses`), { type: folder, data: copy });
+        const copy = {...src, name: newName};
+        await postJSON(withDir(`${apiPrefix}/analyses`), {type: folder, data: copy});
         const refreshed = await getJSON<AnalysesRecord>(withDir(`${apiPrefix}/analyses`));
         const refreshedList = Array.isArray(refreshed[folder]) ? refreshed[folder] : [];
         let deleteIndex = refreshedList.findIndex((it) => JSON.stringify(it) === signature);
@@ -319,9 +328,9 @@ export default function useAppData() {
       const signature = JSON.stringify(src);
 
       try {
-        const copy = { ...src, name: newName };
+        const copy = {...src, name: newName};
 
-        await postJSON(withDir(`${apiPrefix}/data`), { type: param, data: copy });
+        await postJSON(withDir(`${apiPrefix}/data`), {type: param, data: copy});
 
         const refreshed = await getJSON<DataRecord>(withDir(`${apiPrefix}/data`));
         const refreshedList = Array.isArray(refreshed[param]) ? refreshed[param] : [];
@@ -345,7 +354,7 @@ export default function useAppData() {
         const list = Array.isArray(prev) ? prev : [];
         if (!list[idx]) return prev;
         const next = [...list];
-        next[idx] = { ...next[idx], name: newName };
+        next[idx] = {...next[idx], name: newName};
         return next;
       });
     }
@@ -353,19 +362,35 @@ export default function useAppData() {
 
   /** ----------------------- Wizards and Data Save ----------------------- */
   const handleWizardFinish = async (type: string, valuesObj: any) => {
-    if (!apiPrefix) return;
-    const friendlyType = componentMetadata?.[type]?.entityName ?? type;
+    if (!apiPrefix) {
+      return;
+    }
+
+    getComponentRegistryEntry(type);
+    const friendlyType = getComponentLabel(type);
+
     try {
-      await postJSON(withDir(`${apiPrefix}/analyses`), { type: friendlyType, data: valuesObj });
+      await postJSON(withDir(`${apiPrefix}/analyses`), {
+        type: friendlyType,
+        data: valuesObj,
+      });
       await refreshAll();
-    } catch {}
+    } catch (err) {
+      logSilentError(err);
+    }
   };
 
   const handleDataSave = async (category: string, valuesObj: any) => {
-    if (!apiPrefix) return;
+    if (!apiPrefix) {
+      return;
+    }
+
+    if (!valuesObj || !category) {
+      throw new Error("Missing category or data");
+    }
+
     try {
-      if (!valuesObj || !category) throw new Error("Missing category or data");
-      await postJSON(withDir(`${apiPrefix}/data`), { type: category, data: valuesObj });
+      await postJSON(withDir(`${apiPrefix}/data`), {type: category, data: valuesObj});
       await refreshAll();
     } catch (error) {
       console.error("Error saving data:", error);

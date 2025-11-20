@@ -396,7 +396,7 @@ export default function ManualDataEntryEditor(props: ManualDataEntryEditorProps)
 
     const createdText = (_category: string, itemName: string) =>
         TextStore.message(10002, [
-          TextStore.interface("ComponentMetadata_ManualDataEntryEditor"),
+          TextStore.interface("ComponentRegistry_ManualDataEntryEditor"),
           itemName,
         ]);
 

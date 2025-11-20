@@ -6,14 +6,19 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconFolderOpen } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { closeProjectSession } from "../utils/projectSession";
-import useAppData from "../hooks/useAppData";
+import {useAppData} from "../hooks/useAppData";
 import useProjectOpener from "../hooks/useProjectOpener";
 import { fetchRecent, type RecentProject } from "../api/recentProjects";
 import useFolderPicker from "../hooks/useFolderPicker";
 import useNeptuneProjectPicker from "../hooks/useNeptuneProjectPicker";
+import { getAnalysisWizardDefs, getToolDefs, getHelpDefs } from "../registry/componentRegistry";
 
 const NAV_HEIGHT = 40;
 type UnitSystem = "US" | "SI";
+
+const analysisDefs = getAnalysisWizardDefs();
+const toolDefs = getToolDefs();
+const helpDefs = getHelpDefs();
 
 interface NavbarProps {
   addComponent: (type: string, optionalProps?: any) => void;
@@ -170,18 +175,21 @@ function Navbar({ addComponent }: NavbarProps) {
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item onClick={() => openComponent("Bulletin17AnalysisWizard")}>
-                  {TextStore.interface("Navbar_Analysis_Bulletin17")}
-                </Menu.Item>
-                <Menu.Item onClick={() => openComponent("CopulaAnalysisWizard")}>
-                  {TextStore.interface("Navbar_Analysis_Copula")}
-                </Menu.Item>
-                <Menu.Item onClick={() => openComponent("FloodTypeClassAnalysisWizard")}>
-                  {TextStore.interface("Navbar_Analysis_FloodTypeClass")}
-                </Menu.Item>
-                <Menu.Item onClick={() => openComponent("PeakFlowFreqWizard")}>
-                  {TextStore.interface("Navbar_Analysis_PeakFlowFrequency")}
-                </Menu.Item>
+                {analysisDefs.map(({ key, entry }) => {
+                  const label =
+                      typeof entry.label === "function"
+                          ? entry.label()
+                          : entry.label;
+
+                  return (
+                      <Menu.Item
+                          key={key}
+                          onClick={() => openComponent(key)}
+                      >
+                        {label}
+                      </Menu.Item>
+                  );
+                })}
               </Menu.Dropdown>
             </Menu>
           </Group>
@@ -214,19 +222,21 @@ function Navbar({ addComponent }: NavbarProps) {
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item onClick={() => openComponent("ComponentProject")}>
-                  {TextStore.interface("Navbar_Tools_Project")}
-                </Menu.Item>
-                <Menu.Item onClick={() => openComponent("ComponentMessage")}>
-                  {TextStore.interface("Navbar_Tools_Messages")}
-                </Menu.Item>
-                <Divider />
-                <Menu.Item onClick={() => openComponent("ComponentInterfaceOptions")}>
-                  {TextStore.interface("Navbar_Tools_View_InterfaceSize")}
-                </Menu.Item>
-                <Menu.Item onClick={() => openComponent("ComponentPlotStyle")}>
-                  {TextStore.interface("Navbar_Tools_View_PlotStyle")}
-                </Menu.Item>
+                {toolDefs.map(({ key, entry }) => {
+                  const label =
+                      typeof entry.label === "function"
+                          ? entry.label()
+                          : entry.label;
+
+                  return (
+                      <Menu.Item
+                          key={key}
+                          onClick={() => openComponent(key)}
+                      >
+                        {label}
+                      </Menu.Item>
+                  );
+                })}
               </Menu.Dropdown>
             </Menu>
 
@@ -261,8 +271,21 @@ function Navbar({ addComponent }: NavbarProps) {
                 </Menu.Item>
                 <Menu.Item>{TextStore.interface("Navbar_Help_About")}</Menu.Item>
                 <Divider />
-                <Menu.Item onClick={() => openComponent("DemoPlots")}>Demo Plots (Plotly)</Menu.Item>
-                <Menu.Item onClick={() => openComponent("DemoPlotsRecharts")}>Demo Plots (Recharts)</Menu.Item>
+                {helpDefs.map(({ key, entry }) => {
+                  const label =
+                      typeof entry.label === "function"
+                          ? entry.label()
+                          : entry.label;
+
+                  return (
+                      <Menu.Item
+                          key={key}
+                          onClick={() => openComponent(key)}
+                      >
+                        {label}
+                      </Menu.Item>
+                  );
+                })}
               </Menu.Dropdown>
             </Menu>
           </Group>

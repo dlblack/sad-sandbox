@@ -40,9 +40,46 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
 .thin-navbar{max-height:calc(5vh * var(--ui-scale));padding:0!important;font-size:.875rem;z-index:2000}
 
 /* =========================================================
-   Dockable frame + zones
+   Zone Tabs
    ========================================================= */
+/* Base Mantine tab layout */
+.mantine-Tabs-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
 
+/* Label text inside the tab */
+.tab-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 22ch;
+}
+
+/* Active underline accent */
+.tab-active-accent {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: #3a82f7;
+}
+
+/* Category-tinted accents */
+.tab--editor .tab-active-accent {
+    background: #f7c23a;
+}
+
+.tab--plot .tab-active-accent {
+    background: #8bc34a;
+}
+
+.tab--panel .tab-active-accent {
+    background: #9c27b0;
+}
 
 /* =========================================================
    Center zone tabs
@@ -60,9 +97,8 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
 .wizard-grid .form-group.row>.col-auto{grid-column:1}
 .wizard-grid .form-group.row>.col{grid-column:2;min-width:0}
 .wizard-grid .col-form-label,.wizard-grid .wizard-label-fixed{white-space:nowrap}
-.wizard-grid .form-control,.wizard-grid .form-select,.wizard-grid textarea{width:100%}
+.wizard-grid textarea{width:100%}
 .wizard-footer{flex-shrink:0;width:100%;padding:10px 16px;border-top:1px solid #333;display:flex;justify-content:flex-end;align-items:center;background:inherit}
-.wizard-footer .btn.btn-compact{--btn-scale:var(--ui-scale,1);--btn-font:calc(1rem * var(--btn-scale));--btn-pad-y:calc(.25em * var(--btn-scale));--btn-pad-x:calc(.25em * var(--btn-scale));--btn-min-i:calc(7ch * var(--btn-scale));--btn-min-b:calc(2em * var(--btn-scale));font-size:var(--btn-font);line-height:1}
 
 /* =========================================================
    Manual Data Entry Editor
@@ -70,39 +106,13 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
 .manual-entry-content{flex:1 1 0;min-height:0;max-height:100%;max-width:100%;overflow-y:auto;display:flex;flex-direction:column;margin:0;padding:0;border:none}
 .manual-entry-content > legend + * {margin-top: var(--mantine-spacing-md);}
 .manual-entry-content > legend {display: block;}
-.manual-entry-table-panel{
-    width: 90%;
-    min-width: 0;
-    max-width: 100%;
-    margin-top: 1em;
-    padding-bottom: .5em;
-    box-sizing: border-box;
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: none;
-    overflow: auto;
-}
 
 .manual-entry-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
 .manual-entry-label{min-width:90px;font-size:.875rem;line-height:1.2;margin-bottom:0;text-align:left;white-space:nowrap}
 .manual-entry-field{flex:1 1 0;min-width:0}
-.manual-entry-field .form-control,.manual-entry-field .form-select,.manual-entry-field textarea{width:100%;box-sizing:border-box}
+.manual-entry-field textarea{width:100%;box-sizing:border-box}
 .manual-entry-table{width:300px;min-width:0;table-layout:fixed;font-size:.8em;background:#222;border-collapse:collapse;color:#eee}
-.manual-entry-th,.manual-entry-input{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.manual-entry-th{width:140px;padding:.2rem .3rem;text-align:center;font-weight:700;background:#111;color:#fff;font-size:1em}
-
-.manual-entry-th, .manual-entry-td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: center;
-    font-weight: 700;
-    background: #111;
-}
-
-.manual-entry-th {
-    width: 150px;
-}
+.manual-entry-input{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .manual-entry-table th,.manual-entry-table td{border:1px solid #444}
 .manual-entry-input.selected {
@@ -110,14 +120,6 @@ html,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;t
     border: 1px solid var(--mantine-color-blue-filled);
 }
 
-.manual-entry-cell {
-    padding: 0;
-    width: 130px;
-    cursor: pointer;
-}
-.manual-entry-cell.selected {
-    background-color: #444; /* Highlight selected cells with a different color */
-}
 .manual-entry-input[type=number]::-webkit-outer-spin-button,
 .manual-entry-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
@@ -146,20 +148,6 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     min-height: 0;
     overflow: auto;
     padding: var(--mantine-spacing-sm);
-}
-
-.wizardFooter {
-    position: sticky;
-    bottom: 0;
-    padding: var(--mantine-spacing-xs);
-    z-index: 1;
-}
-
-.editor-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
 }
 
 .editor-scroll {
