@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { TextStore } from "../utils/TextStore";
 import { useUISizing } from "../uiSizing";
 import {
@@ -14,6 +14,7 @@ import {
   useMantineColorScheme,
   useComputedColorScheme,
   MantineColorScheme,
+  TextInput,
 } from "@mantine/core";
 
 type DensityPreset = { label: string; value: number };
@@ -38,6 +39,24 @@ export default function ComponentInterfaceOptions(): JSX.Element {
 
   const { scale, density, setScalePercent, setDensity, reset } = useUISizing() as UISizing;
 
+  const [defaultProjectRoot, setDefaultProjectRoot] = useState("");
+  const [savingRoot, setSavingRoot] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/config")
+        .then((r) => r.json())
+        .then((cfg) => {
+          if (!cancelled && cfg && typeof cfg.projectsRoot === "string") {
+            setDefaultProjectRoot(cfg.projectsRoot);
+          }
+        })
+        .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const currentPercent = Math.round(scale * 100);
 
   const densityName =
@@ -51,6 +70,29 @@ export default function ComponentInterfaceOptions(): JSX.Element {
     setColorScheme(v as MantineColorScheme);
   };
 
+  const handleSaveRoot = () => {
+    const trimmed = defaultProjectRoot.trim();
+    if (!trimmed) {
+      return;
+    }
+    setSavingRoot(true);
+    fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectsRoot: trimmed }),
+    })
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((cfg) => {
+          if (cfg && typeof cfg.projectsRoot === "string") {
+            setDefaultProjectRoot(cfg.projectsRoot);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setSavingRoot(false);
+        });
+  };
+
   return (
     <Card
       withBorder
@@ -60,6 +102,9 @@ export default function ComponentInterfaceOptions(): JSX.Element {
       <Box p="sm">
         <Stack gap="md">
           <Box>
+            <Text fw={800} size="sm" mb={6}>
+              {TextStore.interface("ComponentInterfaceOptions_InterfaceOptions_Label")}
+            </Text>
             <Text fw={600} size="sm" mb={6}>
               {TextStore.interface("ComponentInterfaceOptions_ColorScheme")}
             </Text>
@@ -126,6 +171,29 @@ export default function ComponentInterfaceOptions(): JSX.Element {
               onChange={(v) => setDensity(Number(v))}
               data={DENSITY_PRESETS.map(({ label, value }) => ({ label, value: String(value) }))}
             />
+          </Box>
+
+          <Divider />
+
+          <Box>
+            <Text fw={800} size="sm" mb={6}>
+              {TextStore.interface("ComponentInterfaceOptions_DefaultProjectRoot_Label")}
+            </Text>
+            <TextInput
+                size="xs"
+                value={defaultProjectRoot}
+                onChange={(e) => setDefaultProjectRoot(e.currentTarget.value)}
+            />
+            <Group justify="flex-end" mt="xs">
+              <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={handleSaveRoot}
+                  loading={savingRoot}
+              >
+                {TextStore.interface("ComponentInterfaceOptions_DefaultProjectRoot_Save_Button")}
+              </Button>
+            </Group>
           </Box>
         </Stack>
       </Box>

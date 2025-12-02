@@ -18,7 +18,49 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // --- Project Directory Configuration ---
-const PROJECTS_ROOT = path.join(__dirname, "..", "public", "Projects");
+const configPath = path.join(__dirname, "neptuneConfig.json");
+
+function loadConfig() {
+    try {
+        if (!fs.existsSync(configPath)) {
+            const defaultCfg = { projectsRoot: path.join(__dirname, "..", "NeptuneProjects") };
+            fs.writeFileSync(configPath, JSON.stringify(defaultCfg, null, 2));
+            return defaultCfg;
+        }
+        return JSON.parse(fs.readFileSync(configPath, "utf8"));
+    } catch {
+        return { projectsRoot: path.join(__dirname, "..", "NeptuneProjects") };
+    }
+}
+
+let CONFIG = loadConfig();
+let PROJECTS_ROOT = CONFIG.projectsRoot;
+
+app.get("/api/config", (_req, res) => {
+    res.json({ projectsRoot: PROJECTS_ROOT });
+});
+
+app.post("/api/config", (req, res) => {
+    const { projectsRoot } = req.body || {};
+
+    if (!projectsRoot || typeof projectsRoot !== "string" || projectsRoot.trim() === "") {
+        return res.status(400).json({ error: "Invalid projectsRoot" });
+    }
+
+    // Normalize and resolve to an absolute path
+    const normalized = path.resolve(projectsRoot.trim());
+
+    // Update the in-memory config
+    CONFIG.projectsRoot = normalized;
+    PROJECTS_ROOT = normalized;
+
+    // Write to disk
+    fs.writeFileSync(configPath, JSON.stringify(CONFIG, null, 2));
+
+    console.log("Updated projectsRoot:", normalized);
+
+    return res.json({ projectsRoot: normalized });
+});
 
 function fixSlashes(p) {
     return p ? p.replace(/\\/g, "/") : p;
