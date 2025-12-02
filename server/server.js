@@ -20,9 +20,16 @@ app.use(bodyParser.json());
 // --- Project Directory Configuration ---
 const PROJECTS_ROOT = path.join(__dirname, "..", "public", "Projects");
 
-// Resolve per-project files; if absDir is provided, use it as an absolute folder
+function fixSlashes(p) {
+    return p ? p.replace(/\\/g, "/") : p;
+}
+
 function getProjectPathsArgAware(projectName, absDir) {
-    const projectDir = absDir ? path.resolve(absDir) : path.join(PROJECTS_ROOT, projectName);
+    if (absDir) absDir = fixSlashes(absDir);
+    const projectDir = absDir
+      ? path.resolve(absDir)
+      : path.join(PROJECTS_ROOT, projectName);
+
     return {
         projectDir,
         analysesFile: path.join(projectDir, "analysis.json"),
@@ -51,10 +58,34 @@ function writeJson(filePath, data) {
 // Classpath helper for DSS Java reader/writer jars
 function getClassPath() {
     const jarsDir = path.join(__dirname, "jar");
+    const delimiter = path.delimiter;
+
     const jars = fs.existsSync(jarsDir)
-      ? fs.readdirSync(jarsDir).filter(f => f.endsWith(".jar")).map(f => path.join("jar", f))
+      ? fs
+        .readdirSync(jarsDir)
+        .filter(f => f.endsWith(".jar"))
+        .map(f => path.join("jar", f))
       : [];
-    return ["." , ...jars].join(";");
+
+    return ["."].concat(jars).join(delimiter);
+}
+
+// Java constants
+const JAVA_BIN = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
+const CLASS_PATH = getClassPath();
+
+// Small helpers to DRY DSS metadata and temp JSON handling
+function appendMetaAndSave(store, type, metaForJson, dataFile) {
+    if (!store[type]) store[type] = [];
+    store[type].push(metaForJson);
+    writeJson(dataFile, store);
+    return store;
+}
+
+function writeTmpJson(fileName, payload) {
+    const tmpPath = path.join(__dirname, fileName);
+    fs.writeFileSync(tmpPath, JSON.stringify(payload, null, 2), "utf8");
+    return tmpPath;
 }
 
 // --- API Routes ---
@@ -125,7 +156,7 @@ app.post("/api/open-project", (req, res) => {
 // Fetch project metadata
 app.get("/api/:project/metadata", (req, res) => {
     const { project } = req.params;
-    const absDir = req.query.dir;
+    const absDir = fixSlashes(req.query.dir);
     const { projectDir } = getProjectPathsArgAware(project, absDir);
     const projectJsonFile = path.format({ dir: projectDir, base: `${project}.neptune` });
     if (!fs.existsSync(projectJsonFile)) {
@@ -174,7 +205,7 @@ app.post("/api/projects", (req, res) => {
 // Fetch analyses for a specific project
 app.get("/api/:project/analyses", (req, res) => {
     const { project } = req.params;
-    const absDir = req.query.dir;
+    const absDir = fixSlashes(req.query.dir);
     if (!absDir) {
         log("GET analyses missing dir", { project });
         return res.status(400).json({ error: "Missing dir query param" });
@@ -186,7 +217,7 @@ app.get("/api/:project/analyses", (req, res) => {
 // Fetch data for a specific project
 app.get("/api/:project/data", (req, res) => {
     const { project } = req.params;
-    const absDir = req.query.dir;
+    const absDir = fixSlashes(req.query.dir);
     if (!absDir) {
         log("GET data missing dir", { project });
         return res.status(400).json({ error: "Missing dir query param" });
@@ -203,7 +234,7 @@ app.post("/api/:project/:bucket", (req, res) => {
     const params = req.params;
     const project = params.project;
     const bucket = params.bucket;
-    const absDir = req.query.dir;
+    const absDir = fixSlashes(req.query.dir);
 
     if (!absDir) {
         return res.status(400).json({ error: "Missing dir query param" });
@@ -251,12 +282,11 @@ app.post("/api/:project/:bucket", (req, res) => {
         const pathname = metaForJson.pathname;
 
         if (!filepath || !pathname || !startDateTime || !interval || !values || !times) {
-            return res.status(400).json({ error: "Missing DSS fields" });
+            appendMetaAndSave(store, type, metaForJson, dataFile);
+            return res.json({ success: true, metaOnly: true });
         }
 
-        if (!store[type]) store[type] = [];
-        store[type].push(metaForJson);
-        writeJson(dataFile, store);
+        appendMetaAndSave(store, type, metaForJson, dataFile);
 
         const dssInput = {
             pathname: pathname,
@@ -266,8 +296,7 @@ app.post("/api/:project/:bucket", (req, res) => {
             times: times
         };
 
-        const tmpInputPath = path.join(__dirname, "tmp_dss_input.json");
-        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput, null, 2), "utf-8");
+        const tmpInputPath = writeTmpJson("tmp_dss_input.json", dssInput);
 
         const baseDir = path.resolve(String(absDir));
         const dssFilePath = path.isAbsolute(filepath)
@@ -282,12 +311,9 @@ app.post("/api/:project/:bucket", (req, res) => {
         console.log("DSS debug output dssFilePath", dssFilePath);
         console.log("DSS debug payload", JSON.stringify(dssInput));
 
-        const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
-        const classPath = getClassPath();
-
         const child = spawn(
-          javaBin,
-          ["-cp", classPath, "DssWriter", tmpInputPath, dssFilePath],
+          JAVA_BIN,
+          ["-cp", CLASS_PATH, "DssWriter", tmpInputPath, dssFilePath],
           { cwd: __dirname }
         );
 
@@ -332,12 +358,11 @@ app.post("/api/:project/:bucket", (req, res) => {
           yValues.length === 0 ||
           xValues.length !== yValues.length
         ) {
-            return res.status(400).json({ error: "Missing or invalid DSS paired fields" });
+            appendMetaAndSave(store, type, metaForJson, dataFile);
+            return res.json({ success: true, metaOnly: true });
         }
 
-        if (!store[type]) store[type] = [];
-        store[type].push(metaForJson);
-        writeJson(dataFile, store);
+        appendMetaAndSave(store, type, metaForJson, dataFile);
 
         const dssInput = {
             pathname,
@@ -349,8 +374,7 @@ app.post("/api/:project/:bucket", (req, res) => {
             yUnits
         };
 
-        const tmpInputPath = path.join(__dirname, "tmp_dss_paired_input.json");
-        fs.writeFileSync(tmpInputPath, JSON.stringify(dssInput, null, 2), "utf-8");
+        const tmpInputPath = writeTmpJson("tmp_dss_paired_input.json", dssInput);
 
         const baseDir = path.resolve(String(absDir));
         const dssFilePath = path.isAbsolute(filepath)
@@ -365,12 +389,9 @@ app.post("/api/:project/:bucket", (req, res) => {
         console.log("DSS paired debug output dssFilePath", dssFilePath);
         console.log("DSS paired debug payload", JSON.stringify(dssInput));
 
-        const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
-        const classPath = getClassPath();
-
         const child = spawn(
-          javaBin,
-          ["-cp", classPath, "DssPairedWriter", tmpInputPath, dssFilePath],
+          JAVA_BIN,
+          ["-cp", CLASS_PATH, "DssPairedWriter", tmpInputPath, dssFilePath],
           { cwd: __dirname }
         );
 
@@ -399,7 +420,7 @@ app.post("/api/:project/:bucket", (req, res) => {
 // DELETE /api/:project/:bucket/:type/:index
 app.delete("/api/:project/:bucket/:type/:index", (req, res) => {
     const { project, bucket, type, index } = req.params;
-    const absDir = req.query.dir;
+    const absDir = fixSlashes(req.query.dir);
     const { analysesFile, dataFile } = getProjectPathsArgAware(project, absDir || "");
 
     if (!absDir) {
@@ -450,27 +471,42 @@ app.delete("/api/:project/:bucket/:type/:index", (req, res) => {
 // GET /api/:project/read-dss?file=<path>&path=<pathname>&dir=<absProjectDir>
 app.get("/api/:project/read-dss", (req, res) => {
     const { file, path: pathname, dir } = req.query;
-
     if (!file || !pathname) {
         return res.status(400).json({ error: "Missing DSS file or pathname" });
     }
 
-    const fileStr = String(file);
-    const dssFile = path.isAbsolute(fileStr)
-      ? fileStr
-      : dir
-        ? path.resolve(String(dir), fileStr)
-        : path.resolve(__dirname, "..", fileStr);
+    const rawFile = String(file);
+    const normFile = fixSlashes(rawFile);
+    const normDir = dir ? fixSlashes(String(dir)) : null;
 
-    const javaBin = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
-    const classPath = getClassPath();
+    let dssFile;
+
+    if (path.isAbsolute(normFile)) {
+        // Already absolute
+        dssFile = normFile;
+    } else if (normFile.startsWith("public/")) {
+        // Already rooted at app public folder
+        dssFile = path.resolve(__dirname, "..", normFile);
+    } else if (normDir) {
+        // Relative to the project directory
+        dssFile = path.resolve(normDir, normFile);
+    } else {
+        // Fallback: relative to repo root
+        dssFile = path.resolve(__dirname, "..", normFile);
+    }
+
     const readerClass = "DssReader";
 
     const child = spawn(
-      javaBin,
-      ["-cp", classPath, readerClass, dssFile, String(pathname)],
+      JAVA_BIN,
+      ["-cp", CLASS_PATH, readerClass, dssFile, String(pathname)],
       { cwd: __dirname }
     );
+
+    child.on("error", (err) => {
+        console.error("DssReader spawn error", err);
+        return res.status(500).json({ error: "Failed to read DSS (spawn)" });
+    });
 
     let output = "";
     child.stdout.on("data", (data) => { output += data.toString(); });
