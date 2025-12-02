@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, {useEffect, useRef} from "react";
 import { Button, TextInput, Card, Group, Title, Tabs, Divider, Anchor, Stack, Text, Select } from "@mantine/core";
 import useHomePage from "../hooks/useHomePage";
 import TextStore from "../utils/TextStore";
@@ -22,6 +22,17 @@ function HomePage() {
     } = useHomePage();
 
     const projectFileInputRef = useRef<HTMLInputElement | null>(null);
+
+    useEffect(() => {
+        fetch("/api/config")
+            .then(r => r.json())
+            .then(c => {
+                if (c && typeof c.projectsRoot === "string" && c.projectsRoot.length > 0) {
+                    setDirectory(c.projectsRoot);
+                }
+            })
+            .catch(() => {});
+    }, [setDirectory]);
 
     return (
         <div className="home-page-container">
@@ -109,7 +120,7 @@ function HomePage() {
                         <input
                             ref={projectFileInputRef}
                             type="file"
-                            accept=".neptune,application/x-neptune"
+                            accept=".neptune"
                             onChange={onProjectFilePicked}
                             style={{ display: "none" }}
                             id="projectFileInput"

@@ -64,7 +64,7 @@ export const INTERFACE_TEXT = {
   Navbar_Tools_Project: "Project",
   Navbar_Tools_Messages: "Messages",
   Navbar_Tools_View: "View",
-  Navbar_Tools_View_InterfaceSize: "Interface Options",
+  Navbar_Tools_View_InterfaceSize: "Options",
   Navbar_Tools_View_PlotStyle: "Plot Styles",
   Navbar_Tools_ToggleDevTools: "Toggle DevTools",
   Navbar_Help: "Help",
@@ -80,6 +80,7 @@ export const INTERFACE_TEXT = {
   // --------------------------------------
   // ComponentInterfaceOptions
   // --------------------------------------
+  ComponentInterfaceOptions_InterfaceOptions_Label: "Interface Options",
   ComponentInterfaceOptions_ColorScheme: "Color scheme",
   ComponentInterfaceOptions_StyleOption_Auto: "System",
   ComponentInterfaceOptions_StyleOption_Light: "Light",
@@ -93,6 +94,8 @@ export const INTERFACE_TEXT = {
   ComponentInterfaceOptions_Density_Compact: "Compact",
   ComponentInterfaceOptions_Density_Standard: "Standard",
   ComponentInterfaceOptions_Density_Comfy: "Comfy",
+  ComponentInterfaceOptions_DefaultProjectRoot_Label: "Default Project Location",
+  ComponentInterfaceOptions_DefaultProjectRoot_Save_Button: "Save",
 
   // --------------------------------------
   // ComponentPlotStyle
@@ -132,7 +135,7 @@ export const INTERFACE_TEXT = {
   // componentRegistry
   // --------------------------------------
   ComponentRegistry_ComponentProject: "Project",
-  ComponentRegistry_ComponentInterfaceOptions: "Interface Options",
+  ComponentRegistry_ComponentInterfaceOptions: "Options",
   ComponentRegistry_ComponentPlotStyle: "Plot Styles",
   ComponentRegistry_ManualDataEntryEditor: "Manual Data Entry",
   ComponentRegistry_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
