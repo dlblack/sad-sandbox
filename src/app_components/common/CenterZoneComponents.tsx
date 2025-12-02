@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 import { COMPONENT_REGISTRY } from "../../registry/componentRegistry";
+import type { DataRecord, AnalysesRecord, DataSaveHandler,} from "../../types/appData";
+
 import ZoneTabs from "./ZoneTabs";
 import { CenterTab } from "../../types/app";
 
@@ -8,9 +10,9 @@ interface CenterZoneProps {
     activeId: string | null;
     setActiveId: React.Dispatch<React.SetStateAction<string | null>>;
     closeTab: (id: string) => void;
-    data: unknown;
-    analyses: unknown;
-    onDataSave: (category: string, valuesObj: unknown) => Promise<void>;
+    data: DataRecord;
+    analyses: AnalysesRecord;
+    onDataSave: DataSaveHandler;
     onFinish: (type: string, valuesObj: unknown, id?: string) => Promise<void>;
 }
 
@@ -64,9 +66,9 @@ function ActivePane({
                     }: {
     tab: CenterTab;
     closeTab: (id: string) => void;
-    data: unknown;
-    analyses: unknown;
-    onDataSave: (category: string, valuesObj: unknown) => Promise<void>;
+    data: DataRecord;
+    analyses: AnalysesRecord;
+    onDataSave: DataSaveHandler;
     onFinish: (type: string, valuesObj: unknown, id?: string) => Promise<void>;
 }) {
     const reg = COMPONENT_REGISTRY[tab.kind];

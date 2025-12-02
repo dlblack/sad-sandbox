@@ -1,105 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useProject } from "../context/ProjectContext";
 import { getComponentLabel, getComponentRegistryEntry } from "../registry/componentRegistry";
+import type {
+  MapItem,
+  DataRecord,
+  AnalysesRecord,
+  DeleteArgs,
+  SaveAsArgs,
+  RenameArgs, DataItem,
+} from "../types/appData";
+import {
+  fetchAnalyses,
+  fetchData,
+  createAnalysis,
+  saveDataEntry,
+  saveDuplicateEntry,
+  deleteDataItem,
+  deleteAnalysisItem,
+  renameAnalysisOnServer,
+  renameDataOnServer,
+} from "../api/appDataApi";
 import { logSilentError } from "../utils/logSilentError";
 
-/** ----------------------- Types ----------------------- */
-type MapsSection = "maps";
-type DataSection = "data";
-type AnalysesSection = "analyses";
-type DataRecord = Record<string, any[]>;
-type AnalysesRecord = Record<string, any[]>;
-
-type DeleteArgs =
-    | { section: MapsSection; pathArr: [number] }
-    | { section: DataSection; pathArr: [string, number] }
-    | { section: AnalysesSection; pathArr: [string, number] };
-
-type SaveAsArgs =
-    | {
-  section: MapsSection;
-  pathArr: [number];
-  newName: string;
-  newDesc?: string;
-  item?: any;
-}
-    | {
-  section: DataSection;
-  pathArr: [string, number];
-  newName: string;
-  newDesc?: string;
-  item?: any;
-}
-    | {
-  section: AnalysesSection;
-  pathArr: [string, number];
-  newName: string;
-  newDesc?: string;
-  item?: any;
-};
-
-type RenameArgs =
-    | { section: MapsSection; pathArr: [number]; newName: string }
-    | { section: DataSection; pathArr: [string, number]; newName: string }
-    | { section: AnalysesSection; pathArr: [string, number]; newName: string };
-
-/** ----------------------- Helpers ----------------------- */
+/** Helpers */
 function groupAnalysesByType(payload: any = {}): AnalysesRecord {
   return payload;
 }
 
-async function safeJson<T>(res: Response): Promise<T> {
-  const raw = await res.text().catch(() => "");
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText} ${raw ? raw : ""}`.trim());
-  }
-  const parsed = raw ? JSON.parse(raw) : {};
-  return parsed as T;
-}
-
-async function getJSON<T>(url: string): Promise<T> {
-  return safeJson<T>(await fetch(url));
-}
-
-async function postJSON<T>(url: string, body: any): Promise<T> {
-  return safeJson<T>(
-      await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-  );
-}
-
-async function delJSON<T = any>(url: string, body?: any): Promise<T> {
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const raw = await res.text().catch(() => "");
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText} ${raw ? raw : ""}`.trim());
-  }
-  try {
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed as T;
-  } catch {
-    return {} as T;
-  }
-}
-
-// Always append ?dir=<absolute path> to API URLs
-function withDir(url: string): string {
-  const dir = localStorage.getItem("lastProjectDir") || "";
-  return dir
-      ? `${url}${url.includes("?") ? "&" : "?"}dir=${encodeURIComponent(dir)}`
-      : url;
-}
-
 export function useAppData() {
   const { apiPrefix } = useProject() as any;
-  const [maps, setMaps] = useState<any[]>([]);
+  const [maps, setMaps] = useState<MapItem[]>([]);
   const [data, setData] = useState<DataRecord>({});
   const [analyses, setAnalyses] = useState<AnalysesRecord>({});
   const pollRef = useRef<number | null>(null);
@@ -136,14 +66,12 @@ export function useAppData() {
     }
 
     try {
-      const aUrl = withDir(`${apiPrefix}/analyses`);
-      const dUrl = withDir(`${apiPrefix}/data`);
-      const [a, d] = await Promise.all([
-        getJSON<AnalysesRecord>(aUrl).catch(() => ({} as AnalysesRecord)),
-        getJSON<DataRecord>(dUrl).catch(() => ({} as DataRecord)),
+      const [analysesResult, dataResult] = await Promise.all([
+        fetchAnalyses(apiPrefix).catch(() => ({} as AnalysesRecord)),
+        fetchData(apiPrefix).catch(() => ({} as DataRecord)),
       ]);
-      setAnalyses(groupAnalysesByType(a));
-      setData(d);
+      setAnalyses(groupAnalysesByType(analysesResult));
+      setData(dataResult);
     } catch (err) {
       logSilentError(err);
     }
@@ -176,7 +104,7 @@ export function useAppData() {
     };
   }, [apiPrefix, refreshAll]);
 
-  /** ----------------------- Delete ----------------------- */
+  /** Delete */
   async function handleDeleteNode(args: DeleteArgs): Promise<string | null> {
     if (typeof args !== "object" || args === null) return null;
     const localName = getLocalName(args);
@@ -184,7 +112,7 @@ export function useAppData() {
     if (args.section === "maps") {
       const [idx] = args.pathArr;
       setMaps((prev) =>
-          Array.isArray(prev) ? prev.filter((_, i) => i !== idx) : prev
+          Array.isArray(prev) ? prev.filter((_item, index) => index !== idx) : prev
       );
       return localName ?? null;
     }
@@ -196,13 +124,8 @@ export function useAppData() {
         const [type, idx] = args.pathArr;
         const list = Array.isArray(data[type]) ? data[type] : [];
         const src = list[idx];
-        const url = withDir(
-            `${apiPrefix}/data/${encodeURIComponent(type)}/${idx}`
-        );
-        const resp = await delJSON<{ success: boolean; deletedName?: string }>(
-            url,
-            {name: src?.name || localName || null}
-        );
+        const name = src?.name || localName || null;
+        const resp = await deleteDataItem(apiPrefix, type, idx, name);
         await refreshAll();
         return resp?.deletedName || localName || null;
       }
@@ -211,24 +134,20 @@ export function useAppData() {
         const [type, idx] = args.pathArr;
         const list = Array.isArray(analyses[type]) ? analyses[type] : [];
         const src = list[idx];
-        const url = withDir(
-            `${apiPrefix}/analyses/${encodeURIComponent(type)}/${idx}`
-        );
-        const resp = await delJSON<{ success: boolean; deletedName?: string }>(
-            url,
-            {name: src?.name || localName || null}
-        );
+        const name = src?.name || localName || null;
+        const resp = await deleteAnalysisItem(apiPrefix, type, idx, name);
         await refreshAll();
         return resp?.deletedName || localName || null;
       }
-    } catch {
+    } catch (err) {
+      console.error("Delete failed:", err);
       await refreshAll();
       return localName ?? null;
     }
     return localName ?? null;
   }
 
-  /** ----------------------- Save As (duplicate) ----------------------- */
+  /** Save As (duplicate) */
   async function handleSaveAsNode(args: SaveAsArgs) {
     if (typeof args !== "object" || args === null) return;
     const { section, pathArr, newName, newDesc, item } = args;
@@ -238,12 +157,8 @@ export function useAppData() {
       const [type, idx] = pathArr;
 
       const setFn = section === "data" ? setData : setAnalyses;
-      const endpoint =
-          section === "data"
-              ? `${apiPrefix}/data`
-              : `${apiPrefix}/analyses`;
 
-      setFn(prev => {
+      setFn((prev: any) => {
         const next = { ...prev };
         const list = Array.isArray(next[type]) ? next[type] : [];
         const src = list[idx];
@@ -263,7 +178,7 @@ export function useAppData() {
           name: newName,
           description: newDesc ?? item?.description,
         };
-        await postJSON(withDir(endpoint), { type, data: payload });
+        await saveDuplicateEntry(apiPrefix, section, type, payload);
         await refreshAll();
       } catch (err) {
         logSilentError(err, "handleSaveAsNode");
@@ -287,11 +202,11 @@ export function useAppData() {
     }
   }
 
-  /** ----------------------- Rename ----------------------- */
+  /** Rename */
   async function handleRenameNode(args: RenameArgs) {
     if (typeof args !== "object" || args === null) return;
 
-    const {section, pathArr, newName} = args;
+    const { section, pathArr, newName } = args;
     if (!newName || !apiPrefix) return;
 
     if (section === "analyses") {
@@ -300,37 +215,8 @@ export function useAppData() {
       const src = list[idx];
       if (!src || src.name === newName) return;
 
-      const signature = JSON.stringify(src);
-
       try {
-        const copy = { ...src, name: newName };
-        await postJSON(withDir(`${apiPrefix}/analyses`), {
-          type: folder,
-          data: copy,
-        });
-        const refreshed = await getJSON<AnalysesRecord>(
-            withDir(`${apiPrefix}/analyses`)
-        );
-        const refreshedList = Array.isArray(refreshed[folder])
-            ? refreshed[folder]
-            : [];
-        let deleteIndex = refreshedList.findIndex(
-            (it) => JSON.stringify(it) === signature
-        );
-        if (deleteIndex === -1) {
-          deleteIndex = refreshedList.findIndex(
-              (it) => it.name === src.name
-          );
-        }
-
-        if (deleteIndex !== -1) {
-          await delJSON(
-              withDir(
-                  `${apiPrefix}/analyses/${encodeURIComponent(folder)}/${deleteIndex}`
-              )
-          );
-        }
-
+        await renameAnalysisOnServer(apiPrefix, folder, src, newName);
         await refreshAll();
       } catch (e) {
         console.error("Rename analyses failed:", e);
@@ -344,39 +230,8 @@ export function useAppData() {
       const src = list[idx];
       if (!src || src.name === newName) return;
 
-      const signature = JSON.stringify(src);
-
       try {
-        const copy = {...src, name: newName};
-
-        await postJSON(withDir(`${apiPrefix}/data`), {
-          type: param,
-          data: copy,
-        });
-
-        const refreshed = await getJSON<DataRecord>(
-            withDir(`${apiPrefix}/data`)
-        );
-        const refreshedList = Array.isArray(refreshed[param])
-            ? refreshed[param]
-            : [];
-        let deleteIndex = refreshedList.findIndex(
-            (it) => JSON.stringify(it) === signature
-        );
-        if (deleteIndex === -1) {
-          deleteIndex = refreshedList.findIndex(
-              (it) => it.name === src.name
-          );
-        }
-
-        if (deleteIndex !== -1) {
-          await delJSON(
-              withDir(
-                  `${apiPrefix}/data/${encodeURIComponent(param)}/${deleteIndex}`
-              )
-          );
-        }
-
+        await renameDataOnServer(apiPrefix, param, src, newName);
         await refreshAll();
       } catch (e) {
         console.error("Rename data failed:", e);
@@ -386,17 +241,17 @@ export function useAppData() {
 
     if (section === "maps") {
       const [idx] = pathArr;
-      setMaps((prev) => {
+      setMaps(prev => {
         const list = Array.isArray(prev) ? prev : [];
         if (!list[idx]) return prev;
         const next = [...list];
-        next[idx] = {...next[idx], name: newName};
+        next[idx] = { ...next[idx], name: newName };
         return next;
       });
     }
   }
 
-  /** ----------------------- Wizards and Data Save ----------------------- */
+  /** Wizards and Data Save */
   const handleWizardFinish = async (type: string, valuesObj: any) => {
     if (!apiPrefix) {
       return;
@@ -406,17 +261,14 @@ export function useAppData() {
     const friendlyType = getComponentLabel(type);
 
     try {
-      await postJSON(withDir(`${apiPrefix}/analyses`), {
-        type: friendlyType,
-        data: valuesObj,
-      });
+      await createAnalysis(apiPrefix, friendlyType, valuesObj);
       await refreshAll();
     } catch (err) {
       logSilentError(err);
     }
   };
 
-  const handleDataSave = async (category: string, valuesObj: any) => {
+  const handleDataSave = async (category: string, valuesObj: DataItem) => {
     if (!apiPrefix) {
       return;
     }
@@ -445,17 +297,14 @@ export function useAppData() {
               it.filepath.length > 0
       );
 
-      // Always inherit the existing DSS filepath if one exists for this category
+      // Always reuse the existing DSS filepath if one exists for this category
       if (existing) {
         payload.filepath = existing.filepath;
       }
     }
 
     try {
-      await postJSON(withDir(`${apiPrefix}/data`), {
-        type: category,
-        data: payload,
-      });
+      await saveDataEntry(apiPrefix, category, payload);
       await refreshAll();
     } catch (error) {
       console.error("Error saving data:", error);
@@ -472,7 +321,7 @@ export function useAppData() {
     setAnalyses({});
   }
 
-  /** ----------------------- Return ----------------------- */
+  /** Return */
   return {
     maps,
     setMaps,

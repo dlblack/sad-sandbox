@@ -1,6 +1,13 @@
 import React from "react";
-
-export type DockZone = "W" | "CENTER" | "E" | "S";
+import {
+    AnalysesRecord,
+    DataRecord,
+    DataSaveHandler,
+    MapItem,
+    RenameHandler,
+    SaveAsHandler,
+    DeleteHandler
+} from "../../types/appData";
 
 export interface ZoneSize {
     W: number; // px
@@ -8,22 +15,22 @@ export interface ZoneSize {
 }
 
 export interface DockableFrameProps {
-    containers?: any[];
-    setContainers?: (next: any[]) => void;
-    removeComponent?: (id: string, reason?: any) => void;
-    onDragStart?: (id: string, event: MouseEvent) => void;
-    messages?: any[];
-    messageType?: string;
-    setMessageType?: (t: string) => void;
-    onSaveAsNode?: any;
-    onRenameNode?: any;
-    onDeleteNode?: any;
-    maps?: any;
-    data?: any;
-    analyses?: any;
-    handleOpenComponent?: (type: string, props?: any) => void;
-    onWizardFinish?: (type: string, valuesObj: any, id?: string) => Promise<void>;
-    onDataSave?: (category: string, valuesObj: any) => Promise<void>;
+    containers: any[];
+    setContainers: (next: any[]) => void;
+    removeComponent: (id: string, reason?: any) => void;
+    onDragStart: (id: string, event: MouseEvent) => void;
+    messages: string[];
+    messageType: string | null;
+    setMessageType: React.Dispatch<React.SetStateAction<string>>;
+    onSaveAsNode: SaveAsHandler;
+    onRenameNode: RenameHandler;
+    onDeleteNode: DeleteHandler;
+    maps: MapItem[];
+    data: DataRecord;
+    analyses: AnalysesRecord;
+    handleOpenComponent: (type: string, props?: Record<string, unknown>) => void;
+    onWizardFinish: (type: string, valuesObj: any, id?: string) => Promise<void>;
+    onDataSave: DataSaveHandler;
 
     // --- zone content: render-ready React nodes (required) ---
     centerContent: React.ReactNode;

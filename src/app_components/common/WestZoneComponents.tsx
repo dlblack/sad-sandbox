@@ -3,10 +3,13 @@ import ZoneTabs from "./ZoneTabs";
 import { Registry } from "../../types/app";
 import { COMPONENT_REGISTRY } from "../../registry/componentRegistry";
 import {
+    MapItem,
+    DataRecord,
+    AnalysesRecord,
     SaveAsHandler,
     RenameHandler,
     DeleteHandler,
-} from "../../types/treeActions";
+} from "../../types/appData";
 
 export interface WestTab {
     id: string;
@@ -20,9 +23,9 @@ interface WestZoneProps {
     activeId: string | null;
     setActiveId: React.Dispatch<React.SetStateAction<string | null>>;
     closeTab: (id: string) => void;
-    maps: any;
-    data: any;
-    analyses: any;
+    maps: MapItem[];
+    data: DataRecord;
+    analyses: AnalysesRecord;
     handleOpenComponent: (type: string, props?: any) => void;
 
     onSaveAsNode: SaveAsHandler;

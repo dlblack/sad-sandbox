@@ -5,6 +5,7 @@ import {
   DEFAULT_COMPONENT_SIZE,
 } from "../registry/componentRegistry";
 import { makeMessage } from "../utils/messageUtils";
+import {DeleteHandler, SectionKey} from "../types/appData";
 
 type DockZone = "W" | "E" | "S" | "CENTER" | string;
 
@@ -29,8 +30,8 @@ export type WizardFinishFn = (
 ) => Promise<void>;
 
 export type DeleteNodeFn = (
-    section: any,
-    pathArr: any[],
+    section: SectionKey,
+    pathArr: [number] | [string, number],
     name?: string
 ) => Promise<string | null>;
 
@@ -152,27 +153,34 @@ export default function useDockableContainers({
     }
   };
 
-  const deleteNodeWithMessages = useCallback(
-      async (arg1: any, arg2?: any[], arg3?: string) => {
-        const { section, pathArr, name } =
-            arg1 && typeof arg1 === "object" && "section" in arg1 && "pathArr" in arg1
-                ? {
-                  section: arg1.section,
-                  pathArr: arg1.pathArr as any[],
-                  name: (arg1 as any).name as string | undefined,
-                }
-                : {
-                  section: arg1,
-                  pathArr: arg2 as any[],
-                  name: arg3 as string | undefined,
-                };
+  const deleteNodeWithMessages: DeleteHandler = useCallback(
+      async (arg1: any, arg2?: any, arg3?: any) => {
+        let section: SectionKey;
+        let pathArr: [number] | [string, number];
+        let name: string | undefined;
 
-        let finalName = name || null;
+        if (
+            arg1 &&
+            typeof arg1 === "object" &&
+            "section" in arg1 &&
+            "pathArr" in arg1
+        ) {
+          const obj = arg1 as { section: SectionKey; pathArr: [number] | [string, number]; name?: string };
+          section = obj.section;
+          pathArr = obj.pathArr;
+          name = obj.name;
+        } else {
+          section = arg1 as SectionKey;
+          pathArr = arg2 as [number] | [string, number];
+          name = arg3 as string | undefined;
+        }
+
+        let finalName = name ?? null;
 
         if (handleDeleteNode) {
           try {
             const resolved = await handleDeleteNode(section, pathArr, name);
-            if (typeof resolved === "string" && resolved.length) {
+            if (typeof resolved === "string" && resolved.length > 0) {
               finalName = resolved;
             }
           } catch {
@@ -180,7 +188,7 @@ export default function useDockableContainers({
           }
         }
 
-        setMessages((prev) => [
+        setMessages(prev => [
           ...prev,
           makeMessage(10020, [finalName || "Unknown"], "danger"),
         ]);

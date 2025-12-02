@@ -13,6 +13,7 @@ import WestZoneComponents from "./app_components/common/WestZoneComponents";
 import { COMPONENT_REGISTRY, getComponentRegistryEntry ,getComponentLabel } from "./registry/componentRegistry";
 import { CenterTab } from "./types/app";
 import GlobalFileModals from "./app_components/GlobalFileModals";
+import {DeleteArgs, SectionKey} from "./types/appData";
 
 function App() {
   const {
@@ -42,8 +43,12 @@ function App() {
     logCenterAlreadyOpen,
   } = useDockableContainers({
     handleWizardFinish,
-    handleDeleteNode: async (section, pathArr, name) => {
-      const resolved = await handleDeleteNode({ section, pathArr } as any);
+    handleDeleteNode: async (
+        section: SectionKey,
+        pathArr: [number] | [string, number],
+        name?: string
+    ) => {
+      const resolved = await handleDeleteNode({ section, pathArr } as DeleteArgs);
       return resolved ?? name ?? null;
     },
   });
@@ -253,8 +258,8 @@ function App() {
               messages={messages}
               messageType={messageType}
               setMessageType={setMessageType}
-              onSaveAsNode={handleSaveAsNode as any}
-              onRenameNode={handleRenameNode as any}
+              onSaveAsNode={handleSaveAsNode}
+              onRenameNode={handleRenameNode}
               onDeleteNode={deleteNodeWithMessages}
               maps={maps}
               data={data}
