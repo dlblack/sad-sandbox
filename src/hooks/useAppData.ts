@@ -36,28 +36,28 @@ export function useAppData() {
   const mountedRef = useRef(false);
 
   const getLocalName = useCallback(
-      (args: DeleteArgs): string | null => {
-        if (args.section === "maps") {
-          const [idx] = args.pathArr;
-          const list = Array.isArray(maps) ? maps : [];
-          const item = list[idx];
-          return item?.name ?? null;
-        }
-        if (args.section === "data") {
-          const [type, idx] = args.pathArr;
-          const list = Array.isArray(data[type]) ? data[type] : [];
-          const item = list[idx];
-          return item?.name ?? null;
-        }
-        if (args.section === "analyses") {
-          const [type, idx] = args.pathArr;
-          const list = Array.isArray(analyses[type]) ? analyses[type] : [];
-          const item = list[idx];
-          return item?.name ?? null;
-        }
-        return null;
-      },
-      [maps, data, analyses]
+    (args: DeleteArgs): string | null => {
+      if (args.section === "maps") {
+        const [idx] = args.pathArr;
+        const list = Array.isArray(maps) ? maps : [];
+        const item = list[idx];
+        return item?.name ?? null;
+      }
+      if (args.section === "data") {
+        const [type, idx] = args.pathArr;
+        const list = Array.isArray(data[type]) ? data[type] : [];
+        const item = list[idx];
+        return item?.name ?? null;
+      }
+      if (args.section === "analyses") {
+        const [type, idx] = args.pathArr;
+        const list = Array.isArray(analyses[type]) ? analyses[type] : [];
+        const item = list[idx];
+        return item?.name ?? null;
+      }
+      return null;
+    },
+    [maps, data, analyses]
   );
 
   const refreshAll = useCallback(async () => {
@@ -86,21 +86,6 @@ export function useAppData() {
     void refreshAll();
     return () => {
       mountedRef.current = false;
-    };
-  }, [apiPrefix, refreshAll]);
-
-  // light polling so external edits are reflected
-  useEffect(() => {
-    if (!apiPrefix) return;
-    if (pollRef.current) window.clearInterval(pollRef.current);
-    pollRef.current = window.setInterval(() => {
-      if (mountedRef.current) {
-        void refreshAll();
-      }
-    }, 1500) as unknown as number;
-    return () => {
-      if (pollRef.current) window.clearInterval(pollRef.current);
-      pollRef.current = null;
     };
   }, [apiPrefix, refreshAll]);
 
@@ -289,12 +274,12 @@ export function useAppData() {
           : [];
 
       const existing = existingList.find(
-          (it: any) =>
-              it &&
-              it.dataFormat === "DSS" &&
-              it.structureType === "PairedData" &&
-              typeof it.filepath === "string" &&
-              it.filepath.length > 0
+        (it: any) =>
+          it &&
+          it.dataFormat === "DSS" &&
+          it.structureType === "PairedData" &&
+          typeof it.filepath === "string" &&
+          it.filepath.length > 0
       );
 
       // Always reuse the existing DSS filepath if one exists for this category
