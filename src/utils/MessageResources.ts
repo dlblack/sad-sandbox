@@ -20,6 +20,8 @@ export const TEXT_MESSAGES = {
   20010: "{0} is already open.",
   20020: "Deleted \"{0}\".",
   20030: "Closed {0} {1}.",
+
+  30001: "usePopout must be used within PopoutProvider",
 } as const;
 
 export type MessageKey = keyof typeof TEXT_MESSAGES;

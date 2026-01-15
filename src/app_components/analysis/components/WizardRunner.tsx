@@ -38,6 +38,7 @@ type Props<B extends WizardBag = WizardBag, R = unknown> = {
   data?: Record<string, unknown>;
   analyses?: Record<string, unknown>;
   defaultDatasetKey?: string;
+  datasetFilter?: (item: any) => boolean;
   steps: WizardStep<B>[];
   buildResult: (ctx: WizardCtx<B>) => R;
   validateNext?: (ctx: WizardCtx<B>, stepIndex: number) => boolean;
@@ -81,8 +82,8 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
   const rawType = props.type ?? "";
   const typeKey = toTypeKey(rawType);
 
-  const datasetList =
-      (data?.[defaultDatasetKey] as DatasetItem[] | undefined) ?? [];
+  const rawDatasetList = (data?.[defaultDatasetKey] as DatasetItem[] | undefined) ?? [];
+  const datasetList = props.datasetFilter ? rawDatasetList.filter(props.datasetFilter) : rawDatasetList;
   const [step, setStep] = useState<number>(1);
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -101,6 +102,17 @@ export default function WizardRunner<B extends WizardBag = WizardBag, R = unknow
       setDescription((prev) => (prev ? prev : found?.description || ""));
     }
   }, [selectedDataset, datasetList, disableDataset]);
+
+  useEffect(() => {
+    if (disableDataset) return;
+
+    if (datasetList.length === 0) {
+      if (selectedDataset)setSelectedDataset("")
+      return;
+    }
+
+    if (!selectedDataset) setSelectedDataset(datasetList[0].name);
+  }, [datasetList, selectedDataset, disableDataset]);
 
   const currentIndex = Math.max(0, Math.min(step - 1, steps.length - 1));
   const current = steps[currentIndex];

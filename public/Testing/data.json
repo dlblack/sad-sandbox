@@ -51,6 +51,17 @@
       "structureType": "TimeSeries",
       "dataFormat": "DSS",
       "dataType": "Flow",
+      "seriesKind": "AnnualPeak",
+      "variable": "Discharge",
+      "name": "Sacramento River Annual Peak Flow",
+      "description": "Annual for the Sacramento River, 1909 - 2024.",
+      "filepath": "discharge.dss",
+      "pathname": "/Sacramento/Sacramento River a Freeport CA/FLOW-ANNUAL PEAK/17Jan1909/IR-Century/USGS/"
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Flow",
       "name": "TS DSS",
       "description": "",
       "filepath": "discharge.dss",
