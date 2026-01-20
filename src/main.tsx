@@ -6,6 +6,8 @@ import { MantineProvider } from "@mantine/core";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import ProjectShell from "./pages/ProjectShell";
 import HomePage from "./pages/HomePage";
+import PopoutHost from "./popout/PopoutHost";
+import { PopoutProvider } from "./popout/PopoutProvider";
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -16,16 +18,19 @@ import "./styles/css/index.css";
 import "./styles/tokens.css";
 
 const router = createBrowserRouter([
-    { path: "/", element: <HomePage /> },
-    { path: "/project/:projectName/*", element: <ProjectShell /> },
+  { path: "/", element: <HomePage /> },
+  { path: "/popout", element: <PopoutHost /> },
+  { path: "/project/:projectName/*", element: <ProjectShell /> },
 ]);
 
 createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-        <MantineProvider defaultColorScheme="auto">
-            <UISizingProvider>
-                <RouterProvider router={router} />
-            </UISizingProvider>
-        </MantineProvider>
-    </React.StrictMode>
+  <React.StrictMode>
+    <MantineProvider defaultColorScheme="auto">
+      <UISizingProvider>
+        <PopoutProvider>
+          <RouterProvider router={router} />
+        </PopoutProvider>
+      </UISizingProvider>
+    </MantineProvider>
+  </React.StrictMode>
 );

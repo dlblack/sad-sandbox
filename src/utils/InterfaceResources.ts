@@ -363,6 +363,14 @@ export const INTERFACE_TEXT = {
   DELETE: "Delete",
 
   // --------------------------------------
+  // Popout
+  // --------------------------------------
+  PLOT_L: "Plot",
+  WAITING_L: "Waiting for plot…",
+  REFRESH_B: "Refresh",
+  CLOSE_B: "Close",
+
+  // --------------------------------------
   // Analysis Wizard - General Information
   // --------------------------------------
   Wizard_GeneralInfo: "General Information",
@@ -396,11 +404,32 @@ export const INTERFACE_TEXT = {
   // --------------------------------------
   // Bulletin17Wizard
   // --------------------------------------
-  Bulletin17_Wizard_Method_Label: "Method",
-  Bulletin17_Wizard_Method_B17B: "17B Methods",
-  Bulletin17_Wizard_Method_B17C: "17C EMA",
+  Bulletin17_Wizard_TimeWindow_Label: "Time Window",
+  Bulletin17_Wizard_TimeWindow_Description: "Define the absolute time window for EMA Analysis.",
+  Bulletin17_Wizard_TimeWindow_StartYear: "Start Year",
+  Bulletin17_Wizard_TimeWindow_EndYear: "End Year",
+  Bulletin17_Wizard_FlowRanges_Label: "Flow Ranges",
+  Bulletin17_Wizard_FlowRanges_Description: "Enter annual peak values and optional low/high ranges. Years are generated from the time window.",
+  Bulletin17_Wizard_Thresholds_Add: "Add",
+  Bulletin17_Wizard_Thresholds_Remove: "Remove",
+  Bulletin17_Wizard_Thresholds_Col_StartYear: "Start Year",
+  Bulletin17_Wizard_Thresholds_Col_EndYear: "End Year",
+  Bulletin17_Wizard_Thresholds_Col_Low: "Low Threshold",
+  Bulletin17_Wizard_Thresholds_Col_High: "High Threshold",
+  Bulletin17_Wizard_Thresholds_Col_Comments: "Comments",
+  Bulletin17_Wizard_FlowRanges_Col_Year: "Year",
+  Bulletin17_Wizard_FlowRanges_Col_Peak: "Peak",
+  Bulletin17_Wizard_FlowRanges_Col_Low: "Low Value",
+  Bulletin17_Wizard_FlowRanges_Col_High: "High Value",
+  Bulletin17_Wizard_FlowRanges_Col_DataType: "Data Type",
+  Bulletin17_Wizard_FlowRanges_RefreshPlot: "Refresh Plot",
+  Bulletin17_Wizard_FlowRanges_ApplyChanges: "Apply",
+  Bulletin17_Wizard_FlowRanges_XLabel: "Year",
+  Bulletin17_Wizard_FlowRanges_YLabel: "Flow",
+  Bulletin17_Wizard_FlowRanges_Legend_Data: "Data",
+  Bulletin17_Wizard_FlowRanges_Legend_Ranges: "Flow Ranges",
   Bulletin17_Wizard_Prob_Label: "Probability",
-  Bulletin17_Wizard_Prob_Field: "Probability",
+  Bulletin17_Wizard_Prob_Field: "Frequency in Percent",
   Bulletin17_Wizard_Step_Summary: "Complete",
 
   // --------------------------------------

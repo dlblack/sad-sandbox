@@ -13,9 +13,9 @@ const DEFAULTS = {
     W: 360,
     E: 100,
     S: 200,
-    MIN_W: 240,
+    MIN_W: 50,
     MAX_W: 800,
-    MIN_E: 100,
+    MIN_E: 50,
     MAX_E: 1000,
     MIN_S: 120,
 };
