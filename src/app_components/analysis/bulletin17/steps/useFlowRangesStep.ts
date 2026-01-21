@@ -10,10 +10,12 @@ import {
   defaultThresholdRow,
   FlowRow,
   parseClipboardGrid,
+  parseDateUTC,
   parseNum,
   pinkShade,
   syncRowsToYears,
   ThresholdRow,
+  waterYearFromDate,
 } from "./flowRangesUtils";
 
 type FlowRangesState = { rows?: FlowRow[] };
@@ -34,8 +36,6 @@ type Props<B extends FlowRangesBag> = {
   data: Record<string, unknown>;
 };
 
-type YearValue = { year: number; value: number };
-
 type DssTimeSeriesJson = {
   x?: Array<number | string>;
   times?: Array<number | string>;
@@ -43,26 +43,35 @@ type DssTimeSeriesJson = {
   values?: Array<number | string>;
 };
 
-function coerceToYear(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return Math.trunc(value);
+type YearPeriodSpec =
+  | { mode: "CY" }
+  | { mode: "WY" }
+  | { mode: "START_MONTH"; startMonth: number };
 
-  if (typeof value === "string") {
-    const asNumber = Number(value);
-    if (Number.isFinite(asNumber)) return Math.trunc(asNumber);
+const DEFAULT_PERIOD: YearPeriodSpec = { mode: "WY" };
 
-    const asDate = new Date(value);
-    if (!Number.isNaN(asDate.getTime())) return asDate.getUTCFullYear();
-  }
+type BucketReduce = "max" | "min" | "first" | "last";
 
-  if (value && typeof value === "object") {
-    const candidate = value as any;
-    if (candidate.year != null) return coerceToYear(candidate.year);
-    if (candidate.x != null) return coerceToYear(candidate.x);
-    if (candidate.date != null) return coerceToYear(candidate.date);
-    if (candidate.time != null) return coerceToYear(candidate.time);
-  }
+type PasteCol = "peak" | "low" | "high";
 
-  return null;
+function bucketYearFromDate(d: Date, spec: YearPeriodSpec): number {
+  if (spec.mode === "CY") return d.getUTCFullYear();
+  if (spec.mode === "WY") return waterYearFromDate(d);
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth();
+  return m >= spec.startMonth ? y + 1 : y;
+}
+
+function reduceValue(
+  existing: { value: number; order: number } | undefined,
+  next: { value: number; order: number },
+  reduce: BucketReduce
+) {
+  if (!existing) return next;
+  if (reduce === "first") return existing.order <= next.order ? existing : next;
+  if (reduce === "last") return existing.order >= next.order ? existing : next;
+  if (reduce === "min") return existing.value <= next.value ? existing : next;
+  return existing.value >= next.value ? existing : next;
 }
 
 function coerceToNumberValue(value: unknown): number | null {
@@ -70,26 +79,33 @@ function coerceToNumberValue(value: unknown): number | null {
   return Number.isFinite(asNumber) ? asNumber : null;
 }
 
-function normalizeDssTimeSeriesToYearValues(timeSeriesJson: DssTimeSeriesJson): YearValue[] {
+function normalizeDssTimeSeriesToYearToValue(
+  timeSeriesJson: DssTimeSeriesJson,
+  period: YearPeriodSpec,
+  reduce: BucketReduce
+): Map<number, number> {
   const xValues = (timeSeriesJson.x ?? timeSeriesJson.times ?? []) as Array<number | string>;
   const yValues = (timeSeriesJson.y ?? timeSeriesJson.values ?? []) as Array<number | string>;
   const pairCount = Math.min(xValues.length, yValues.length);
 
-  const yearValues: YearValue[] = [];
+  const bucketAgg = new Map<number, { value: number; order: number }>();
+
   for (let index = 0; index < pairCount; index += 1) {
-    const year = coerceToYear(xValues[index]);
+    const d = parseDateUTC(xValues[index]);
     const value = coerceToNumberValue(yValues[index]);
-    if (year == null || value == null) continue;
-    yearValues.push({ year, value });
+    if (!d || value == null) continue;
+
+    const year = bucketYearFromDate(d, period);
+    const next = { value, order: index };
+    bucketAgg.set(year, reduceValue(bucketAgg.get(year), next, reduce));
   }
 
-  return yearValues;
+  const out = new Map<number, number>();
+  for (const [year, agg] of bucketAgg.entries()) out.set(year, agg.value);
+  return out;
 }
 
-function findSelectedDatasetDescriptor(
-  data: Record<string, unknown>,
-  selectedDataset?: string
-): any | null {
+function findSelectedDatasetDescriptor(data: Record<string, unknown>, selectedDataset?: string): any | null {
   if (!selectedDataset) return null;
 
   const dataAny = data as any;
@@ -108,11 +124,7 @@ function findSelectedDatasetDescriptor(
   );
 }
 
-async function fetchDssTimeSeriesJson(
-  apiPrefix: string,
-  filePath?: string,
-  dssPathname?: string
-): Promise<DssTimeSeriesJson> {
+async function fetchDssTimeSeriesJson(apiPrefix: string, filePath?: string, dssPathname?: string): Promise<DssTimeSeriesJson> {
   const projectDirectory = localStorage.getItem("lastProjectDir") || "";
 
   const url =
@@ -137,14 +149,6 @@ function rowsContainAnyUserEdits(flowRows: FlowRow[]): boolean {
   return false;
 }
 
-function buildYearToValueLookup(yearValues: YearValue[]): Map<number, number> {
-  const yearToValueMap = new Map<number, number>();
-  for (const point of yearValues) {
-    yearToValueMap.set(point.year, point.value);
-  }
-  return yearToValueMap;
-}
-
 function applyDatasetValuesToFlowRows(flowRows: FlowRow[], yearToValueMap: Map<number, number>): FlowRow[] {
   return flowRows.map((flowRow) => {
     const datasetValue = yearToValueMap.get(flowRow.year);
@@ -167,12 +171,7 @@ type PlotSnapshot = {
   totalLowNum: number;
 };
 
-export function useFlowRangesStep<B extends FlowRangesBag>({
-                                                             bag,
-                                                             setBag,
-                                                             selectedDataset,
-                                                             data,
-                                                           }: Props<B>) {
+export function useFlowRangesStep<B extends FlowRangesBag>({ bag, setBag, selectedDataset, data }: Props<B>) {
   const units = useUnits();
   const { apiPrefix } = useProject();
 
@@ -242,7 +241,7 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
     return () => resizeObserver.disconnect();
   }, []);
 
-  const [datasetSeries, setDatasetSeries] = useState<YearValue[]>([]);
+  const [datasetYearToValue, setDatasetYearToValue] = useState<Map<number, number>>(new Map());
   const [datasetIdentityKey, setDatasetIdentityKey] = useState<string>("");
 
   useEffect(() => {
@@ -255,7 +254,12 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
       const datasetDescriptor = findSelectedDatasetDescriptor(data, selectedDataset);
       if (!datasetDescriptor) return;
 
-      const filePath = datasetDescriptor.filepath ?? datasetDescriptor.file ?? datasetDescriptor.pathfile ?? datasetDescriptor.filename;
+      const filePath =
+        datasetDescriptor.filepath ??
+        datasetDescriptor.file ??
+        datasetDescriptor.pathfile ??
+        datasetDescriptor.filename;
+
       const pathname =
         (typeof datasetDescriptor.pathname === "string" ? datasetDescriptor.pathname : null) ??
         (Array.isArray(datasetDescriptor.pathname) ? datasetDescriptor.pathname[0] : null) ??
@@ -268,14 +272,14 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
 
       try {
         const dssJson = await fetchDssTimeSeriesJson(String(apiPrefix), String(filePath ?? ""), String(pathname ?? ""));
-        const normalizedPoints = normalizeDssTimeSeriesToYearValues(dssJson);
+        const yearToValue = normalizeDssTimeSeriesToYearToValue(dssJson, DEFAULT_PERIOD, "max");
 
         if (isCancelled) return;
-        setDatasetSeries(normalizedPoints);
+        setDatasetYearToValue(yearToValue);
         setDatasetIdentityKey(nextIdentityKey);
       } catch (error) {
         if (!isCancelled) {
-          setDatasetSeries([]);
+          setDatasetYearToValue(new Map());
           setDatasetIdentityKey(nextIdentityKey);
           console.error(error);
         }
@@ -296,22 +300,12 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
     const nextAutoFillGuardKey = `${selectedDataset}::${totalStartYear}::${totalEndYear}::${datasetIdentityKey}`;
     if (nextAutoFillGuardKey === autoFillGuardKey) return;
 
-    if (!datasetSeries.length) return;
+    if (!datasetYearToValue.size) return;
     if (rowsContainAnyUserEdits(rows)) return;
 
-    const yearToValueMap = buildYearToValueLookup(datasetSeries);
-
-    setRows((previousRows) => applyDatasetValuesToFlowRows(previousRows, yearToValueMap));
+    setRows((previousRows) => applyDatasetValuesToFlowRows(previousRows, datasetYearToValue));
     setAutoFillGuardKey(nextAutoFillGuardKey);
-  }, [
-    selectedDataset,
-    totalStartYear,
-    totalEndYear,
-    datasetSeries,
-    datasetIdentityKey,
-    rows,
-    autoFillGuardKey,
-  ]);
+  }, [selectedDataset, totalStartYear, totalEndYear, datasetYearToValue, datasetIdentityKey, rows, autoFillGuardKey]);
 
   const [plotSnapshot, setPlotSnapshot] = useState<PlotSnapshot>(() => ({
     rows: syncRowsToYears(bag.flowRanges?.rows, years),
@@ -347,7 +341,7 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
   const thresholdShades = useMemo(() => {
     const totalThresholds = thresholdRows.length;
     return thresholdRows.map((_, index) => ({
-      fill: pinkShade(index, totalThresholds, 0.20),
+      fill: pinkShade(index, totalThresholds, 0.2),
       rect: pinkShade(index, totalThresholds, 0.35),
       line: pinkShade(index, totalThresholds, 0.85),
     }));
@@ -491,14 +485,16 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
   function setCell(rowIndex: number, patch: Partial<FlowRow>) {
     setRows((previousRows) => {
       const nextRows = previousRows.slice();
+      const current = nextRows[rowIndex];
+      const isSystematic = current?.dataType === "Systematic";
 
-      const mergedRow: FlowRow = { ...nextRows[rowIndex], ...patch };
+      if (isSystematic && patch.peak != null) return previousRows;
 
-      if (patch.peak != null) {
+      const mergedRow: FlowRow = { ...current, ...patch };
+
+      if (!isSystematic && patch.peak != null) {
         const peakValue = parseNum(mergedRow.peak);
-        if (peakValue != null) {
-          mergedRow.dataType = "Systematic";
-        }
+        if (peakValue != null) mergedRow.dataType = "Systematic";
       }
 
       nextRows[rowIndex] = mergedRow;
@@ -506,47 +502,68 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
     });
   }
 
-  function applyPasteGrid(startRowIndex: number, startColumnIndex: 0 | 1 | 2, clipboardText: string) {
+  function applyPasteGrid(startRowIndex: number, startColumn: PasteCol, clipboardText: string) {
     const grid = parseClipboardGrid(clipboardText);
     if (!grid.length) return;
 
     setRows((previousRows) => {
       const nextRows = previousRows.slice();
+      let didChange = false;
 
       for (let gridRowIndex = 0; gridRowIndex < grid.length; gridRowIndex += 1) {
         const targetRowIndex = startRowIndex + gridRowIndex;
         if (targetRowIndex >= nextRows.length) break;
 
-        const rowCells = grid[gridRowIndex];
-        const peak = (rowCells[startColumnIndex] ?? "").trim();
-        const low = (rowCells[startColumnIndex + 1] ?? "").trim();
-        const high = (rowCells[startColumnIndex + 2] ?? "").trim();
+        const rowCells = grid[gridRowIndex].map((c) => (c ?? "").trim());
+        const existing = nextRows[targetRowIndex];
+        const isSystematic = existing.dataType === "Systematic";
 
-        const mergedRow: FlowRow = {
-          ...nextRows[targetRowIndex],
-          peak,
-          low,
-          high,
-        };
+        let nextPeak = existing.peak;
+        let nextLow = existing.low;
+        let nextHigh = existing.high;
 
-        if (startColumnIndex === 0) {
-          const peakValue = parseNum(mergedRow.peak);
-          if (peakValue != null) {
-            mergedRow.dataType = "Systematic";
-          }
+        if (startColumn === "peak") {
+          if (!isSystematic && rowCells[0] != null) nextPeak = rowCells[0] ?? "";
+          if (rowCells.length >= 2) nextLow = rowCells[1] ?? "";
+          if (rowCells.length >= 3) nextHigh = rowCells[2] ?? "";
+        } else if (startColumn === "low") {
+          if (rowCells.length >= 1) nextLow = rowCells[0] ?? "";
+          if (rowCells.length >= 2) nextHigh = rowCells[1] ?? "";
+        } else if (startColumn === "high") {
+          if (rowCells.length >= 1) nextHigh = rowCells[0] ?? "";
         }
 
-        nextRows[targetRowIndex] = mergedRow;
+        const changed =
+          nextPeak !== existing.peak ||
+          nextLow !== existing.low ||
+          nextHigh !== existing.high;
+
+        if (!changed) continue;
+
+        const merged: FlowRow = {
+          ...existing,
+          peak: nextPeak,
+          low: nextLow,
+          high: nextHigh,
+        };
+
+        if (!isSystematic && startColumn === "peak") {
+          const peakValue = parseNum(String(merged.peak ?? ""));
+          if (peakValue != null) merged.dataType = "Systematic";
+        }
+
+        nextRows[targetRowIndex] = merged;
+        didChange = true;
       }
 
-      return nextRows;
+      return didChange ? nextRows : previousRows;
     });
   }
 
   function addThreshold() {
     const startYear = clampInt(newThrStartYear, totalStartYear);
     const endYear = clampInt(newThrEndYear, totalEndYear);
-    setThresholdRows((previousThresholdRows) => [...previousThresholdRows, defaultThresholdRow(startYear, endYear)]);
+    setThresholdRows((previous) => [...previous, defaultThresholdRow(startYear, endYear)]);
   }
 
   function applyThresholdsToFlowRanges() {
@@ -554,9 +571,7 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
 
     setRows((previousRows) => {
       const yearToRowIndex = new Map<number, number>();
-      for (let index = 0; index < previousRows.length; index += 1) {
-        yearToRowIndex.set(previousRows[index].year, index);
-      }
+      for (let index = 0; index < previousRows.length; index += 1) yearToRowIndex.set(previousRows[index].year, index);
 
       let didChangeAnyRow = false;
       const nextRows = previousRows.slice();
@@ -577,7 +592,6 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
           if (rowIndex == null) continue;
 
           const flowRow = nextRows[rowIndex];
-
           if ((flowRow.peak ?? "").trim()) continue;
 
           const existingLowText = (flowRow.low ?? "").trim();
@@ -588,15 +602,12 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
 
           const isAlreadyCensored = flowRow.dataType === "Censored";
           const looksEmpty =
-            (existingLowValue == null || existingLowValue === 0) &&
-            (existingHighValue == null || existingHighValue === 0);
+            (existingLowValue == null || existingLowValue === 0) && (existingHighValue == null || existingHighValue === 0);
 
           if (!isAlreadyCensored && !looksEmpty) continue;
 
           const nextHighText = highLimit.toString();
-          const shouldUpdate =
-            existingLowText !== "0" || existingHighText !== nextHighText || flowRow.dataType !== "Censored";
-
+          const shouldUpdate = existingLowText !== "0" || existingHighText !== nextHighText || flowRow.dataType !== "Censored";
           if (!shouldUpdate) continue;
 
           nextRows[rowIndex] = {
@@ -614,14 +625,14 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
   }
 
   function removeThreshold(thresholdIndex: number) {
-    setThresholdRows((previousThresholdRows) => previousThresholdRows.filter((_, index) => index !== thresholdIndex));
+    setThresholdRows((previous) => previous.filter((_, index) => index !== thresholdIndex));
   }
 
   function setThresholdCell(thresholdIndex: number, patch: Partial<ThresholdRow>) {
-    setThresholdRows((previousThresholdRows) => {
-      const nextThresholdRows = previousThresholdRows.slice();
-      nextThresholdRows[thresholdIndex] = { ...nextThresholdRows[thresholdIndex], ...patch };
-      return nextThresholdRows;
+    setThresholdRows((previous) => {
+      const next = previous.slice();
+      next[thresholdIndex] = { ...next[thresholdIndex], ...patch };
+      return next;
     });
   }
 
@@ -634,7 +645,7 @@ export function useFlowRangesStep<B extends FlowRangesBag>({
         return lowBound == null ? 0 : lowBound;
       })(),
     });
-    setPlotKey((previousKey) => previousKey + 1);
+    setPlotKey((k) => k + 1);
   }
 
   return {

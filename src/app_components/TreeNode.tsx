@@ -212,7 +212,6 @@ function MenuItem({
 const TreeNode: React.FC<TreeNodeProps> = ({
                                                label,
                                                children,
-                                               isTopLevel = false,
                                                onSaveAs,
                                                type,
                                                section,
@@ -305,7 +304,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     const badge = getNodeBadgeOrIcon(parentLabel, isLeaf, section);
 
     return (
-        <Box ref={ref} style={{ paddingInline: 8, paddingBlock: isTopLevel ? 6 : 2 }}>
+        <Box ref={ref} style={{ paddingInline: 8, paddingBlock: 0 }}>
             <Group wrap="nowrap" gap={6} align="center" onContextMenu={handleContextMenu}>
                 {hasContent ? (
                     expanded ? <FaFolderOpen color="#f6b73c" /> : <FaFolder color="#f6b73c" />
@@ -379,7 +378,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 />
             )}
 
-            {expanded && hasContent && <Box style={{ paddingLeft: 18, marginTop: 4 }}>{children}</Box>}
+            {expanded && hasContent && <Box style={{ paddingLeft: 11 }}>{children}</Box>}
         </Box>
     );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, NumberInput, Table, TextInput } from "@mantine/core";
+import { Button, NumberInput, ScrollArea, Table, TextInput } from "@mantine/core";
 import { TextStore } from "../../../../utils/TextStore";
 import { useUnits } from "../../../../context/UnitsContext";
 import type { ThresholdRow } from "./flowRangesUtils";
@@ -90,8 +90,8 @@ export function PerceptionThresholdsTable({
   const Td = Table.Td;
 
   return (
-    <div style={{ overflow: "auto" }}>
-      <div style={{ display: "flex", gap: 8, alignItems: "end", marginBottom: 8 }}>
+    <div className="perception-thresholds-root">
+      <div className="perception-thresholds-header">
         <NumberInput
           label={TextStore.interface("Bulletin17_Wizard_TimeWindow_StartYear")}
           value={newThrStartYear || ""}
@@ -113,119 +113,121 @@ export function PerceptionThresholdsTable({
         </Button>
       </div>
 
-      <Table
-        withTableBorder
-        withColumnBorders
-        highlightOnHover
-        verticalSpacing="xs"
-        horizontalSpacing="xs"
-        styles={tableStyles}
-      >
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_StartYear")}</Table.Th>
-            <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_EndYear")}</Table.Th>
-            <Table.Th>{units.label(TextStore.interface("Bulletin17_Wizard_Thresholds_Col_Low"), "flow")}</Table.Th>
-            <Table.Th>{units.label(TextStore.interface("Bulletin17_Wizard_Thresholds_Col_High"), "flow")}</Table.Th>
-            <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_Comments")}</Table.Th>
-            <Table.Th />
-          </Table.Tr>
-        </Table.Thead>
+      <ScrollArea className="perception-thresholds-scroll" type="auto">
+        <Table
+          withTableBorder
+          withColumnBorders
+          highlightOnHover
+          verticalSpacing="xs"
+          horizontalSpacing="xs"
+          styles={tableStyles}
+        >
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_StartYear")}</Table.Th>
+              <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_EndYear")}</Table.Th>
+              <Table.Th>{units.label(TextStore.interface("Bulletin17_Wizard_Thresholds_Col_Low"), "flow")}</Table.Th>
+              <Table.Th>{units.label(TextStore.interface("Bulletin17_Wizard_Thresholds_Col_High"), "flow")}</Table.Th>
+              <Table.Th>{TextStore.interface("Bulletin17_Wizard_Thresholds_Col_Comments")}</Table.Th>
+              <Table.Th />
+            </Table.Tr>
+          </Table.Thead>
 
-        <Table.Tbody>
-          <Table.Tr>
-            <Td style={greenCell}>
-                <div style={staticCellText}>{totalStartYear}</div>
-            </Td>
-            <Td style={greenCell}>
-                <div style={staticCellText}>{totalEndYear}</div>
-            </Td>
-            <Td style={greenCell}>
-              <TextInput
-                  value={totalLow}
-                  onChange={(e) => setTotalLow(e.currentTarget.value)}
-                  size="xs"
-                  styles={textInputStyles}
-              />
-            </Td>
-            <Td style={greenCell}>
-              <TextInput
-                  value={totalHigh}
-                  onChange={(e) => setTotalHigh(e.currentTarget.value)}
-                  size="xs"
-                  styles={textInputStyles}
-              />
-            </Td>
-            <Td style={greenCell}>
-              <TextInput
-                  value={totalComment}
-                  onChange={(e) => setTotalComment(e.currentTarget.value)}
-                  size="xs"
-                  styles={textInputStyles}
-              />
-            </Td>
-            <Td style={greenCell} />
-          </Table.Tr>
+          <Table.Tbody>
+            <Table.Tr>
+              <Td style={greenCell}>
+                  <div style={staticCellText}>{totalStartYear}</div>
+              </Td>
+              <Td style={greenCell}>
+                  <div style={staticCellText}>{totalEndYear}</div>
+              </Td>
+              <Td style={greenCell}>
+                <TextInput
+                    value={totalLow}
+                    onChange={(e) => setTotalLow(e.currentTarget.value)}
+                    size="xs"
+                    styles={textInputStyles}
+                />
+              </Td>
+              <Td style={greenCell}>
+                <TextInput
+                    value={totalHigh}
+                    onChange={(e) => setTotalHigh(e.currentTarget.value)}
+                    size="xs"
+                    styles={textInputStyles}
+                />
+              </Td>
+              <Td style={greenCell}>
+                <TextInput
+                    value={totalComment}
+                    onChange={(e) => setTotalComment(e.currentTarget.value)}
+                    size="xs"
+                    styles={textInputStyles}
+                />
+              </Td>
+              <Td style={greenCell} />
+            </Table.Tr>
 
-            {thresholdRows.map((t, idx) => {
-              const cellStyle: React.CSSProperties = {
-                background: thrShades[idx]?.fill ?? "rgba(255,170,170,0.2)",
-              };
+              {thresholdRows.map((t, idx) => {
+                const cellStyle: React.CSSProperties = {
+                  background: thrShades[idx]?.fill ?? "rgba(255,170,170,0.2)",
+                };
 
-              return (
-                <Table.Tr key={t.id}>
-                  <Td style={cellStyle}>
-                    <NumberInput
-                      value={t.startYear}
-                      onChange={(v) => setThresholdCell(idx, { startYear: clampInt(v, t.startYear) })}
-                      hideControls
-                      size="xs"
-                      styles={numberInputStyles}
-                    />
-                  </Td>
-                  <Td style={cellStyle}>
-                    <NumberInput
-                      value={t.endYear}
-                      onChange={(v) => setThresholdCell(idx, { endYear: clampInt(v, t.endYear) })}
-                      hideControls
-                      size="xs"
-                      styles={numberInputStyles}
-                    />
-                  </Td>
-                  <Td style={cellStyle}>
-                    <TextInput
-                      value={t.low}
-                      onChange={(e) => setThresholdCell(idx, { low: e.currentTarget.value })}
-                      size="xs"
-                      styles={textInputStyles}
-                    />
-                  </Td>
-                  <Td style={cellStyle}>
-                    <TextInput
-                      value={t.high}
-                      onChange={(e) => setThresholdCell(idx, { high: e.currentTarget.value })}
-                      size="xs"
-                      styles={textInputStyles}
-                    />
-                  </Td>
-                  <Td style={cellStyle}>
-                    <TextInput
-                      value={t.comment}
-                      onChange={(e) => setThresholdCell(idx, { comment: e.currentTarget.value })}
-                      size="xs"
-                      styles={textInputStyles}
-                    />
-                  </Td>
-                  <Td style={cellStyle}>
-                    <Button size="xs" variant="subtle" color="red" onClick={() => removeThreshold(idx)}>
-                      {TextStore.interface("Bulletin17_Wizard_Thresholds_Remove")}
-                    </Button>
-                  </Td>
-                </Table.Tr>
-              );
-            })}
-        </Table.Tbody>
-      </Table>
+                return (
+                  <Table.Tr key={t.id}>
+                    <Td style={cellStyle}>
+                      <NumberInput
+                        value={t.startYear}
+                        onChange={(v) => setThresholdCell(idx, { startYear: clampInt(v, t.startYear) })}
+                        hideControls
+                        size="xs"
+                        styles={numberInputStyles}
+                      />
+                    </Td>
+                    <Td style={cellStyle}>
+                      <NumberInput
+                        value={t.endYear}
+                        onChange={(v) => setThresholdCell(idx, { endYear: clampInt(v, t.endYear) })}
+                        hideControls
+                        size="xs"
+                        styles={numberInputStyles}
+                      />
+                    </Td>
+                    <Td style={cellStyle}>
+                      <TextInput
+                        value={t.low}
+                        onChange={(e) => setThresholdCell(idx, { low: e.currentTarget.value })}
+                        size="xs"
+                        styles={textInputStyles}
+                      />
+                    </Td>
+                    <Td style={cellStyle}>
+                      <TextInput
+                        value={t.high}
+                        onChange={(e) => setThresholdCell(idx, { high: e.currentTarget.value })}
+                        size="xs"
+                        styles={textInputStyles}
+                      />
+                    </Td>
+                    <Td style={cellStyle}>
+                      <TextInput
+                        value={t.comment}
+                        onChange={(e) => setThresholdCell(idx, { comment: e.currentTarget.value })}
+                        size="xs"
+                        styles={textInputStyles}
+                      />
+                    </Td>
+                    <Td style={cellStyle}>
+                      <Button size="xs" variant="subtle" color="red" onClick={() => removeThreshold(idx)}>
+                        {TextStore.interface("Bulletin17_Wizard_Thresholds_Remove")}
+                      </Button>
+                    </Td>
+                  </Table.Tr>
+                );
+              })}
+          </Table.Tbody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 }

@@ -120,12 +120,12 @@ export default function ComponentMessage({
               return (
                   <Card
                       key={i}
-                      radius="sm"
+                      radius="none"
                       padding="xs"
-                      withBorder
                       style={{
                         borderColor: `var(--mantine-color-${color}-6)`,
                         background: `var(--mantine-color-${color}-0)`,
+                        padding: "1px",
                       }}
                   >
                     <Text size="xs" style={{ color: `var(--mantine-color-${color}-9)` }}>
