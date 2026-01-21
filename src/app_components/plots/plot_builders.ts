@@ -4,234 +4,267 @@ import { resolveSeriesStyle, styleToPlotly } from "./plotStyleResolve";
 import { getMergedDefaultsSync } from "./plotStyleStore";
 import type { SeriesRuleKey, PlotKind as StylePlotKind } from "./plotStyleTypes";
 
-type Labelish = string | number | Date | null | undefined;
+type CategoryLabelValue = string | number | Date | null | undefined;
 
-/* ---------------- normalization ---------------- */
+const PARAMETER_ALIASES: Record<string, string> = {
+  FLOW: "FLOW",
+  DISCHARGE: "FLOW",
+  PRECIP: "PRECIPITATION",
+  PRECIPITATION: "PRECIPITATION",
+  STAGE: "STAGE",
+  ELEVATION: "STAGE",
+  STORAGE: "STORAGE",
+};
+
 /**
  * Normalizes parameter names so that FLOW, Discharge, etc. map consistently.
  * This allows multiple synonymous terms to share one rule.
  */
-function normalizeParameter(p: any): string | undefined {
-    if (!p) return undefined;
-    const text = String(p).trim().toUpperCase();
+function normalizeParameter(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  const key = String(value).trim().toUpperCase();
+  if (!key) return undefined;
+  return PARAMETER_ALIASES[key] || key;
+}
 
-    const aliases: Record<string, string> = {
-        FLOW: "FLOW",
-        DISCHARGE: "FLOW",
-        PRECIP: "PRECIPITATION",
-        PRECIPITATION: "PRECIPITATION",
-        STAGE: "STAGE",
-        ELEVATION: "STAGE",
-        STORAGE: "STORAGE"
-    };
+function toDatumArray(value: unknown): Datum[] {
+  return Array.isArray(value) ? (value as Datum[]) : [];
+}
 
-    return aliases[text] || text;
+function getFirstSeries(req: PlotRequest): { x: Datum[]; y: Datum[]; name?: string } {
+  const series =
+    "series" in req.input && Array.isArray(req.input.series) && req.input.series.length > 0
+      ? req.input.series[0]
+      : { x: [], y: [] };
+
+  return {
+    x: toDatumArray(series.x),
+    y: toDatumArray(series.y),
+    name: (series as any).name,
+  };
+}
+
+function asTrimmedString(value: unknown): string {
+  return String(value ?? "").trim();
 }
 
 /* ---------------- time series ---------------- */
 export function buildTimeSeries(req: PlotRequest): BuiltPlot {
-    const s =
-        "series" in req.input && Array.isArray(req.input.series) && req.input.series.length > 0
-            ? req.input.series[0]
-            : { x: [], y: [] };
+  const firstSeries = getFirstSeries(req);
+  const { x, y } = firstSeries;
 
-    const x = Array.isArray(s.x) ? (s.x as Datum[]) : [];
-    const y = Array.isArray(s.y) ? (s.y as Datum[]) : [];
+  const options = (req.options || {}) as Record<string, unknown>;
+  const stepped = Boolean(options.stepped);
+  const showRangeSlider = Boolean(options.showRangeSlider);
+  const lineShape = stepped ? "hv" : "linear";
 
-    const stepped = Boolean((req.options as any)?.stepped);
-    const lineShape = stepped ? "hv" : "linear";
+  const mergedDefaults = getMergedDefaultsSync();
 
-    const merged = getMergedDefaultsSync();
+  const styleKey: SeriesRuleKey = {
+    kind: req.kind as StylePlotKind | undefined,
+    parameter: normalizeParameter(options.parameter),
+    seriesName: firstSeries.name,
+    seriesIndex: 0,
+  };
 
-    const key: SeriesRuleKey = {
-        kind: req.kind as StylePlotKind | undefined,
-        parameter: normalizeParameter((req.options as any)?.parameter),
-        seriesName: s.name,
-        seriesIndex: 0
-    };
+  const resolvedStyle = mergedDefaults ? resolveSeriesStyle(mergedDefaults, styleKey) : undefined;
+  const resolvedPlotlyStyle = styleToPlotly(resolvedStyle);
 
-    const auto = merged ? resolveSeriesStyle(merged, key) : undefined;
-    const autoPlotly = styleToPlotly(auto);
+  const baseTrace: Partial<PlotData> = {
+    type: "scatter",
+    mode: "lines",
+    x,
+    y,
+    line: { shape: lineShape },
+  };
 
-    const base: Partial<PlotData> = {
-        type: "scatter",
-        mode: "lines",
-        x,
-        y,
-        line: { shape: lineShape }
-    };
+  const trace: Partial<PlotData> = Object.assign({}, baseTrace, resolvedPlotlyStyle);
 
-    const trace: Partial<PlotData> = Object.assign({}, base, autoPlotly);
+  if (stepped) {
+    trace.line = Object.assign({}, trace.line, { shape: "hv" });
+  }
 
-    return {
-        data: [trace],
-        layout: {
-            title: { text: req.title || "" },
-            xaxis: { title: { text: req.x_label || "Time" } },
-            yaxis: { title: { text: req.y_label || "" } }
-        }
-    };
+  return {
+    data: [trace],
+    layout: {
+      title: { text: req.title || "" },
+      xaxis: {
+        title: { text: req.x_label || "Time" },
+        type: "date",
+        rangeslider: { visible: showRangeSlider },
+      },
+      yaxis: { title: { text: req.y_label || "" } },
+    },
+  };
 }
 
 /* ---------------- paired category ---------------- */
 type PairedCategoryOptions = {
-    labels?: string[];
-    xReverse?: boolean;
-    yScale?: "linear" | "log";
-    styleMap?: Record<string, Partial<PlotData>>;
-    yMinDecade?: number;
-    xaxis?: Partial<Layout["xaxis"]>;
-    parameter?: string;
+  labels?: string[];
+  xReverse?: boolean;
+  yScale?: "linear" | "log";
+  styleMap?: Record<string, Partial<PlotData>>;
+  yMinDecade?: number;
+  xaxis?: Partial<Layout["xaxis"]>;
+  parameter?: string;
 };
 
-const asDatumArray = (v: unknown): Datum[] => (Array.isArray(v) ? (v as Datum[]) : []);
-const asString = (v: any): string => String(v ?? "").trim();
+function formatProbabilityLabel(value: unknown): string {
+  const num = Number(value as any);
+  if (!Number.isFinite(num)) return asTrimmedString(value);
 
-function probLabel(v: any): string {
-    const n = Number(v);
-    if (!Number.isFinite(n)) return asString(v);
-    const targets = [1, 0.99, 0.9, 0.5, 0.1, 0.01, 0.001];
-    const tol = 0.000001;
-    for (const t of targets) if (Math.abs(n - t) <= tol) return String(t);
-    if (n >= 0.1) return Number(n.toFixed(2)).toString();
-    if (n >= 0.01) return Number(n.toFixed(3)).toString();
-    return Number(n.toPrecision(3)).toString();
+  const commonTargets = [1, 0.99, 0.9, 0.5, 0.1, 0.01, 0.001];
+  const tolerance = 0.000001;
+
+  for (const target of commonTargets) {
+    if (Math.abs(num - target) <= tolerance) return String(target);
+  }
+
+  if (num >= 0.1) return Number(num.toFixed(2)).toString();
+  if (num >= 0.01) return Number(num.toFixed(3)).toString();
+  return Number(num.toPrecision(3)).toString();
 }
 
-function chooseLabelFn(masterRaw: ReadonlyArray<Labelish>) {
-    const nums = masterRaw.map((v) => Number(v as any));
-    const allNumeric = nums.every((m) => Number.isFinite(m));
-    const inProbRange = allNumeric && nums.every((m) => m > 0 && m <= 1);
-    return inProbRange ? probLabel : asString;
+function chooseCategoryLabelFormatter(masterValues: ReadonlyArray<CategoryLabelValue>) {
+  const numeric = masterValues.map((v) => Number(v as any));
+  const allNumeric = numeric.every((n) => Number.isFinite(n));
+  const looksLikeProbability = allNumeric && numeric.every((n) => n > 0 && n <= 1);
+
+  return looksLikeProbability ? formatProbabilityLabel : asTrimmedString;
+}
+
+function buildLogAxis(
+  allYValues: number[],
+  yAxisTitle: string,
+  yMinDecadeHint?: number
+): Partial<Layout["yaxis"]> {
+  const positive = allYValues.filter((n) => n > 0);
+  const minY = positive.length ? Math.min(...positive) : 1;
+  const maxY = positive.length ? Math.max(...positive) : 10;
+
+  const minPower = Math.floor(Math.log10(yMinDecadeHint || minY));
+  const maxPower = Math.ceil(Math.log10(maxY));
+
+  const start = Math.pow(10, minPower);
+  const end = Math.pow(10, maxPower);
+
+  const decades: number[] = [];
+  for (let tick = start; tick <= end; tick *= 10) decades.push(tick);
+
+  const lastDecade = decades.length === 0 ? start : decades[decades.length - 1];
+
+  return {
+    type: "log",
+    title: { text: yAxisTitle },
+    tickmode: "array",
+    tickvals: decades,
+    ticktext: decades.map((n) => n.toLocaleString()),
+    ticks: "",
+    ticklen: 0,
+    showgrid: true,
+    gridcolor: "rgba(0,0,0,0.22)",
+    gridwidth: 1.2,
+    minor: {
+      showgrid: true,
+      dtick: "D1",
+      gridcolor: "rgba(0,0,0,0.12)",
+      gridwidth: 0.7,
+    },
+    range: [Math.log10(decades[0] || start), Math.log10(lastDecade)],
+  };
 }
 
 export function buildPairedCategory(req: PlotRequest): BuiltPlot {
-    const series = "series" in req.input ? req.input.series || [] : [];
-    const opts = (req.options || {}) as PairedCategoryOptions;
+  const series = "series" in req.input ? req.input.series || [] : [];
+  const options = (req.options || {}) as PairedCategoryOptions;
 
-    const masterRaw: Array<Labelish> =
-        Array.isArray(opts.labels) && opts.labels.length > 0
-            ? (opts.labels as Array<Labelish>)
-            : (asDatumArray(series[0]?.x) as Array<Labelish>);
+  const masterCategoryRaw: Array<CategoryLabelValue> =
+    Array.isArray(options.labels) && options.labels.length > 0
+      ? (options.labels as Array<CategoryLabelValue>)
+      : (toDatumArray(series[0]?.x) as Array<CategoryLabelValue>);
 
-    const labelFn = chooseLabelFn(masterRaw);
-    const masterLabels = masterRaw.map(labelFn);
+  const formatCategoryLabel = chooseCategoryLabelFormatter(masterCategoryRaw);
+  const masterCategoryLabels = masterCategoryRaw.map(formatCategoryLabel);
 
-    const traces: Partial<PlotData>[] = [];
-    const allY: number[] = [];
+  const traces: Partial<PlotData>[] = [];
+  const allYValues: number[] = [];
 
-    const merged = getMergedDefaultsSync();
+  const mergedDefaults = getMergedDefaultsSync();
 
-    series.forEach((s, si) => {
-        const sx = asDatumArray(s.x);
-        const sy = asDatumArray(s.y);
+  series.forEach((seriesItem, seriesIndex) => {
+    const xValues = toDatumArray(seriesItem.x);
+    const yValues = toDatumArray(seriesItem.y);
 
-        const map: Record<string, number> = {};
-        sx.forEach((xVal, i) => {
-            const yVal = sy[i];
-            const num = Number(yVal as any);
-            if (Number.isFinite(num)) {
-                const k = labelFn(xVal);
-                map[k] = num;
-                allY.push(num);
-            }
-        });
+    const yByCategory: Record<string, number> = {};
 
-        const orderedX = masterLabels.slice();
-        const orderedY = orderedX.map((lab) => (lab in map ? map[lab] : null));
+    xValues.forEach((xValue, i) => {
+      const yValue = yValues[i];
+      const yNum = Number(yValue as any);
+      if (!Number.isFinite(yNum)) return;
 
-        const base: Partial<PlotData> = {
-            type: "scatter",
-            mode: "lines",
-            connectgaps: true,
-            x: orderedX,
-            y: orderedY,
-            name: s.name
-        };
-
-        const key: SeriesRuleKey = {
-            kind: req.kind as StylePlotKind | undefined,
-            parameter: normalizeParameter(opts.parameter),
-            seriesName: s.name,
-            seriesIndex: si
-        };
-
-        const auto = merged ? resolveSeriesStyle(merged, key) : undefined;
-        const autoPlotly = styleToPlotly(auto);
-        const namedOverride = opts.styleMap && s.name ? opts.styleMap[s.name] : undefined;
-
-        const trace = Object.assign({}, base, autoPlotly, namedOverride);
-        traces.push(trace);
+      const categoryKey = formatCategoryLabel(xValue as any);
+      yByCategory[categoryKey] = yNum;
+      allYValues.push(yNum);
     });
 
-    const categoryArray = Boolean(opts.xReverse)
-        ? masterLabels.slice().reverse()
-        : masterLabels.slice();
+    const orderedCategories = masterCategoryLabels.slice();
+    const orderedY = orderedCategories.map((category) => (category in yByCategory ? yByCategory[category] : null));
 
-    const wantsLog = opts.yScale === "log";
-    let yaxis: Partial<Layout["yaxis"]>;
-
-    if (wantsLog) {
-        const positiveY = allY.filter((v) => v > 0);
-        const minY = positiveY.length ? Math.min(...positiveY) : 1;
-        const maxY = positiveY.length ? Math.max(...positiveY) : 10;
-
-        const minP = Math.floor(Math.log10(opts.yMinDecade || minY));
-        const maxP = Math.ceil(Math.log10(maxY));
-
-        const start = Math.pow(10, minP);
-        const end = Math.pow(10, maxP);
-        const decades: number[] = [];
-        for (let tick = start; tick <= end; tick *= 10) decades.push(tick);
-
-        yaxis = {
-            type: "log",
-            title: { text: req.y_label || "" },
-            tickmode: "array",
-            tickvals: decades,
-            ticktext: decades.map((v) => v.toLocaleString()),
-            ticks: "",
-            ticklen: 0,
-            showgrid: true,
-            gridcolor: "rgba(0,0,0,0.22)",
-            gridwidth: 1.2,
-            minor: {
-                showgrid: true,
-                dtick: "D1",
-                gridcolor: "rgba(0,0,0,0.12)",
-                gridwidth: 0.7
-            },
-            range: [
-                Math.log10(decades[0]),
-                Math.log10(decades[decades.length === 0 ? 0 : decades.length - 1])
-            ]
-        };
-    } else {
-        yaxis = { type: "linear", title: { text: req.y_label || "" } };
-    }
-
-    const defaultXaxis: Partial<Layout["xaxis"]> = {
-        title: { text: req.x_label || "" },
-        type: "category",
-        categoryorder: "array",
-        categoryarray: categoryArray
+    const baseTrace: Partial<PlotData> = {
+      type: "scatter",
+      mode: "lines",
+      connectgaps: true,
+      x: orderedCategories,
+      y: orderedY,
+      name: (seriesItem as any).name,
     };
 
-    const layout: Partial<Layout> = {
-        title: { text: req.title || "" },
-        xaxis: opts.xaxis ? Object.assign({}, defaultXaxis, opts.xaxis) : defaultXaxis,
-        yaxis,
-        margin: { l: 92, r: 220, b: 64, t: 52 },
-        height: 450,
-        legend: {
-            orientation: "v",
-            x: 1.03,
-            y: 0.5,
-            xanchor: "left",
-            yanchor: "middle",
-            bgcolor: "rgba(255,255,255,0.85)"
-        }
+    const styleKey: SeriesRuleKey = {
+      kind: req.kind as StylePlotKind | undefined,
+      parameter: normalizeParameter(options.parameter),
+      seriesName: (seriesItem as any).name,
+      seriesIndex,
     };
 
-    return { data: traces, layout };
+    const resolvedStyle = mergedDefaults ? resolveSeriesStyle(mergedDefaults, styleKey) : undefined;
+    const resolvedPlotlyStyle = styleToPlotly(resolvedStyle);
+
+    const name = (seriesItem as any).name as string | undefined;
+    const namedOverride = options.styleMap && name ? options.styleMap[name] : undefined;
+
+    const trace = Object.assign({}, baseTrace, resolvedPlotlyStyle, namedOverride);
+    traces.push(trace);
+  });
+
+  const categoryArray = options.xReverse ? masterCategoryLabels.slice().reverse() : masterCategoryLabels.slice();
+
+  const wantsLogScale = options.yScale === "log";
+  const yaxis: Partial<Layout["yaxis"]> = wantsLogScale
+    ? buildLogAxis(allYValues, req.y_label || "", options.yMinDecade)
+    : { type: "linear", title: { text: req.y_label || "" } };
+
+  const defaultXaxis: Partial<Layout["xaxis"]> = {
+    title: { text: req.x_label || "" },
+    type: "category",
+    categoryorder: "array",
+    categoryarray: categoryArray,
+  };
+
+  const layout: Partial<Layout> = {
+    title: { text: req.title || "" },
+    xaxis: options.xaxis ? Object.assign({}, defaultXaxis, options.xaxis) : defaultXaxis,
+    yaxis,
+    margin: { l: 92, r: 220, b: 64, t: 52 },
+    height: 450,
+    legend: {
+      orientation: "v",
+      x: 1.03,
+      y: 0.5,
+      xanchor: "left",
+      yanchor: "middle",
+      bgcolor: "rgba(255,255,255,0.85)",
+    },
+  };
+
+  return { data: traces, layout };
 }

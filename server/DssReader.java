@@ -31,15 +31,14 @@ public class DssReader {
                     System.exit(0);
                 }
 
-                // Debug log to inspect fields
                 System.err.println("DSS PATH: " + pathname);
                 System.err.println("PARAMETER: " + tsc.parameter);
                 System.err.println("UNITS: " + tsc.units);
+                System.err.println("TYPE: " + tsc.type);
 
                 double[] values = tsc.values;
                 int[] times = tsc.times;
 
-                // Extract labels explicitly
                 String[] parts = pathname.split("/");
                 String label = (tsc.parameter != null && !tsc.parameter.trim().isEmpty())
                         ? tsc.parameter
@@ -47,11 +46,14 @@ public class DssReader {
                 String units = (tsc.units != null && !tsc.units.trim().isEmpty())
                         ? tsc.units
                         : (parts.length > 6 ? parts[6] : "");
+                String valueType = (tsc.type != null && !tsc.type.trim().isEmpty())
+                        ? tsc.type
+                        : "";
 
                 System.err.println("FINAL LABEL: " + label);
                 System.err.println("FINAL UNITS: " + units);
+                System.err.println("FINAL TYPE: " + valueType);
 
-                // Format times to ISO for frontend
                 SimpleDateFormat isoFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                 isoFmt.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -68,6 +70,7 @@ public class DssReader {
                 json.put("y", values);
                 json.put("yLabel", label);
                 json.put("yUnits", units);
+                json.put("valueType", valueType);  // <-- IMPORTANT
 
                 System.out.print(json.toString());
                 System.exit(0);

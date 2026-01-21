@@ -158,7 +158,9 @@ function Navbar({ addComponent }: NavbarProps) {
                     <Menu.Item onClick={() => openComponent("ManualDataEntryEditor")}>
                       {TextStore.interface("Navbar_Data_NewData_Manual")}
                     </Menu.Item>
-                    <Menu.Item>{TextStore.interface("Navbar_Data_NewData_ImportUSGS")}</Menu.Item>
+                    <Menu.Item onClick={() => openComponent("UsgsDataImporter")}>
+                      {TextStore.interface("Navbar_Data_NewData_ImportUSGS")}
+                    </Menu.Item>
                     <Menu.Item>{TextStore.interface("Navbar_Data_NewData_ImportDSS")}</Menu.Item>
                   </Menu.Dropdown>
                 </Menu>

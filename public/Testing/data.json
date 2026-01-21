@@ -101,6 +101,21 @@
       "description": "Discharge for the Feather River, 01Jul2000 07:00 - 06Jul2000 06:45.",
       "filepath": "discharge.dss",
       "pathname": "/Sacramento/Yuba River/FLOW/01Jul2025/15Minute/USGS/"
+    },
+    {
+      "structureType": "TimeSeries",
+      "dataFormat": "DSS",
+      "dataType": "Flow",
+      "seriesKind": "AnnualPeak",
+      "variable": "Discharge",
+      "name": "American River Annual Peak Flow",
+      "description": "USGS Discharge imported into discharge.dss for project MyProject",
+      "filepath": "discharge.dss",
+      "pathname": [
+        "/11446500//FLOW-ANNUAL PEAK/10JAN1862/IR-Century/USGS-Neptune/"
+      ],
+      "units": "CFS",
+      "valueType": "INST-VAL"
     }
   ],
   "Elev-Stor": [

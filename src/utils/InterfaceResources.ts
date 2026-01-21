@@ -138,6 +138,7 @@ export const INTERFACE_TEXT = {
   ComponentRegistry_ComponentInterfaceOptions: "Options",
   ComponentRegistry_ComponentPlotStyle: "Plot Styles",
   ComponentRegistry_ManualDataEntryEditor: "Manual Data Entry",
+  ComponentRegistry_UsgsDataImporter: "USGS Data Importer",
   ComponentRegistry_Wizard_Bulletin17AnalysisWizard: "Bulletin 17 Analysis",
   ComponentRegistry_Wizard_CopulaAnalysisWizard: "Copula Analysis",
   ComponentRegistry_Wizard_FloodTypeClassAnalysisWizard: "Flood Type Classification Analysis",
@@ -281,6 +282,14 @@ export const INTERFACE_TEXT = {
   TableContext_DeleteRows: "Delete Row(s)",
 
   // --------------------------------------
+  // UsgsStationIdsByStateDialog
+  // --------------------------------------
+  UsgsStationIdsByStateDialog_Title: "Get USGS Station IDs by State",
+  UsgsStationIdsByStateDialog_DataType: "Data Type: ",
+  UsgsStationIdsByStateDialog_State: "State",
+  UsgsStationIdsByStateDialog_State_Placeholder: "Choose a state",
+
+  // --------------------------------------
   // TableFillOptionsDialog
   // --------------------------------------
   TableFillOptions_Title: "Table Fill Options",
@@ -346,6 +355,61 @@ export const INTERFACE_TEXT = {
   ManualDataEntryEditor_SummaryYUnits: "Y Units: ",
   ManualDataEntryEditor_SummaryXLabel: "X Label: ",
   ManualDataEntryEditor_SummaryXUnits: "X Units: ",
+
+  // --------------------------------------
+  // USGS Data Importer
+  // --------------------------------------
+  UsgsDataImporter_Name: "Name: ",
+  UsgsDataImporter_Description: "Description: ",
+  UsgsDataImporter_SummaryDataFormat: "Data Format: ",
+  UsgsDataImporter_DataType_Label: "Data Type: ",
+  UsgsDataImporter_DataType_AnnualPeakData: "Annual Peak Data",
+  UsgsDataImporter_DataType_Daily: "Daily",
+  UsgsDataImporter_DataType_Instantaneous: "Instantaneous",
+  UsgsDataImporter_DateRange_Label: "Date Range: ",
+  UsgsDataImporter_StartDate: "Start Date",
+  UsgsDataImporter_EndDate: "End Date",
+  UsgsDataImporter_RetrievePor: "Retrieve Period of Record",
+  UsgsDataImporter_TimeZone_Label: "Time Zone: ",
+  UsgsDataImporter_TimeZone_UTC: "UTC",
+  UsgsDataImporter_TimeZone_LocalStandard: "Local Standard Time",
+  UsgsDataImporter_Variety_Label: "Variety: ",
+  UsgsDataImporter_Variety_Flow: "Flow",
+  UsgsDataImporter_Variety_Stage: "Stage",
+  UsgsDataImporter_StationID_Label: "Station IDs: ",
+  UsgsDataImporter_StationID_Manual: "Enter station IDs manually",
+  UsgsDataImporter_StationID_Auto: "Get USGS Station IDs by State",
+  UsgsDataImporter_GetStations_Button: "Get Station IDs",
+  UsgsDataImporter_Import_SelectStations_Label: "Select which stations to import and adjust the DSS pathname parts.",
+  UsgsDataImporter_Import_StationsToImport_Label: "Stations to import",
+  UsgsDataImporter_Import_StatesRetrieved_Label: "States retrieved:",
+  UsgsDataImporter_Import_Select_Button: "Select all",
+  UsgsDataImporter_Import_Unselect_Button: "Unselect all",
+  UsgsDataImporter_Import_AddStationRow_Button: "Add station row",
+  UsgsDataImporter_Import_Button: "Import",
+  UsgsDataImporter_Importing_Button: "Importing...",
+  UsgsDataImporter_Import_Title: "Importing USGS Data",
+  UsgsDataImporter_Import_Close_Button: "Close",
+  UsgsDataImporter_Import_Progress_QueryingStarting: "Querying USGS data...",
+  UsgsDataImporter_Import_Progress_DownloadingStarting: "Downloading USGS data...",
+  UsgsDataImporter_Import_Progress_QueryingRange: "Querying {0}–{1} of {2}...",
+  UsgsDataImporter_Import_Write_Preparing: "Preparing to write...",
+  UsgsDataImporter_Import_Write_Done: "Finished writing data to disk.",
+  UsgsDataImporter_Import_Progress_Downloading: "Downloading {0} of {1}...",
+  UsgsDataImporter_Import_Write_Flow_DSS: "Writing flow to DSS...",
+  UsgsDataImporter_Import_Write_Stage_DSS: "Writing stage to DSS...",
+  UsgsDataImporter_Import_Write_Flow_JSON: "Writing flow to JSON...",
+  UsgsDataImporter_Import_Write_Stage_JSON: "Writing stage to JSON...",
+  UsgsDataImporter_Import_ProgressDialog_TotalSeries: "Total series requested: ",
+  UsgsDataImporter_Import_Write_Dss_Flow: "Writing flow to DSS...",
+  UsgsDataImporter_Import_Write_Dss_Stage: "Writing stage to DSS...",
+  UsgsDataImporter_Import_Write_Json_Flow: "Writing flow to JSON...",
+  UsgsDataImporter_Import_Write_Json_Stage: "Writing stage to JSON...",
+  UsgsDataImporter_Import_Summary_TotalSelected: "Total selected stations: ",
+  UsgsDataImporter_Import_Summary_TotalSeries: "Total series requested: ",
+  UsgsDataImporter_Import_Summary_WithData: "Stations with data: ",
+  UsgsDataImporter_Import_Summary_WithoutData: "Stations with no data: ",
+  UsgsDataImporter_Import_Summary_Failed: "Stations failed: ",
 
   // --------------------------------------
   // Wizard Navigation Buttons

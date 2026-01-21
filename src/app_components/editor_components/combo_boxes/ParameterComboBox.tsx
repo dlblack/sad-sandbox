@@ -1,15 +1,23 @@
 import React, { useMemo } from "react";
 import { Select, SelectProps } from "@mantine/core";
+import { TimeSeriesType } from "../../../timeSeries/timeSeriesType";
 import { TextStore } from "../../../utils/TextStore";
 
-const PARAMETER_OPTIONS = [
-  { value: "Flow", labelKey: "Parameter_Flow" },
-  { value: "Stage", labelKey: "Parameter_Stage" },
-  { value: "Elev", labelKey: "Parameter_Elev" },
-  { value: "Precipitation", labelKey: "Parameter_Precipitation" },
-  { value: "SWE", labelKey: "Parameter_SWE" },
-  { value: "Temperature", labelKey: "Parameter_Temperature" },
-  { value: "Windspeed", labelKey: "Parameter_Windspeed" },
+type ParameterOption = {
+  kind: TimeSeriesType;
+  value: string;
+  labelKey: string;
+};
+
+
+const PARAMETER_OPTIONS: ParameterOption[] = [
+  { kind: TimeSeriesType.FLOW,         value: "Flow",          labelKey: "Parameter_Flow" },
+  { kind: TimeSeriesType.STAGE,        value: "Stage",         labelKey: "Parameter_Stage" },
+  { kind: TimeSeriesType.ELEVATION,    value: "Elev",          labelKey: "Parameter_Elev" },
+  { kind: TimeSeriesType.PRECIPITATION,value: "Precipitation", labelKey: "Parameter_Precipitation" },
+  { kind: TimeSeriesType.SWE,          value: "SWE",           labelKey: "Parameter_SWE" },
+  { kind: TimeSeriesType.TEMPERATURE,  value: "Temperature",   labelKey: "Parameter_Temperature" },
+  { kind: TimeSeriesType.WINDSPEED,    value: "Windspeed",     labelKey: "Parameter_Windspeed" },
 ];
 
 type Props = {
@@ -19,19 +27,23 @@ type Props = {
 
 export default function ParameterComboBox({ value, onChange, ...props }: Props) {
   const data = useMemo(
-      () => PARAMETER_OPTIONS.map((o) => ({ value: o.value, label: TextStore.interface(o.labelKey) })),
-      []
+    () =>
+      PARAMETER_OPTIONS.map((option) => ({
+        value: option.value,
+        label: TextStore.interface(option.labelKey),
+      })),
+    []
   );
 
   return (
-      <Select
-          size="xs"
-          data={data}
-          value={value ?? ""}
-          onChange={(v) => onChange(v ?? "")}
-          placeholder={TextStore.interface("Parameter_Placeholder")}
-          searchable
-          {...props}
-      />
+    <Select
+      size="xs"
+      data={data}
+      value={value ?? ""}
+      onChange={(selectedValue) => onChange(selectedValue ?? "")}
+      placeholder={TextStore.interface("Parameter_Placeholder")}
+      searchable
+      {...props}
+    />
   );
 }
