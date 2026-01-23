@@ -139,14 +139,14 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .wizardStack {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 1 1 auto;
+    height: 100%;
     min-height: 0;
 }
 
 .wizardBody {
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
-    overflow: auto;
     padding: var(--mantine-spacing-sm);
 }
 
@@ -235,13 +235,46 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     height: 100%;
     min-height: 0;
     display: grid;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: max-content auto minmax(0, 1fr);
     gap: 10px;
+    align-items: start;
+}
+
+.flowranges-thresholds-block {
+    align-self: start;
+    min-height: 0;
 }
 
 /* Apply button row */
 .flowranges-actions {
     flex: 0 0 auto;
+}
+
+.perception-thresholds-root {
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 8px;
+
+    --pt-row-h: 2.35em;
+    --pt-head-h: 2.6em;
+}
+
+.perception-thresholds-scroll {
+    min-height: 0;
+    max-height: calc(var(--pt-head-h) + (3 * var(--pt-row-h)));
+}
+
+.perception-thresholds-scroll .mantine-ScrollArea-viewport {
+    height: 100%;
+}
+
+.perception-thresholds-header {
+    min-height: 0;
+    display: flex;
+    gap: 8px;
+    align-items: end;
 }
 
 /* FlowRanges table wrapper */
@@ -297,4 +330,14 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 
 .popoutHostWaiting {
     opacity: 0.7;
+}
+
+.project-tree-fill {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
 }

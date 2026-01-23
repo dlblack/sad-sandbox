@@ -90,3 +90,48 @@ export function pinkShade(index: number, total: number, alpha: number) {
   const b = Math.round(interpolateLinear(170, 70, t));
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+export function parseDateUTC(v: unknown): Date | null {
+  if (v == null) return null;
+  if (v instanceof Date && Number.isFinite(v.getTime())) return v;
+
+  if (typeof v === "number" && Number.isFinite(v)) {
+    const d = new Date(v);
+    return Number.isFinite(d.getTime()) ? d : null;
+  }
+
+  const s = String(v).trim();
+  if (!s) return null;
+
+  const iso = Date.parse(s);
+  if (Number.isFinite(iso)) return new Date(iso);
+
+  const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m1) {
+    const mm = Number(m1[1]);
+    const dd = Number(m1[2]);
+    const yyyy = Number(m1[3]);
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) return new Date(Date.UTC(yyyy, mm - 1, dd));
+  }
+
+  const m2 = s.match(/^(\d{1,2})([A-Za-z]{3})(\d{4})$/);
+  if (m2) {
+    const dd = Number(m2[1]);
+    const mon = m2[2].toLowerCase();
+    const yyyy = Number(m2[3]);
+    const monthMap: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+    };
+    const mm = monthMap[mon];
+    if (mm != null && dd >= 1 && dd <= 31) return new Date(Date.UTC(yyyy, mm, dd));
+  }
+
+  return null;
+}
+
+export function waterYearFromDate(d: Date): number {
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth(); // 0=Jan
+  return m >= 9 ? y + 1 : y; // Oct(9)–Dec -> next WY
+}

@@ -1,248 +1,76 @@
-import React, { useEffect } from "react";
-import WizardRunner from "../components/WizardRunner";
-import { makeWizardGeneralInfoStep, GeneralInfoSummary } from "../components/steps/WizardGeneralInfo";
-import { makeSkewStep, SkewSummary, skewChoiceToOptions } from "../components/steps/WizardSkew";
-import WizardFlowRangesStep from "../components/steps/WizardFlowRangesStep";
-import { TextStore } from "../../../utils/TextStore";
-import { Stack, Text, NumberInput, Table } from "@mantine/core";
+import React from "react";
+import WizardRunner from "../_shared/WizardRunner";
+import { makeWizardGeneralInfoStep } from "../_shared/steps";
+import { makeSkewStep, skewChoiceToOptions } from "../_shared/steps";
+import { makeTimeWindowStep, makeFlowRangesStep, makeProbabilitiesStep, makeSummaryStep } from "./steps";
+import { getComponentLabel } from "../../../registry/componentRegistry";
 
 type Bag = Record<string, unknown>;
 interface WizardCtx {
+  id?: string;
+  type?: string;
   name?: string;
   description?: string;
   selectedDataset?: string;
   bag: Bag;
+  analyses?: Record<string, unknown>;
 }
 
 export interface Bulletin17AnalysisWizardProps {
-  [key: string]: unknown;
+  id?: string;
+  type?: string;
+  data?: Record<string, unknown>;
+  analyses?: Record<string, unknown>;
+  onFinish?: (result: unknown) => void;
+  onRemove?: () => void;
 }
 
 function asStringArray(v: unknown): string[] {
-  if (!Array.isArray(v)) return [];
-  return v.map((x) => (x == null ? "" : String(x)));
+  if (!v) return [];
+  if (Array.isArray(v)) return v.map((x) => String(x ?? ""));
+  return [];
 }
 
-function normalizeProbRows(probStrings: string[], minRows = 12): string[] {
-  const out = probStrings.slice();
-  while (out.length < minRows) out.push("");
-  return out;
+function normName(v: unknown): string {
+  return String(v ?? "").trim().toLowerCase();
 }
 
-function firstProbabilityOrDefault(probStrings: string[], fallback = 0.01): number {
-  for (const s of probStrings) {
-    const n = Number(s);
-    if (Number.isFinite(n)) return n;
-  }
-  return fallback;
+function getBucketAnalyses(ctx: any): any[] {
+  const bucketKey = getComponentLabel(String(ctx?.type ?? "")) || "";
+  const list = (ctx?.analyses as any)?.[bucketKey];
+  return Array.isArray(list) ? list : [];
 }
 
-const DEFAULT_PROB_ROWS: string[] = [
-  "0.2",
-  "0.5",
-  "1.0",
-  "2.0",
-  "5.0",
-  "10.0",
-  "20.0",
-  "50.0",
-  "80.0",
-  "90.0",
-  "95.0",
-  "99.0",
-];
-
-function ProbabilityStep({
-                           bag,
-                           setBag,
-                         }: {
-  bag: Bag;
-  setBag: (fn: (prev: Bag) => Bag) => void;
-}) {
-  useEffect(() => {
-    setBag((prev) => {
-      const existing = asStringArray(prev.probabilities);
-      if (existing.length > 0) return prev;
-
-      return {
-        ...prev,
-        probabilities: DEFAULT_PROB_ROWS.slice(),
-        probability: firstProbabilityOrDefault(DEFAULT_PROB_ROWS, 0.01),
-      };
-    });
-  }, [setBag]);
-
-  const probRows = normalizeProbRows(asStringArray(bag.probabilities), 12);
-
-  const setProbAt = (idx: number, value: number | "" | null) => {
-    setBag((prev) => {
-      const prevRows = normalizeProbRows(asStringArray(prev.probabilities), 12);
-      const nextRows = prevRows.slice();
-
-      nextRows[idx] = value == null || value === "" ? "" : Number(value).toFixed(1);
-
-      const lastIdx = nextRows.length - 1;
-      if (nextRows[lastIdx].trim() !== "") nextRows.push("");
-
-      const firstProb = firstProbabilityOrDefault(nextRows, 0.01);
-
-      return {
-        ...prev,
-        probabilities: nextRows,
-        probability: firstProb,
-      };
-    });
-  };
-
-  return (
-    <Stack gap="xs">
-      <Text>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</Text>
-
-      <Table withTableBorder withColumnBorders={false} striped>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-
-        <Table.Tbody>
-          {probRows.map((val, i) => (
-            <Table.Tr key={i}>
-              <Table.Td style={{ padding: 0 }}>
-                <NumberInput
-                  size="xs"
-                  step={0.1}
-                  min={0}
-                  max={100}
-                  decimalScale={1}
-                  fixedDecimalScale
-                  value={val.trim() === "" ? "" : val}
-                  onChange={(v) => setProbAt(i, v as any)}
-                  styles={{
-                    root: { margin: 0 },
-                    input: { margin: 0 },
-                  }}
-                />
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </Stack>
-  );
+function isSameId(a: any, ctxId?: string): boolean {
+  if (!ctxId) return false;
+  return a?.id === ctxId || a?.key === ctxId || a?.uuid === ctxId;
 }
 
 export default function Bulletin17AnalysisWizard(props: Bulletin17AnalysisWizardProps) {
   const steps = [
     makeWizardGeneralInfoStep(),
-
-    {
-      label: TextStore.interface("Bulletin17_Wizard_TimeWindow_Label"),
-      render: ({ bag, setBag }: { bag: Bag; setBag: (fn: (prev: Bag) => Bag) => void }) => (
-        <Stack gap="xs">
-          <Text size="sm" fw={500}>
-            {TextStore.interface("Bulletin17_Wizard_TimeWindow_Description")}
-          </Text>
-          <NumberInput
-            label={TextStore.interface("Bulletin17_Wizard_TimeWindow_StartYear")}
-            value={typeof bag.startYear === "number" ? (bag.startYear as number) : undefined}
-            onChange={(v) => setBag((prev) => ({ ...prev, startYear: Number(v) || undefined }))}
-            min={1800}
-            max={2100}
-            step={1}
-            allowDecimal={false}
-            hideControls={false}
-          />
-          <NumberInput
-            label={TextStore.interface("Bulletin17_Wizard_TimeWindow_EndYear")}
-            value={typeof bag.endYear === "number" ? (bag.endYear as number) : undefined}
-            onChange={(v) => setBag((prev) => ({ ...prev, endYear: Number(v) || undefined }))}
-            min={1800}
-            max={2100}
-            step={1}
-            allowDecimal={false}
-            hideControls={false}
-          />
-        </Stack>
-      ),
-    },
-
-    {
-      key: "flowRanges",
-      label: TextStore.interface("Bulletin17_Wizard_FlowRanges_Label"),
-      render: ({
-                 bag,
-                 setBag,
-                 selectedDataset,
-                 data,
-               }: {
-        bag: Bag;
-        setBag: (fn: (prev: Bag) => Bag) => void;
-        selectedDataset?: string;
-        data: Record<string, unknown>;
-      }) => (
-        <WizardFlowRangesStep
-          bag={bag}
-          setBag={setBag}
-          selectedDataset={selectedDataset}
-          data={data}
-        />
-      ),
-      validate: (_: { bag: Bag }) => true,
-      summary: () => null,
-    },
-
+    makeTimeWindowStep(),
+    makeFlowRangesStep(),
     makeSkewStep({ allowStation: false, allowWeighted: false, compact: true }),
-
-    {
-      label: TextStore.interface("Bulletin17_Wizard_Prob_Label"),
-      render: ({ bag, setBag }: { bag: Bag; setBag: (fn: (prev: Bag) => Bag) => void }) => (
-        <ProbabilityStep bag={bag} setBag={setBag} />
-      ),
-    },
-
-    {
-      label: TextStore.interface("Bulletin17_Wizard_Step_Summary"),
-      render: ({ name, description, selectedDataset, bag }: WizardCtx) => {
-        const probs = asStringArray(bag.probabilities)
-          .map((s) => Number(s))
-          .filter((n) => Number.isFinite(n));
-
-        return (
-          <Stack gap="sm">
-            <Text fw={600}>{TextStore.interface("Wizard_Summary_Title")}</Text>
-
-            <GeneralInfoSummary
-              name={name}
-              description={description}
-              selectedDataset={selectedDataset}
-            />
-
-            <Stack gap={2}>
-              <Text size="sm">
-                <strong>Start Year:</strong> {bag.startYear as number}
-              </Text>
-              <Text size="sm">
-                <strong>End Year:</strong> {bag.endYear as number}
-              </Text>
-              <Text size="sm">
-                <strong>{TextStore.interface("Bulletin17_Wizard_Prob_Field")}</strong>{" "}
-                {probs.length ? probs.map((p) => p.toFixed(1)).join(", ") : "—"}
-              </Text>
-            </Stack>
-
-            <SkewSummary
-              choice={bag.skewChoice as string}
-              regionalSkew={bag.regionalSkew as number | string | undefined}
-              regionalSkewMSE={bag.regionalSkewMSE as number | string | undefined}
-            />
-          </Stack>
-        );
-      },
-    },
+    makeProbabilitiesStep(),
+    makeSummaryStep(),
   ];
 
-  const validateNext = (ctx: WizardCtx, stepIndex: number) => {
+  const validateNext = (ctx: any, stepIndex: number) => {
+    if (stepIndex === 0) {
+      const name = normName(ctx?.name);
+      if (!name) return false;
+
+      const list = getBucketAnalyses(ctx);
+      const taken = list.some((a: any) => {
+        if (!a) return false;
+        if (isSameId(a, ctx?.id)) return false;
+        return normName(a?.name) === name;
+      });
+
+      return !taken;
+    }
+
     if (stepIndex === 1) {
       const startYear = ctx.bag.startYear as number | undefined;
       const endYear = ctx.bag.endYear as number | undefined;
@@ -250,7 +78,7 @@ export default function Bulletin17AnalysisWizard(props: Bulletin17AnalysisWizard
       return startYear < endYear;
     }
 
-    if (stepIndex === 4 && String(ctx.bag.skewChoice || "") === "option3") {
+    if (stepIndex === 3 && String(ctx.bag.skewChoice || "") === "option3") {
       return String(ctx.bag.regionalSkew ?? "") !== "" && String(ctx.bag.regionalSkewMSE ?? "") !== "";
     }
 
@@ -261,6 +89,7 @@ export default function Bulletin17AnalysisWizard(props: Bulletin17AnalysisWizard
     name?: string;
     description?: string;
     selectedDataset: string;
+
     startYear: number;
     endYear: number;
     flowRanges?: unknown;
@@ -283,9 +112,7 @@ export default function Bulletin17AnalysisWizard(props: Bulletin17AnalysisWizard
       .map((s) => Number(s))
       .filter((n) => Number.isFinite(n));
 
-    const probability = probabilities.length
-      ? probabilities[0]
-      : Number(ctx.bag.probability ?? 0.01);
+    const probability = probabilities.length ? probabilities[0] / 100 : Number(ctx.bag.probability ?? 0.01);
 
     return {
       name: ctx.name,

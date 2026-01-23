@@ -1,9 +1,7 @@
 import * as React from "react";
 
-export type Id = string;
-
 export interface CenterTab {
-    id: Id;
+    id: string;
     kind: string;
     title: string;
     props?: Record<string, unknown>;
