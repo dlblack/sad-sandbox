@@ -341,3 +341,17 @@ input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     overflow-y: auto;
     white-space: nowrap;
 }
+
+.copula-marginaldistributions-stack {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.copula-marginaldistributions-scroll {
+    flex: 1;
+}
+
+.copula-marginaldistributions-simplegrid {
+    padding-right: calc(0.75rem * var(--ui-scale, 1));
+    min-height: 100%;
+}
