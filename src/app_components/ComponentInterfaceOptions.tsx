@@ -15,7 +15,12 @@ import {
   useComputedColorScheme,
   MantineColorScheme,
   TextInput,
+  Switch,
 } from "@mantine/core";
+import {
+  getSuppressBrowserContextMenu,
+  setSuppressBrowserContextMenu,
+} from "../hooks/useContextMenuSuppression";
 
 type DensityPreset = { label: string; value: number };
 
@@ -41,17 +46,18 @@ export default function ComponentInterfaceOptions(): JSX.Element {
 
   const [defaultProjectRoot, setDefaultProjectRoot] = useState("");
   const [savingRoot, setSavingRoot] = useState(false);
+  const [suppressContextMenu, setSuppressContextMenu] = useState(getSuppressBrowserContextMenu());
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/config")
-        .then((r) => r.json())
-        .then((cfg) => {
-          if (!cancelled && cfg && typeof cfg.projectsRoot === "string") {
-            setDefaultProjectRoot(cfg.projectsRoot);
-          }
-        })
-        .catch(() => {});
+      .then((r) => r.json())
+      .then((cfg) => {
+        if (!cancelled && cfg && typeof cfg.projectsRoot === "string") {
+          setDefaultProjectRoot(cfg.projectsRoot);
+        }
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -81,24 +87,27 @@ export default function ComponentInterfaceOptions(): JSX.Element {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ projectsRoot: trimmed }),
     })
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((cfg) => {
-          if (cfg && typeof cfg.projectsRoot === "string") {
-            setDefaultProjectRoot(cfg.projectsRoot);
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          setSavingRoot(false);
-        });
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((cfg) => {
+        if (cfg && typeof cfg.projectsRoot === "string") {
+          setDefaultProjectRoot(cfg.projectsRoot);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        setSavingRoot(false);
+      });
+  };
+
+  const handleSuppressContextMenuChange = (checked: boolean) => {
+    setSuppressContextMenu(checked);
+    setSuppressBrowserContextMenu(checked);
+    // Reload the page to apply the change
+    window.location.reload();
   };
 
   return (
-    <Card
-      withBorder
-      radius="md"
-      p={0}
-    >
+    <Card withBorder radius="md" p={0}>
       <Box p="sm">
         <Stack gap="md">
           <Box>
@@ -176,20 +185,39 @@ export default function ComponentInterfaceOptions(): JSX.Element {
           <Divider />
 
           <Box>
+            <Switch
+              checked={suppressContextMenu}
+              onChange={(e) => handleSuppressContextMenuChange(e.currentTarget.checked)}
+              label={
+                <Box>
+                  <Text size="sm" fw={600}>
+                    {TextStore.interface("ComponentInterfaceOptions_SuppressContextMenu_Label")}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {TextStore.interface("ComponentInterfaceOptions_SuppressContextMenu_Description")}
+                  </Text>
+                </Box>
+              }
+            />
+          </Box>
+
+          <Divider />
+
+          <Box>
             <Text fw={800} size="sm" mb={6}>
               {TextStore.interface("ComponentInterfaceOptions_DefaultProjectRoot_Label")}
             </Text>
             <TextInput
-                size="xs"
-                value={defaultProjectRoot}
-                onChange={(e) => setDefaultProjectRoot(e.currentTarget.value)}
+              size="xs"
+              value={defaultProjectRoot}
+              onChange={(e) => setDefaultProjectRoot(e.currentTarget.value)}
             />
             <Group justify="flex-end" mt="xs">
               <Button
-                  size="xs"
-                  variant="outline"
-                  onClick={handleSaveRoot}
-                  loading={savingRoot}
+                size="xs"
+                variant="outline"
+                onClick={handleSaveRoot}
+                loading={savingRoot}
               >
                 {TextStore.interface("ComponentInterfaceOptions_DefaultProjectRoot_Save_Button")}
               </Button>
