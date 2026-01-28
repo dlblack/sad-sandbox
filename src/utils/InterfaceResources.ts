@@ -81,6 +81,8 @@ export const INTERFACE_TEXT = {
   ComponentInterfaceOptions_Density_Compact: "Compact",
   ComponentInterfaceOptions_Density_Standard: "Standard",
   ComponentInterfaceOptions_Density_Comfy: "Comfy",
+  ComponentInterfaceOptions_SuppressContextMenu_Label: "Disable Browser Context Menu",
+  ComponentInterfaceOptions_SuppressContextMenu_Description: "Prevents the browser's right-click menu from appearing (requires page reload)",
   ComponentInterfaceOptions_DefaultProjectRoot_Label: "Default Project Location",
   ComponentInterfaceOptions_DefaultProjectRoot_Save_Button: "Save",
 

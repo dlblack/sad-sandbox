@@ -3,6 +3,7 @@ import isElectron from "./utils/isElectron";
 import Navbar from "./app_components/Navbar";
 import DockableFrame from "./app_components/dockable/DockableFrame";
 import { useAppData } from "./hooks/useAppData";
+import { useContextMenuSuppression } from "./hooks/useContextMenuSuppression";
 import useDockableContainers from "./hooks/useDockableContainers";
 import { useDockZoneTabs } from "./hooks/useDockZoneTabs";
 import useElectronMenus from "./hooks/useElectronMenus";
@@ -75,6 +76,8 @@ function App() {
   };
 
   useElectronMenus(openComponent);
+
+  useContextMenuSuppression();
 
   const westTabs = useDockZoneTabs(containers, "W");
   const { activeId: activeWestId, setActiveId: setActiveWestId, closeTab: closeWestTab } =
