@@ -215,7 +215,7 @@ function getClassPath() {
 }
 
 // Java constants
-const JAVA_BIN = "C:\\Programs\\jdk-11.0.11+9\\bin\\java.exe";
+const JAVA_BIN = "C:\\Programs\\jdk-21.0.8+9\\bin\\java.exe";
 const CLASS_PATH = getClassPath();
 
 // Small helpers to DRY DSS metadata and temp JSON handling

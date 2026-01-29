@@ -1,194 +1,148 @@
 # HEC-Neptune UI
 
-A UI for interactive data analysis and visualization, integrating React, Vite, Node.js/Express, and Java utilities for DSS file operations.
+A desktop/web UI for interactive data analysis and visualization. The frontend is React + Vite (optionally packaged with Electron). The backend is an Express API that can call small Java utilities for HEC-DSS read/write operations.
 
 ---
 
 ## Features
 
-- Modern React frontend (Vite)
-- Express.js API backend
-- Java-powered DSS (Data Storage System) integration
-- Interactive maps and plots (Leaflet, Plotly.js)
-- Drag-and-drop UI
+- React 19 UI with Mantine components
+- Vite dev server with `/api` proxy to the backend
+- Optional Electron shell (same UI, desktop window + native dialogs)
+- Express backend for project I/O and DSS operations
+- Java helpers for DSS reading/writing (invoked by the backend)
+- Plotting and mapping (Plotly.js + Leaflet)
+- Popout windows (Electron + in-app popout routing)
 
 ---
 
 ## Prerequisites
 
-**Assumed OS: Windows. (Linux/Mac: see notes below.)**
-
-- **VS Code**  
-  [Download and install VS Code](https://code.visualstudio.com/download).  
-  (You may wish to rename/extract the folder as `C:\Programs\VSCode` to avoid path issues when downloading new versions.)
-
-- **Node.js v22.12.0 or higher (includes npm)**  
+- Node.js 22+ (npm included)
   [Download Node.js](https://nodejs.org/en/download)  
   (Install or extract to `C:\Node`.)
+- Java 21+ (required only for DSS endpoints)
+- Windows is the primary target for DSS (the repo includes `javaHeclib.dll`). Other OSes will require compatible native libraries.
 
-- **Java Runtime Environment (JRE) or Java Development Kit (JDK), version 11 or higher**  
-  - [Download OpenJDK 11+](https://www.oracle.com/java/technologies/downloads/archive/)
-  - Must be installed and available on your PATH.
-  - The backend uses Java for writing to DSS files.
-  - Default path in `server.js` is:  
-    `C:\Programs\jdk-11.0.11+9\bin\java.exe`  
-    (Adjust if your Java is elsewhere.)
-
-- **(Optional) Git**  
-  For version control.
-
----
-
-### Java & DSS Library Setup
-
-**All required DSS .jar files and javaHeclib.dll are already included in the repo under /server/jar and /server/lib for convenience:**
-
-- /server/jar/ — All required .jar files from HEC-DSSVue
-
-- /server/lib/ — javaHeclib.dll native library
-
-**No manual copying or external downloads needed!**
-
-## Environment Variables
-
-1. Open the Windows search and find  
-   **“Edit environment variables for your account”**.
-2. Edit the `Path` variable and **add:**
-    - The path to your Node directory (`C:\Node`)
-    - The VS Code `bin` folder (`C:\Programs\VSCode\bin`)
-    - The Java `bin` folder (e.g., `C:\Programs\jdk-11.0.11+9\bin`)
-    - (Optional) Git `cmd` folder if not present
-
-**Test your setup:**  
-Open a new command prompt (not inside the Node folder) and run:
-
-```
-node -v
-npm -v
-java -version
-````
 ---
 
 ## Getting Started
 
-1. Clone the repo and install dependencies
-```
-git clone <your-repo-url>
-cd <repo-folder>
+1) Install dependencies (project root)
+
+```bash
 npm install
 ```
 
-2. Start the backend server
+2) Start the backend (Express)
 
-Open a new terminal window or tab, then run:
-```
-cd server
-node server.js
+```bash
+node server/server.js
 ```
 
-- This starts the Express backend at http://localhost:5001
-- Java is invoed automatically for DSS file operations.
-- If Java is not in the default path, edit `server.js` and set `javaPath` accordingly.
+Backend runs on `http://localhost:5001`.
 
-3. Start the frontend
+3) Start the frontend (Vite)
 
-- In a new terminal at the project root:
-```
+```bash
 npm run dev
 ```
 
-- This starts the Vite frontend at http://localhost:5173
+Frontend runs on `http://localhost:5173` and proxies `/api/*` to the backend.
 
-To open as a standalone application, open a new terminal at the project root, and run:
+4) Run as a desktop app (Electron)
+
+```bash
 npm run electron
+```
 
-There will be visual differences in the interface appearance, but functionality is unchanged.
+Electron still expects the backend to be running on `http://localhost:5001`.
 
 ---
 
-## Folder Structure
+## DSS Setup Notes (Java + jars)
+
+The backend builds a Java classpath from `server/jar/*.jar` and uses the native library in `server/lib/`.
+
+- `server/lib/javaHeclib.dll` is present in this repo.
+
+`server/server.js` currently uses a Windows Java path constant:
+
+- `JAVA_BIN = "C:\Programs\jdk-21.0.8+9\bin\java.exe"`
+
+Update that value if your Java is installed elsewhere, or change the implementation to use `java` from PATH.
+
+---
+
+## Project Structure
 
 ```
 hec-neptune/
+├── assets/                         # App assets (images, fonts, sample DSS)
+│   ├── files/
+│   ├── images/
+│   └── webfonts/
+├── public/                         # Static files served by Vite
+│   ├── recentProjects.json
+│   └── Testing/                    # Sample project + DSS files for local testing
+├── server/                         # Express backend + Java DSS helpers
+│   ├── server.js                   # Express API (DSS + project I/O)
+│   ├── neptuneConfig.json          # Stores projectsRoot (defaults to ../NeptuneProjects)
+│   ├── DssReader.java/.class       # Java DSS reader utility
+│   ├── DssWriter.java/.class       # Java DSS writer utility
+│   ├── DssPairedWriter.java/.class # Java DSS paired-data writer utility
+│   ├── usgs/                       # USGS helper enums/utilities for backend writes
+│   ├── lib/                        # Native DSS library (javaHeclib.dll)
+│   └── jar/                        # DSS jar dependencies
+├── src/                            # React application source
+│   ├── api/                        # API clients (project I/O, USGS, etc.)
+│   ├── app_components/             # Main UI components (dockable UI, plots, tables, editors)
+│   ├── context/                    # React contexts (Project, Units)
+│   ├── dialogs/                    # Modal dialogs
+│   ├── hooks/                      # App hooks
+│   ├── pages/                      # Route pages (Home, Project shell)
+│   ├── popout/                     # Popout host/provider + IPC bridge types
+│   ├── registry/                   # Component registry for dynamic/dockable UI
+│   ├── styles/                     # CSS tokens + styles
+│   ├── timeSeries/                 # Time series types/helpers
+│   ├── types/                      # Shared app types
+│   ├── units/                      # Unit system registry/helpers
+│   ├── utils/                      # Utilities (resources, file helpers, wizard bus, etc.)
+│   ├── App.tsx
+│   └── main.tsx                    # React entry
+├── src-electron/                   # Electron main + preload source
+│   ├── main.ts
+│   └── preload.ts
+├── dist/                           # Build output (Vite) [generated]
+├── dist-electron/                  # Build output (electron main/preload) [generated]
 ├── index.html
 ├── package.json
-├── public/
-├── src/
-│   └── [React source files]
-├── server/
-│   ├── DssWriter.class
-│   ├── DssWriter.java
-│   ├── server.js
-│   ├── jar/
-│   │   └── [All DSS .jar files]
-│   ├── lib/
-│   │   └── javaHeclib.dll
-│   └── [data.json, analysis.json, etc.]
+├── tsconfig.json
 └── vite.config.ts
 ```
-
 
 ---
 
 ## Useful NPM Scripts
-- `npm run dev` -- Start frontend Vite dev server
-- `npm run build` -- Build frontend for production
-- `npm run preview` --Preview production build locally
 
----
+- `npm run dev` — Start Vite dev server
+- `npm run build` — Build frontend (and Electron main/preload via vite-plugin-electron)
+- `npm run preview` — Preview the production build locally
+- `npm run electron` — Build + run Electron
+- `npm run typecheck` — TypeScript typecheck
 
-## Main Dependencies
-Frontend:
--React 19
--Vite
--Leaflet
--Plotly.js
-
-Backend:
--express
--body-parser
--cors
-
-Java/Server:
--heclib.jar and supporting .jar files for DSS (included in `/server/jar`)
--javaHeclib.dll native library (included in `/server/lib`)
 ---
 
 ## Troubleshooting
-- If DSS file writing fails:
 
-  - Make sure you have Java 11+ installed and in your PATH.
+- DSS calls fail immediately:
+  - Confirm Java is installed and the `JAVA_BIN` in `server/server.js` points to a valid `java.exe` (or update to use PATH).
+  - Ensure `server/jar/` exists and contains the required `.jar` dependencies referenced by the Java utilities.
+  - Confirm `server/lib/javaHeclib.dll` exists (Windows).
 
-  - Ensure all .jar files are in server/jar and javaHeclib.dll is in server/lib.
+- Frontend `/api/*` requests fail:
+  - Confirm the backend is running on `http://localhost:5001`.
+  - Confirm Vite proxy is active (see `vite.config.ts`).
 
-  - Check server.js for the correct javaPath.
-
-  - Check the backend terminal for Java or DSS errors.
-
-- On other operating systems:
-
-  - Java must be available on your PATH.
-
-  - You may need to update classpath syntax (; vs :) in server.js.
-
-  - Native libraries like javaHeclib.dll may not work; this setup is tested on Windows only.
-
-- "Unable to initialize main class DssWriter" or "NoClassDefFoundError":
-
-  - Usually means a required .jar is missing or Java is not pointing to the correct lib directory.
-
-- "DLL not found" errors:
-
-  - Make sure javaHeclib.dll is present in /server/lib.
-
----
-
-## Notes
-
-- Both the frontend and backend must be running for full app functionality.
-
-- All necessary Java dependencies are bundled—no extra steps required.
-
-- For development, keep both frontend and backend terminal windows open.
-
-- For any issues, check the backend terminal output first.
+- Electron opens but features relying on `/api` fail:
+  - Electron does not start the backend. Start `node server/server.js` separately.
